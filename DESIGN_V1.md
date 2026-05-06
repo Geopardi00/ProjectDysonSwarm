@@ -1557,7 +1557,61 @@ Use Godot 4.6 GDScript.
 
 ---
 
-## 32. Current locked V1.0 decisions summary
+## 32. Current prototype implementation snapshot
+
+This section records where the playable prototype is now, after Milestones 1-4 and the first cargo UI cleanup pass.
+
+Implemented:
+
+- Data-driven launch loop is working.
+- Vehicle selection, material assignment, packing, launch resolution, CPU progress, and win/loss checks are connected.
+- Fuel is assigned and packed like any other cargo material.
+- Launch success/failure is based on placed fuel only.
+- Only placed pieces generate the launch manifest.
+- Assigned but unplaced pieces are ignored.
+- Overdelivery is wasted.
+- The player cannot return from packing to assignment in the same turn.
+
+Current cargo implementation:
+
+- Big Rocket has 10 base shapes, 2 copies each, for 20 assignable piece instances.
+- Big Rocket base set totals 50 cells, matching the 5x10 cargo hold.
+- Space Shuttle has 8 base shapes, 2 copies each, for 16 assignable piece instances.
+- Space Shuttle base set totals 32 cells, matching the 4x8 cargo hold.
+- SpinLaunch has a simple 1x2 capsule-style stub.
+- Each piece copy has its own instance id, so copies of the same shape can use different materials.
+- No universal piece set is used.
+- No 1-cell filler pieces are used.
+
+Current assignment UI:
+
+- Available pieces are grouped by shape.
+- Selecting a shape group shows the individual copies for assignment.
+- Payload and fuel meters update during assignment.
+- Moonbase material needs are visible during assignment.
+- The center of the assignment screen shows a non-interactive cargo hold preview.
+- Layout is currently: info panel on the left, cargo hold preview in the center, available cargo on the right.
+
+Current packing UI:
+
+- The cargo grid is displayed in a horizontal sketch-inspired layout.
+- Internal data still uses vehicle grid dimensions, such as Big Rocket 5x10 and Space Shuttle 4x8.
+- The visual grid is transposed for readability, such as Big Rocket shown as 10 columns by 5 rows.
+- Player can select assigned pieces, rotate before placement, place them, pick placed pieces back up, remove pieces, clear all placements, and launch.
+- The placed manifest and fuel warning update from placed pieces only.
+
+Useful next planning targets:
+
+- Milestone 5 full loop polish: faction select, strategy screen, game over screen, and turn-to-turn readability.
+- CPU faction personality and balance.
+- Better news feed events.
+- Material economy and moonbase progress pacing.
+- Visual cargo piece treatment and material color language.
+- First pass at player guidance without turning the UI into a tutorial wall.
+
+---
+
+## 33. Current locked V1.0 decisions summary
 
 ```text
 Game name:

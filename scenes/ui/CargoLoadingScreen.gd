@@ -8,6 +8,7 @@ const GameDataScript := preload("res://scripts/data/GameData.gd")
 const CargoAssignmentScript := preload("res://scripts/cargo/CargoAssignment.gd")
 const CargoGridViewScript := preload("res://scenes/ui/CargoGridView.gd")
 const CargoHoldPreviewScript := preload("res://scenes/ui/CargoHoldPreview.gd")
+const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 
 enum CargoPhase { ASSIGNMENT, PACKING }
 
@@ -45,10 +46,14 @@ var packing_summary_label: Label
 var packing_warning_label: Label
 var packing_grid_view: Control
 var launch_button: Button
+var meters_container: VBoxContainer
+var meter_sets: Array[Dictionary] = []
 
 
 func _ready() -> void:
+	_add_scene_background()
 	_build_ui()
+	UiAssetsScript.apply_text_outline(self)
 	visible = false
 
 
@@ -74,6 +79,119 @@ func set_moonbase_requirements(requirements: Dictionary) -> void:
 		moonbase_remaining_requirements = GameDataScript.MOONBASE_REQUIREMENTS.duplicate(true)
 	else:
 		moonbase_remaining_requirements = requirements.duplicate(true)
+
+
+func _add_scene_background() -> void:
+	var texture := UiAssetsScript.get_background()
+	if texture == null:
+		return
+	var background := TextureRect.new()
+	background.name = "Background"
+	background.set_anchors_preset(Control.PRESET_FULL_RECT)
+	background.texture = texture
+	background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	background.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(background)
+	move_child(background, 0)
+
+
+func _with_panel_art(content: Control, frame_id: String, minimum_size: Vector2) -> Control:
+	var wrapper := Control.new()
+	wrapper.custom_minimum_size = minimum_size
+	wrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	wrapper.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	var frame_texture := UiAssetsScript.get_panel_frame(frame_id)
+	if frame_texture != null:
+		var frame := TextureRect.new()
+		frame.set_anchors_preset(Control.PRESET_FULL_RECT)
+		frame.texture = frame_texture
+		frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		frame.stretch_mode = TextureRect.STRETCH_SCALE
+		frame.modulate.a = 0.85
+		frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		wrapper.add_child(frame)
+
+	var margin := MarginContainer.new()
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.add_theme_constant_override("margin_left", 28)
+	margin.add_theme_constant_override("margin_top", 28)
+	margin.add_theme_constant_override("margin_right", 28)
+	margin.add_theme_constant_override("margin_bottom", 28)
+	wrapper.add_child(margin)
+	margin.add_child(content)
+
+	return wrapper
+
+
+func _with_cargo_hold_panel(content: Control) -> Control:
+	var wrapper := Control.new()
+	wrapper.custom_minimum_size = Vector2(778, 478)
+	wrapper.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	wrapper.size_flags_vertical = Control.SIZE_EXPAND_FILL
+
+	var frame_texture := UiAssetsScript.get_panel_frame("cargo_hold")
+	if frame_texture != null:
+		var frame := TextureRect.new()
+		frame.set_anchors_preset(Control.PRESET_FULL_RECT)
+		frame.texture = frame_texture
+		frame.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		frame.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		frame.modulate.a = 0.95
+		frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		wrapper.add_child(frame)
+
+	var margin := MarginContainer.new()
+	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	margin.add_theme_constant_override("margin_left", 84)
+	margin.add_theme_constant_override("margin_top", 104)
+	margin.add_theme_constant_override("margin_right", 72)
+	margin.add_theme_constant_override("margin_bottom", 64)
+	wrapper.add_child(margin)
+	margin.add_child(content)
+
+	return wrapper
+
+
+func _build_meter_block() -> VBoxContainer:
+	var meters := VBoxContainer.new()
+	meters.add_theme_constant_override("separation", 6)
+
+	var next_capacity_label := Label.new()
+	meters.add_child(next_capacity_label)
+
+	var next_payload_bar := ProgressBar.new()
+	next_payload_bar.show_percentage = false
+	meters.add_child(next_payload_bar)
+
+	var next_fuel_label := Label.new()
+	meters.add_child(next_fuel_label)
+
+	var next_fuel_bar := ProgressBar.new()
+	next_fuel_bar.show_percentage = false
+	meters.add_child(next_fuel_bar)
+
+	var next_warning_label := Label.new()
+	next_warning_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	meters.add_child(next_warning_label)
+
+	if capacity_label == null:
+		capacity_label = next_capacity_label
+		payload_bar = next_payload_bar
+		fuel_label = next_fuel_label
+		fuel_bar = next_fuel_bar
+		warning_label = next_warning_label
+
+	meter_sets.append({
+		"capacity_label": next_capacity_label,
+		"payload_bar": next_payload_bar,
+		"fuel_label": next_fuel_label,
+		"fuel_bar": next_fuel_bar,
+		"warning_label": next_warning_label,
+	})
+
+	return meters
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
@@ -114,28 +232,6 @@ func _build_ui() -> void:
 	back_button.pressed.connect(_on_back_pressed)
 	header.add_child(back_button)
 
-	var meters := VBoxContainer.new()
-	meters.add_theme_constant_override("separation", 6)
-	root.add_child(meters)
-
-	capacity_label = Label.new()
-	meters.add_child(capacity_label)
-
-	payload_bar = ProgressBar.new()
-	payload_bar.show_percentage = false
-	meters.add_child(payload_bar)
-
-	fuel_label = Label.new()
-	meters.add_child(fuel_label)
-
-	fuel_bar = ProgressBar.new()
-	fuel_bar.show_percentage = false
-	meters.add_child(fuel_bar)
-
-	warning_label = Label.new()
-	warning_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	meters.add_child(warning_label)
-
 	_build_assignment_panel()
 	_build_packing_panel()
 
@@ -147,21 +243,18 @@ func _build_assignment_panel() -> void:
 	root.add_child(assignment_panel)
 
 	var piece_scroll := ScrollContainer.new()
-	piece_scroll.custom_minimum_size = Vector2(520, 560)
 	piece_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	piece_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	assignment_panel.add_child(piece_scroll)
+	piece_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 
 	piece_list = VBoxContainer.new()
 	piece_list.add_theme_constant_override("separation", 6)
 	piece_scroll.add_child(piece_list)
 
 	var center_panel := VBoxContainer.new()
-	center_panel.custom_minimum_size = Vector2(620, 560)
 	center_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	center_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	center_panel.add_theme_constant_override("separation", 10)
-	assignment_panel.add_child(center_panel)
 
 	moonbase_needs_label = Label.new()
 	moonbase_needs_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -174,12 +267,10 @@ func _build_assignment_panel() -> void:
 	assignment_grid_preview = CargoHoldPreviewScript.new()
 	assignment_grid_preview.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	assignment_grid_preview.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	center_panel.add_child(assignment_grid_preview)
+	center_panel.add_child(_with_cargo_hold_panel(assignment_grid_preview))
 
 	var side_panel := VBoxContainer.new()
-	side_panel.custom_minimum_size = Vector2(420, 560)
 	side_panel.add_theme_constant_override("separation", 10)
-	assignment_panel.add_child(side_panel)
 
 	var detail_scroll := ScrollContainer.new()
 	detail_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -198,16 +289,23 @@ func _build_assignment_panel() -> void:
 	copy_buttons_row.add_theme_constant_override("separation", 6)
 	detail_content.add_child(copy_buttons_row)
 
+	var lower_spacer := Control.new()
+	lower_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	side_panel.add_child(lower_spacer)
+
+	meters_container = _build_meter_block()
+	side_panel.add_child(meters_container)
+
 	material_buttons = GridContainer.new()
 	material_buttons.columns = 2
 	material_buttons.add_theme_constant_override("h_separation", 6)
 	material_buttons.add_theme_constant_override("v_separation", 6)
-	detail_content.add_child(material_buttons)
+	side_panel.add_child(material_buttons)
 	_build_material_buttons()
 
 	assigned_label = Label.new()
 	assigned_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	detail_content.add_child(assigned_label)
+	side_panel.add_child(assigned_label)
 
 	var action_row := HBoxContainer.new()
 	action_row.add_theme_constant_override("separation", 8)
@@ -223,9 +321,9 @@ func _build_assignment_panel() -> void:
 	confirm_button.pressed.connect(_on_confirm_pressed)
 	action_row.add_child(confirm_button)
 
-	assignment_panel.move_child(side_panel, 0)
-	assignment_panel.move_child(center_panel, 1)
-	assignment_panel.move_child(piece_scroll, 2)
+	assignment_panel.add_child(_with_panel_art(side_panel, "vehicle_info", Vector2(420, 760)))
+	assignment_panel.add_child(center_panel)
+	assignment_panel.add_child(_with_panel_art(piece_scroll, "available_cargo", Vector2(460, 760)))
 
 
 func _build_packing_panel() -> void:
@@ -236,9 +334,7 @@ func _build_packing_panel() -> void:
 	root.add_child(packing_panel)
 
 	var left_panel := VBoxContainer.new()
-	left_panel.custom_minimum_size = Vector2(420, 560)
 	left_panel.add_theme_constant_override("separation", 10)
-	packing_panel.add_child(left_panel)
 
 	var title := Label.new()
 	title.text = "Pieces to place"
@@ -267,18 +363,15 @@ func _build_packing_panel() -> void:
 	center_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	center_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	center_panel.add_theme_constant_override("separation", 10)
-	packing_panel.add_child(center_panel)
 
 	packing_grid_view = CargoGridViewScript.new()
 	packing_grid_view.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	packing_grid_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	packing_grid_view.grid_cell_clicked.connect(_on_grid_cell_clicked)
-	center_panel.add_child(packing_grid_view)
+	center_panel.add_child(_with_cargo_hold_panel(packing_grid_view))
 
 	var right_panel := VBoxContainer.new()
-	right_panel.custom_minimum_size = Vector2(360, 560)
 	right_panel.add_theme_constant_override("separation", 10)
-	packing_panel.add_child(right_panel)
 
 	packing_summary_label = Label.new()
 	packing_summary_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -289,20 +382,29 @@ func _build_packing_panel() -> void:
 	packing_warning_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	right_panel.add_child(packing_warning_label)
 
+	var packing_lower_spacer := Control.new()
+	packing_lower_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right_panel.add_child(packing_lower_spacer)
+
+	right_panel.add_child(_build_meter_block())
+
 	launch_button = Button.new()
 	launch_button.text = "Launch"
 	launch_button.pressed.connect(_on_launch_pressed)
 	right_panel.add_child(launch_button)
 
-	packing_panel.move_child(right_panel, 0)
-	packing_panel.move_child(center_panel, 1)
-	packing_panel.move_child(left_panel, 2)
+	packing_panel.add_child(_with_panel_art(right_panel, "vehicle_info", Vector2(420, 760)))
+	packing_panel.add_child(center_panel)
+	packing_panel.add_child(_with_panel_art(left_panel, "available_cargo", Vector2(460, 760)))
 
 
 func _build_material_buttons() -> void:
 	for material: String in GameDataScript.MATERIALS:
 		var button := Button.new()
 		button.text = _format_material_name(material)
+		button.icon = UiAssetsScript.get_material_icon(material)
+		button.expand_icon = true
+		button.add_theme_constant_override("icon_max_width", 30)
 		button.pressed.connect(_on_material_pressed.bind(material))
 		material_buttons.add_child(button)
 
@@ -316,6 +418,9 @@ func _rebuild_assignment_piece_buttons() -> void:
 		var piece: CargoPiece = group["pieces"][0]
 		var button := Button.new()
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.icon = UiAssetsScript.get_cargo_piece_texture(piece.shape_id)
+		button.expand_icon = true
+		button.add_theme_constant_override("icon_max_width", 96)
 		button.text = _format_assignment_group_button_text(group)
 		button.pressed.connect(_on_assignment_group_pressed.bind(piece.shape_id))
 		piece_buttons[piece.shape_id] = button
@@ -330,6 +435,9 @@ func _rebuild_packing_piece_buttons() -> void:
 	for piece: CargoPiece in packing_state.get_unplaced_pieces():
 		var button := Button.new()
 		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.icon = UiAssetsScript.get_cargo_piece_texture(piece.shape_id)
+		button.expand_icon = true
+		button.add_theme_constant_override("icon_max_width", 96)
 		button.text = _format_packing_piece_button_text(piece)
 		button.pressed.connect(_on_packing_piece_pressed.bind(piece.instance_id))
 		packing_piece_buttons[piece.instance_id] = button
@@ -369,9 +477,11 @@ func _refresh_assignment() -> void:
 	_rebuild_copy_buttons()
 
 	warning_label.text = _get_assignment_warning_text(required_fuel, assigned_fuel, max_payload, assigned_payload)
+	_update_meter_warnings(warning_label.text)
 	moonbase_needs_label.text = _format_moonbase_needs()
 	assigned_label.text = _format_assigned_list()
 	_refresh_assignment_piece_button_text()
+	UiAssetsScript.apply_text_outline(self)
 
 
 func _refresh_packing() -> void:
@@ -384,6 +494,7 @@ func _refresh_packing() -> void:
 	vehicle_label.text = "%s packing" % String(vehicle.get("display_name", packing_state.vehicle_id))
 	_update_meters("Placed payload", placed_payload, max_payload, "Placed fuel", placed_fuel, required_fuel)
 	warning_label.text = "Packing phase: assignments are locked."
+	_update_meter_warnings(warning_label.text)
 	packing_summary_label.text = _format_packing_summary()
 	packing_warning_label.text = _get_packing_warning_text(required_fuel, placed_fuel)
 	launch_button.disabled = packing_state.get_placed_payload() <= 0
@@ -392,15 +503,27 @@ func _refresh_packing() -> void:
 	var selected_piece := packing_state.get_assigned_piece(selected_piece_id)
 	packing_grid_view.set_packing_state(packing_state)
 	packing_grid_view.set_selected_piece(selected_piece, selected_rotation)
+	UiAssetsScript.apply_text_outline(self)
+
+
+func _update_meter_warnings(text: String) -> void:
+	for meter_set: Dictionary in meter_sets:
+		var next_warning_label := meter_set["warning_label"] as Label
+		next_warning_label.text = text
 
 
 func _update_meters(payload_title: String, payload_value: int, max_payload: int, fuel_title: String, fuel_value: int, required_fuel: int) -> void:
-	capacity_label.text = "%s: %d / %d" % [payload_title, payload_value, max_payload]
-	payload_bar.max_value = max_payload
-	payload_bar.value = payload_value
-	fuel_label.text = "%s: %d / %d" % [fuel_title, fuel_value, required_fuel]
-	fuel_bar.max_value = maxi(maxi(required_fuel, fuel_value), 1)
-	fuel_bar.value = fuel_value
+	for meter_set: Dictionary in meter_sets:
+		var next_capacity_label := meter_set["capacity_label"] as Label
+		var next_payload_bar := meter_set["payload_bar"] as ProgressBar
+		var next_fuel_label := meter_set["fuel_label"] as Label
+		var next_fuel_bar := meter_set["fuel_bar"] as ProgressBar
+		next_capacity_label.text = "%s: %d / %d" % [payload_title, payload_value, max_payload]
+		next_payload_bar.max_value = max_payload
+		next_payload_bar.value = payload_value
+		next_fuel_label.text = "%s: %d / %d" % [fuel_title, fuel_value, required_fuel]
+		next_fuel_bar.max_value = maxi(maxi(required_fuel, fuel_value), 1)
+		next_fuel_bar.value = fuel_value
 
 
 func _refresh_assignment_piece_button_text() -> void:
@@ -435,24 +558,22 @@ func _format_assignment_group_button_text(group: Dictionary) -> String:
 	var pieces: Array = group["pieces"]
 	var assigned_summary := _format_group_assignment_summary(pieces)
 	var selected_marker := " *" if piece.shape_id == selected_shape_id else ""
-	return "%s%s x%d | %d units each\n%s\n%s" % [
+	return "%s%s x%d | %d units each\n%s" % [
 		piece.display_name,
 		selected_marker,
 		pieces.size(),
 		piece.get_payload_units(),
 		assigned_summary,
-		piece.get_preview_text(),
 	]
 
 
 func _format_packing_piece_button_text(piece: CargoPiece) -> String:
 	var selected_marker := " *" if piece.instance_id == selected_piece_id else ""
-	return "%s%s | %s | %d units\n%s" % [
+	return "%s%s | %s | %d units" % [
 		piece.display_name,
 		selected_marker,
 		_format_material_name(piece.material),
 		piece.get_payload_units(),
-		piece.get_preview_text(),
 	]
 
 
@@ -481,7 +602,6 @@ func _format_selected_shape_details() -> String:
 	var lines: Array[String] = [
 		"Selected shape: %s x%d" % [first_piece.display_name, pieces.size()],
 		"Payload per copy: %d" % first_piece.get_payload_units(),
-		first_piece.get_preview_text(),
 		"",
 		"Copies:",
 	]
@@ -523,7 +643,8 @@ func _format_packing_summary() -> String:
 	var selected_piece := packing_state.get_assigned_piece(selected_piece_id)
 	if selected_piece != null:
 		lines.append("Selected: %s" % selected_piece.display_name)
-		lines.append("\n".join(_get_rotated_preview_rows(selected_piece, selected_rotation)))
+		lines.append("Material: %s" % _format_material_name(selected_piece.material))
+		lines.append("Payload: %d" % selected_piece.get_payload_units())
 	else:
 		lines.append("Selected: none")
 

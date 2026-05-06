@@ -47,6 +47,26 @@ func _run() -> bool:
 		big_base_cell_total += int(preview.get("cell_count", 0))
 	if big_base_cell_total != 50:
 		return _fail("Big Rocket base shape set should total exactly 50 cells.")
+	var expected_shuttle_ids := [
+		"ss_c_block_5",
+		"ss_i_block_3",
+		"ss_t_block_4",
+		"ss_square_block_4",
+		"ss_p_block_5",
+		"ss_l_block_4",
+		"ss_step_block_4",
+		"ss_corner_block_3",
+	]
+	var shuttle_base_cell_total := 0
+	for index in range(shuttle_previews.size()):
+		var preview: Dictionary = shuttle_previews[index]
+		if String(preview.get("id", "")) != expected_shuttle_ids[index]:
+			return _fail("Space Shuttle shape id mismatch at index %d." % index)
+		if int(preview.get("copies", 0)) != 2:
+			return _fail("Space Shuttle shape should have exactly 2 copies.")
+		shuttle_base_cell_total += int(preview.get("cell_count", 0))
+	if shuttle_base_cell_total != 32:
+		return _fail("Space Shuttle base shape set should total exactly 32 cells.")
 
 	var big_assignment = CargoAssignmentScript.new()
 	big_assignment.setup("big_rocket")

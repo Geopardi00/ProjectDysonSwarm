@@ -32,7 +32,7 @@ func set_selected_piece(piece: CargoPiece, rotation: int) -> void:
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_STOP
-	custom_minimum_size = Vector2(520, 520)
+	custom_minimum_size = Vector2(620, 300)
 
 
 func _gui_input(event: InputEvent) -> void:
@@ -51,10 +51,8 @@ func _draw() -> void:
 		return
 
 	_update_cell_size()
-	_draw_grid_background()
 	_draw_placed_pieces()
 	_draw_selected_piece_preview()
-	_draw_grid_lines()
 
 
 func _update_cell_size() -> void:
@@ -62,12 +60,6 @@ func _update_cell_size() -> void:
 	var grid_height := int(packing_state.vehicle.get("grid_height", 1))
 	cell_size = floor(min(size.x / float(grid_height), size.y / float(grid_width)))
 	cell_size = max(cell_size, 24.0)
-
-
-func _draw_grid_background() -> void:
-	var grid_width := int(packing_state.vehicle.get("grid_width", 0))
-	var grid_height := int(packing_state.vehicle.get("grid_height", 0))
-	draw_rect(Rect2(Vector2.ZERO, Vector2(grid_height, grid_width) * cell_size), Color(0.08, 0.09, 0.10), true)
 
 
 func _draw_placed_pieces() -> void:
@@ -92,16 +84,6 @@ func _draw_selected_piece_preview() -> void:
 	for cell: Vector2i in occupied_cells:
 		if _is_cell_in_grid(cell):
 			_draw_cell(cell, color, true)
-
-
-func _draw_grid_lines() -> void:
-	var grid_width := int(packing_state.vehicle.get("grid_width", 0))
-	var grid_height := int(packing_state.vehicle.get("grid_height", 0))
-	var line_color := Color(0.62, 0.66, 0.68, 0.75)
-	for x in range(grid_height + 1):
-		draw_line(Vector2(x * cell_size, 0), Vector2(x * cell_size, grid_width * cell_size), line_color)
-	for y in range(grid_width + 1):
-		draw_line(Vector2(0, y * cell_size), Vector2(grid_height * cell_size, y * cell_size), line_color)
 
 
 func _draw_cell(cell: Vector2i, color: Color, filled: bool) -> void:
