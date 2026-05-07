@@ -16,11 +16,46 @@ const MATERIAL_COLORS := {
 var packing_state
 var selected_piece: CargoPiece
 var selected_rotation := 0
+var grid_width := 0
+var grid_height := 0
+var vehicle_name := ""
 var cell_size := 48.0
+
+@export var fixed_cell_size := 0.0:
+	set(value):
+		fixed_cell_size = value
+		queue_redraw()
+@export var debug_draw_grid := false:
+	set(value):
+		debug_draw_grid = value
+		queue_redraw()
+@export var manual_grid_origin := Vector2.ZERO:
+	set(value):
+		manual_grid_origin = value
+		queue_redraw()
+@export var manual_grid_size := Vector2(620, 300):
+	set(value):
+		manual_grid_size = value
+		queue_redraw()
+@export var use_manual_grid_rect := false:
+	set(value):
+		use_manual_grid_rect = value
+		queue_redraw()
+
+
+func set_grid(next_width: int, next_height: int, next_vehicle_name: String = "") -> void:
+	grid_width = next_width
+	grid_height = next_height
+	vehicle_name = next_vehicle_name
+	queue_redraw()
 
 
 func set_packing_state(next_packing_state) -> void:
 	packing_state = next_packing_state
+	if packing_state != null:
+		grid_width = int(packing_state.vehicle.get("grid_width", 0))
+		grid_height = int(packing_state.vehicle.get("grid_height", 0))
+		vehicle_name = String(packing_state.vehicle.get("display_name", ""))
 	queue_redraw()
 
 
@@ -47,19 +82,38 @@ func _gui_input(event: InputEvent) -> void:
 
 
 func _draw() -> void:
-	if packing_state == null:
+	if grid_width <= 0 or grid_height <= 0:
 		return
 
 	_update_cell_size()
-	_draw_placed_pieces()
-	_draw_selected_piece_preview()
+	if debug_draw_grid:
+		_draw_debug_grid()
+	if packing_state != null:
+		_draw_placed_pieces()
+		_draw_selected_piece_preview()
 
 
 func _update_cell_size() -> void:
-	var grid_width := int(packing_state.vehicle.get("grid_width", 1))
-	var grid_height := int(packing_state.vehicle.get("grid_height", 1))
-	cell_size = floor(min(size.x / float(grid_height), size.y / float(grid_width)))
-	cell_size = max(cell_size, 24.0)
+	if fixed_cell_size > 0.0:
+		cell_size = fixed_cell_size
+		return
+
+	var grid_rect := _get_grid_rect()
+	cell_size = floor(min(grid_rect.size.x / float(grid_height), grid_rect.size.y / float(grid_width)))
+	cell_size = max(cell_size, 1.0)
+
+
+func _draw_debug_grid() -> void:
+	var grid_rect := _get_drawn_grid_rect()
+	var line_color := Color(0.95, 0.55, 0.04, 0.75)
+	draw_rect(grid_rect, Color(0.05, 0.07, 0.08, 0.25), true)
+	draw_rect(grid_rect, line_color, false, 2.0)
+	for x in range(grid_height + 1):
+		var line_x := grid_rect.position.x + x * cell_size
+		draw_line(Vector2(line_x, grid_rect.position.y), Vector2(line_x, grid_rect.position.y + grid_width * cell_size), line_color)
+	for y in range(grid_width + 1):
+		var line_y := grid_rect.position.y + y * cell_size
+		draw_line(Vector2(grid_rect.position.x, line_y), Vector2(grid_rect.position.x + grid_height * cell_size, line_y), line_color)
 
 
 func _draw_placed_pieces() -> void:
@@ -88,13 +142,15 @@ func _draw_selected_piece_preview() -> void:
 
 func _draw_cell(cell: Vector2i, color: Color, filled: bool) -> void:
 	var display_cell := _data_cell_to_display_cell(cell)
-	var rect := Rect2(Vector2(display_cell) * cell_size + Vector2.ONE, Vector2.ONE * (cell_size - 2.0))
+	var origin := _get_drawn_grid_rect().position
+	var rect := Rect2(origin + Vector2(display_cell) * cell_size + Vector2.ONE, Vector2.ONE * (cell_size - 2.0))
 	draw_rect(rect, color, filled)
 	draw_rect(rect, Color(0.03, 0.04, 0.05, 0.75), false, 1.0)
 
 
 func _position_to_cell(position: Vector2) -> Vector2i:
-	var display_cell := Vector2i(floori(position.x / cell_size), floori(position.y / cell_size))
+	var local_position := position - _get_drawn_grid_rect().position
+	var display_cell := Vector2i(floori(local_position.x / cell_size), floori(local_position.y / cell_size))
 	return Vector2i(display_cell.y, display_cell.x)
 
 
@@ -103,8 +159,17 @@ func _data_cell_to_display_cell(cell: Vector2i) -> Vector2i:
 
 
 func _is_cell_in_grid(cell: Vector2i) -> bool:
-	if packing_state == null:
-		return false
-	var grid_width := int(packing_state.vehicle.get("grid_width", 0))
-	var grid_height := int(packing_state.vehicle.get("grid_height", 0))
 	return cell.x >= 0 and cell.y >= 0 and cell.x < grid_width and cell.y < grid_height
+
+
+func _get_grid_rect() -> Rect2:
+	if use_manual_grid_rect:
+		return Rect2(manual_grid_origin, manual_grid_size)
+	return Rect2(Vector2.ZERO, size)
+
+
+func _get_drawn_grid_rect() -> Rect2:
+	var grid_rect := _get_grid_rect()
+	var drawn_size := Vector2(grid_height, grid_width) * cell_size
+	var origin := grid_rect.position + (grid_rect.size - drawn_size) * 0.5
+	return Rect2(origin, drawn_size)

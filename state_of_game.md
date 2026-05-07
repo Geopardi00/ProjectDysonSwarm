@@ -1,10 +1,10 @@
 # Project Dyson Swarm - State of Game
 
-Last updated: 2026-05-06
+Last updated: 2026-05-07
 
 ## Current Prototype Status
 
-Milestones 1-5 are implemented and Milestone 7 has an early art/UI pass in progress.
+Milestones 1-5 are implemented and Milestone 7 has an editor-driven art/UI pass in progress.
 
 Working loop:
 
@@ -77,7 +77,9 @@ Currently wired:
 - Vehicle icons on strategy vehicle cards.
 - Material icons on assignment material buttons.
 - Cargo piece images on assignment and packing lists.
-- Panel textures for vehicle info, available cargo, and cargo hold.
+- Empty panel textures for vehicle info / available cargo style panels.
+- Vehicle-specific cargo hold panel textures for Big Rocket, Space Shuttle, and SpinLaunch.
+- Strategy screen, cargo loading screen, cargo grid view, and cargo hold panel are now scene-backed for easier 2D editor placement.
 
 Important UI helper:
 
@@ -98,27 +100,32 @@ Strategy / vehicle selection:
 
 - Left panel: day, player status, moonbase needs, CPU competitors, news.
 - Right area: three vehicle cards.
-- Vehicle stats are moving toward the lower part of each card.
+- Vehicle card names, icons, and stat labels are manually placeable in `StrategyScreen.tscn`.
+- Vehicle stat text uses separate labels: payload, fuel needed, days to launch, cargo grid.
+- `StrategyVehicleIconPlacementPreview.tscn` exists as a small tuning scene for vehicle-card placement.
 
 Assignment:
 
-- Left panel: selected piece/copy info, payload/fuel meters, material buttons, assigned summary, reset/confirm.
-- Center: moonbase needs and cargo hold panel.
+- Left panel: selected piece image preview, copy buttons, payload/fuel meters, material buttons, per-material assigned-unit labels.
+- Material buttons and their assigned-unit labels are hand-placeable in the 2D editor.
+- Center: moonbase needs and manually placeable cargo hold panel.
 - Right panel: available cargo groups.
 - ASCII piece previews have been removed from the visible list.
+- Reset/confirm buttons live under the center cargo hold panel.
 
 Packing:
 
-- Left panel: placed manifest, warnings, payload/fuel info, launch.
-- Center: cargo hold panel with functional clickable packing overlay.
+- Left panel: placed manifest, warnings, payload/fuel info.
+- Center: manually placeable cargo hold panel with functional clickable packing overlay.
 - Right panel: assigned pieces to place plus rotate/clear controls.
-- The scripted grid background has been removed so the panel art can carry the cargo hold.
+- Launch button lives under the center cargo hold panel.
+- Assignment and packing cargo hold panel positions are independently hand-tunable but currently matched.
 
 ## Known Rough Edges
 
-- UI is still script-built. This is fast for iteration but not ideal for exact pixel placement.
-- Final visual polish may be easier in Godot's 2D editor once the layout stops changing.
-- Cargo hold panel art is used, but click/grid alignment may still need visual tuning.
+- Some UI is still generated dynamically, especially cargo piece list buttons and copy buttons.
+- Large layout surfaces are now scene/editor-backed, but exact pixel polish is still in progress.
+- Cargo hold panel art and click/grid alignment have been tuned for Big Rocket but may need verification for Shuttle and SpinLaunch.
 - Material needs panel is text-first; it can later become icon/progress-bar based.
 - Panel textures may still need exact padding and scale adjustments.
 - Debug buttons are currently visible on the strategy screen.
@@ -130,6 +137,7 @@ Run from the project root:
 ```powershell
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/CargoSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/CargoUiSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/StrategyScreenSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --quit-after 1 res://scenes/main/Main.tscn
 ```
 
@@ -137,13 +145,14 @@ Latest checks passed before this checkpoint:
 
 - Cargo smoke test passed.
 - Cargo UI smoke test passed.
-- Main scene loaded headless.
+- Strategy screen smoke test passed.
+- Main scene loaded headless during this visual pass.
 
 ## Suggested Next Steps
 
 1. Playtest current visual pass and take screenshots.
-2. Tune panel scale/padding and cargo hold click alignment.
-3. Decide whether to move major UI placement into `.tscn` scenes for easier 2D-editor editing.
+2. Verify cargo hold panel/grid alignment for Shuttle and SpinLaunch.
+3. Continue tuning exact panel positions in `.tscn` scenes.
 4. Hide or gate debug buttons.
 5. Improve moonbase needs display using material icons.
 6. Continue first visual pass before changing balance.

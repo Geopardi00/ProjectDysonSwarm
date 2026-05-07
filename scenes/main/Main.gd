@@ -3,6 +3,7 @@ extends Control
 const GameDataScript := preload("res://scripts/data/GameData.gd")
 const LaunchManagerScript := preload("res://scripts/launch/LaunchManager.gd")
 const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
+const StrategyScreenScene := preload("res://scenes/ui/StrategyScreen.tscn")
 
 const SHOW_DEBUG_ACTIONS := true
 
@@ -131,193 +132,14 @@ func _build_faction_card(faction_id: String, display_name: String) -> Button:
 
 func _show_strategy_screen() -> void:
 	cargo_loading_screen.visible = false
-	_set_active_screen(_build_strategy_screen())
-
-
-func _build_strategy_screen() -> Control:
-	var summary := game_state.get_summary()
-
-	var layout := VBoxContainer.new()
-	layout.add_theme_constant_override("separation", 12)
-
-	var header := HBoxContainer.new()
-	header.add_theme_constant_override("separation", 8)
-	layout.add_child(header)
-
-	var title := Label.new()
-	title.text = "Strategy Screen"
-	title.add_theme_font_size_override("font_size", 28)
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	header.add_child(title)
-
-	var reset_button := Button.new()
-	reset_button.text = "Reset Match"
-	reset_button.pressed.connect(_on_reset_button_pressed)
-	header.add_child(reset_button)
-
-	var panels := HBoxContainer.new()
-	panels.add_theme_constant_override("separation", 28)
-	panels.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	layout.add_child(panels)
-
-	panels.add_child(_with_panel_art(_build_status_panel(summary), "available_cargo", Vector2(520, 760)))
-	panels.add_child(_build_vehicle_panel())
-
-	if SHOW_DEBUG_ACTIONS:
-		layout.add_child(_build_debug_row())
-
-	UiAssetsScript.apply_text_outline(layout)
-	return _with_margin(layout)
-
-
-func _build_status_panel(summary: Dictionary) -> Control:
-	var panel := VBoxContainer.new()
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	panel.add_theme_constant_override("separation", 10)
-
-	var day_label := Label.new()
-	day_label.text = "Day %d" % int(summary["days_elapsed"])
-	day_label.add_theme_font_size_override("font_size", 24)
-	panel.add_child(day_label)
-
-	var faction_label := Label.new()
-	faction_label.text = "Player faction: %s" % String(summary["player_faction"])
-	panel.add_child(faction_label)
-
-	var readiness_label := Label.new()
-	readiness_label.text = "Moonbase readiness: %.1f%%" % float(summary["player_readiness_percent"])
-	panel.add_child(readiness_label)
-
-	panel.add_child(_make_progress_bar(float(summary["player_readiness_percent"]), 100.0))
-
-	var launches_label := Label.new()
-	launches_label.text = "Launches: %d  Success: %d  Failed: %d" % [
-		int(summary["launches_attempted"]),
-		int(summary["successful_launches"]),
-		int(summary["failed_launches"]),
-	]
-	panel.add_child(launches_label)
-
-	var needs_label := Label.new()
-	needs_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	needs_label.text = _format_needs(summary["remaining_requirements"])
-	panel.add_child(needs_label)
-
-	var cpu_label := Label.new()
-	cpu_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	cpu_label.text = _format_competitors(summary["competitors"])
-	panel.add_child(cpu_label)
-
-	var news_title := Label.new()
-	news_title.text = "News feed"
-	news_title.add_theme_font_size_override("font_size", 20)
-	panel.add_child(news_title)
-
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	panel.add_child(scroll)
-
-	var news_label := Label.new()
-	news_label.custom_minimum_size = Vector2(420, 0)
-	news_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	news_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	news_label.text = _format_news(summary["news"])
-	scroll.add_child(news_label)
-
-	return panel
-
-
-func _build_vehicle_panel() -> Control:
-	var panel := HBoxContainer.new()
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	panel.add_theme_constant_override("separation", 22)
-
-	for vehicle_id: String in ["big_rocket", "space_shuttle", "spinlaunch"]:
-		panel.add_child(_with_panel_art(_build_vehicle_card(vehicle_id), "vehicle_info", Vector2(300, 600)))
-
-	return panel
-
-
-func _build_vehicle_card(vehicle_id: String) -> Control:
-	var vehicle := GameDataScript.get_vehicle(vehicle_id)
-	var card := VBoxContainer.new()
-	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	card.alignment = BoxContainer.ALIGNMENT_CENTER
-	card.add_theme_constant_override("separation", 12)
-
-	var title := Label.new()
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.text = String(vehicle.get("display_name", vehicle_id))
-	title.add_theme_font_size_override("font_size", 22)
-	card.add_child(title)
-
-	var icon := TextureRect.new()
-	var icon_height := 180.0
-	if vehicle_id == "big_rocket":
-		icon_height = 200.0
-	elif vehicle_id == "spinlaunch":
-		icon_height = 150.0
-	icon.custom_minimum_size = Vector2(220, icon_height)
-	icon.texture = UiAssetsScript.get_vehicle_icon(vehicle_id)
-	icon.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	card.add_child(icon)
-
-	var upper_spacer := Control.new()
-	upper_spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	card.add_child(upper_spacer)
-
-	var capacity := Label.new()
-	capacity.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	capacity.text = "Payload: %d\nFuel: %d\nDays: %d\nGrid: %dx%d" % [
-		int(vehicle.get("max_payload", 0)),
-		int(vehicle.get("required_fuel", 0)),
-		int(vehicle.get("launch_days", 0)),
-		int(vehicle.get("grid_width", 0)),
-		int(vehicle.get("grid_height", 0)),
-	]
-	card.add_child(capacity)
-
-	var lower_spacer := Control.new()
-	lower_spacer.custom_minimum_size = Vector2(0, 48)
-	card.add_child(lower_spacer)
-
-	var button := Button.new()
-	button.text = "Select Vehicle"
-	button.custom_minimum_size = Vector2(180, 42)
-	button.pressed.connect(_open_assignment_screen.bind(vehicle_id))
-	card.add_child(button)
-
-	return card
-
-
-func _build_news_panel(summary: Dictionary) -> Control:
-	var panel := VBoxContainer.new()
-	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	panel.add_theme_constant_override("separation", 10)
-
-	var title := Label.new()
-	title.text = "News feed"
-	title.add_theme_font_size_override("font_size", 22)
-	panel.add_child(title)
-
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	panel.add_child(scroll)
-
-	var news_label := Label.new()
-	news_label.custom_minimum_size = Vector2(480, 0)
-	news_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	news_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	news_label.text = _format_news(summary["news"])
-	scroll.add_child(news_label)
-
-	return panel
+	var strategy_screen := StrategyScreenScene.instantiate()
+	strategy_screen.vehicle_selected.connect(_open_assignment_screen)
+	strategy_screen.reset_requested.connect(_on_reset_button_pressed)
+	strategy_screen.debug_add_news_requested.connect(_on_debug_add_news_pressed)
+	strategy_screen.debug_force_player_win_requested.connect(_on_debug_force_player_win_pressed)
+	strategy_screen.debug_force_cpu_win_requested.connect(_on_debug_force_cpu_win_pressed)
+	_set_active_screen(strategy_screen)
+	strategy_screen.setup(game_state.get_summary(), SHOW_DEBUG_ACTIONS)
 
 
 func _show_launch_result(result: Dictionary) -> void:
@@ -555,14 +377,6 @@ func _with_panel_art(content: Control, frame_id: String, minimum_size: Vector2) 
 	margin.add_child(content)
 
 	return wrapper
-
-
-func _make_progress_bar(value: float, max_value: float) -> ProgressBar:
-	var bar := ProgressBar.new()
-	bar.show_percentage = true
-	bar.max_value = max_value
-	bar.value = value
-	return bar
 
 
 func _format_launch_result(result: Dictionary) -> String:

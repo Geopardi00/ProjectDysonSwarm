@@ -1,8 +1,23 @@
-[gd_scene load_steps=2 format=3 uid="uid://cargo_loading_screen"]
+[gd_scene format=3 uid="uid://b8tgph63inluv"]
 
-[ext_resource type="Script" path="res://scenes/ui/CargoLoadingScreen.gd" id="1_cargo_loading"]
+[ext_resource type="Script" uid="uid://lqyo3k06v45w" path="res://scenes/ui/CargoLoadingScreen.gd" id="1_cargo_loading"]
+[ext_resource type="Texture2D" uid="uid://jdd6xt5nsnso" path="res://assets/ui/backgrounds/ui_bg_space_loading_1920x1080.png" id="2_background"]
+[ext_resource type="Texture2D" uid="uid://v18ueb4hewi0" path="res://assets/ui/panels/empty_panel_vehicle_info_frame.png" id="3_vehicle_panel"]
+[ext_resource type="Texture2D" uid="uid://bhab58eau625x" path="res://assets/ui/panels/empty_panel.png" id="4_cargo_panel"]
+[ext_resource type="PackedScene" uid="uid://dhequ46dd2nt1" path="res://scenes/ui/CargoHoldPanel.tscn" id="5_hold_panel"]
+[ext_resource type="Texture2D" uid="uid://ccub0wdomtcwr" path="res://assets/ui/materials/fuel_icon.png" id="6_fuel_icon"]
+[ext_resource type="Texture2D" uid="uid://cxdy4v5akpwpy" path="res://assets/ui/materials/carbon_metals_icon.png" id="7_carbon_icon"]
+[ext_resource type="Texture2D" uid="uid://dkmmhxx4ss47j" path="res://assets/ui/materials/silicon_icon.png" id="8_silicon_icon"]
+[ext_resource type="Texture2D" uid="uid://b81gpbrdvryds" path="res://assets/ui/materials/copper_icon.png" id="9_copper_icon"]
+[ext_resource type="Texture2D" uid="uid://c0giugw2yagei" path="res://assets/ui/materials/electronics_icon.png" id="10_electronics_icon"]
+[ext_resource type="Texture2D" uid="uid://bu80cuu63ho7" path="res://assets/ui/materials/rare_materials_icon.png" id="11_rare_icon"]
+[ext_resource type="Texture2D" uid="uid://bjrxdj3h0b11a" path="res://assets/ui/materials/propellant_icon.png" id="12_propellant_icon"]
 
-[node name="CargoLoadingScreen" type="Control"]
+[sub_resource type="LabelSettings" id="LabelSettings_outline"]
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
+
+[node name="CargoLoadingScreen" type="Control" unique_id=715382821]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -10,3 +25,611 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_cargo_loading")
+
+[node name="Background" type="TextureRect" parent="." unique_id=1203145530]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="RootMargin" type="MarginContainer" parent="." unique_id=872773114]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="Layout" type="VBoxContainer" parent="RootMargin" unique_id=825963232]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="RootMargin/Layout" unique_id=4795930]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="VehicleLabel" type="Label" parent="RootMargin/Layout/Header" unique_id=1173278582]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+text = "Cargo loading"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="BackButton" type="Button" parent="RootMargin/Layout/Header" unique_id=985904312]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Back"
+
+[node name="AssignmentPanel" type="HBoxContainer" parent="RootMargin/Layout" unique_id=2051998405]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="AssignmentInfoPanel" type="Control" parent="RootMargin/Layout/AssignmentPanel" unique_id=857298069]
+custom_minimum_size = Vector2(420, 760)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PanelArt" type="TextureRect" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel" unique_id=381617230]
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_vehicle_panel")
+expand_mode = 1
+
+[node name="Margin" type="MarginContainer" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel" unique_id=879764191]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 56.0
+offset_top = 110.0
+offset_right = 56.0
+offset_bottom = 110.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.80466276, 0.8755043)
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="InfoContent" type="Control" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin" unique_id=1678344527]
+layout_mode = 2
+
+[node name="DetailContent" type="Control" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent" unique_id=2101946712]
+anchors_preset = 0
+offset_right = 360.0
+offset_bottom = 320.0
+
+[node name="SelectedPieceLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/DetailContent" unique_id=114077697]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+label_settings = SubResource("LabelSettings_outline")
+autowrap_mode = 3
+
+[node name="SelectedPiecePreview" type="TextureRect" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/DetailContent" unique_id=1368360047]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 150)
+layout_mode = 0
+offset_left = 90.0
+offset_top = 25.0
+offset_right = 270.0
+offset_bottom = 175.0
+expand_mode = 2
+stretch_mode = 3
+
+[node name="CopyButtonsRow" type="HBoxContainer" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/DetailContent" unique_id=788983612]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 4.3116746
+offset_top = 404.89337
+offset_right = 364.31168
+offset_bottom = 444.89337
+theme_override_constants/separation = 6
+
+[node name="LowerSpacer" type="Control" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent" unique_id=521360320]
+anchors_preset = 0
+
+[node name="AssignmentMeters" type="Control" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent" unique_id=113679032]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 150)
+anchors_preset = 0
+offset_top = 320.0
+offset_right = 360.0
+offset_bottom = 470.0
+
+[node name="CapacityLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters" unique_id=1197825848]
+layout_mode = 0
+offset_left = 3.0689185
+offset_top = 146.57213
+offset_right = 363.0689
+offset_bottom = 170.57213
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PayloadBar" type="ProgressBar" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters" unique_id=576764530]
+layout_mode = 0
+offset_left = 0.583405
+offset_top = 172.84268
+offset_right = 360.5834
+offset_bottom = 192.84268
+show_percentage = false
+
+[node name="FuelLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters" unique_id=903370975]
+layout_mode = 0
+offset_left = 6.797188
+offset_top = 232.23701
+offset_right = 366.79718
+offset_bottom = 256.237
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="FuelBar" type="ProgressBar" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters" unique_id=2144957944]
+layout_mode = 0
+offset_left = 3.0689182
+offset_top = 258.5076
+offset_right = 363.0689
+offset_bottom = 278.50757
+show_percentage = false
+
+[node name="WarningLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters" unique_id=1971404195]
+layout_mode = 0
+offset_left = 4.311675
+offset_top = 293.9158
+offset_right = 364.31168
+offset_bottom = 331.9158
+label_settings = SubResource("LabelSettings_outline")
+autowrap_mode = 3
+
+[node name="MaterialButtons" type="Control" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent" unique_id=1761913063]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_top = 475.0
+offset_right = 360.0
+offset_bottom = 585.0
+
+[node name="FuelButton" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=573728625]
+layout_mode = 0
+offset_left = 49.05091
+offset_top = 184.6037
+offset_right = 129.0509
+offset_bottom = 215.6037
+theme_override_constants/icon_max_width = 30
+text = "Fuel"
+icon = ExtResource("6_fuel_icon")
+expand_icon = true
+
+[node name="FuelAmountLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=1532830101]
+layout_mode = 0
+offset_left = 343.58426
+offset_top = 189.1725
+offset_right = 463.58426
+offset_bottom = 213.1725
+text = "0 units"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="CarbonMetalsButton" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=684305321]
+layout_mode = 0
+offset_left = 49.05091
+offset_top = 226.86505
+offset_right = 179.0509
+offset_bottom = 257.86505
+theme_override_constants/icon_max_width = 30
+text = "Carbon Metals"
+icon = ExtResource("7_carbon_icon")
+expand_icon = true
+
+[node name="CarbonMetalsAmountLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=1340915071]
+layout_mode = 0
+offset_left = 343.58423
+offset_top = 230.29169
+offset_right = 463.58423
+offset_bottom = 254.29169
+text = "0 units"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="SiliconButton" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=56481048]
+layout_mode = 0
+offset_left = 49.05091
+offset_top = 265.69983
+offset_right = 129.0509
+offset_bottom = 296.69983
+theme_override_constants/icon_max_width = 30
+text = "Silicon"
+icon = ExtResource("8_silicon_icon")
+expand_icon = true
+
+[node name="SiliconAmountLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=1160804422]
+layout_mode = 0
+offset_left = 343.58423
+offset_top = 269.0
+offset_right = 463.58423
+offset_bottom = 293.0
+text = "0 units"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="CopperButton" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=1256784535]
+layout_mode = 0
+offset_left = 49.05093
+offset_top = 306.819
+offset_right = 139.05093
+offset_bottom = 337.819
+theme_override_constants/icon_max_width = 30
+text = "Copper"
+icon = ExtResource("9_copper_icon")
+expand_icon = true
+
+[node name="CopperAmountLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=36014825]
+layout_mode = 0
+offset_left = 343.58423
+offset_top = 310.0
+offset_right = 463.58423
+offset_bottom = 334.0
+text = "0 units"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="ElectronicsButton" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=628905473]
+layout_mode = 0
+offset_left = 50.29367
+offset_top = 346.79593
+offset_right = 155.29367
+offset_bottom = 377.79593
+theme_override_constants/icon_max_width = 30
+text = "Electronics"
+icon = ExtResource("10_electronics_icon")
+expand_icon = true
+
+[node name="ElectronicsAmountLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=424465646]
+layout_mode = 0
+offset_left = 343.58423
+offset_top = 350.0
+offset_right = 463.58423
+offset_bottom = 374.0
+text = "0 units"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="RareMetalsButton" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=1550430546]
+layout_mode = 0
+offset_left = 50.29368
+offset_top = 386.7729
+offset_right = 165.29367
+offset_bottom = 417.7729
+theme_override_constants/icon_max_width = 30
+text = "Rare Metals"
+icon = ExtResource("11_rare_icon")
+expand_icon = true
+
+[node name="RareMetalsAmountLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=1913813428]
+layout_mode = 0
+offset_left = 342.3415
+offset_top = 387.91513
+offset_right = 462.3415
+offset_bottom = 411.91513
+text = "0 units"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PropellantButton" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=453483218]
+layout_mode = 0
+offset_left = 50.29367
+offset_top = 425.60767
+offset_right = 155.29367
+offset_bottom = 456.60767
+theme_override_constants/icon_max_width = 30
+text = "Propellant"
+icon = ExtResource("12_propellant_icon")
+expand_icon = true
+
+[node name="PropellantAmountLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=1578005109]
+layout_mode = 0
+offset_left = 343.58423
+offset_top = 429.0
+offset_right = 463.58423
+offset_bottom = 453.0
+text = "0 units"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="AssignmentCenter" type="Control" parent="RootMargin/Layout/AssignmentPanel" unique_id=1845272819]
+custom_minimum_size = Vector2(780, 760)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MoonbaseNeedsLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentCenter" unique_id=1966856836]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 760.0
+offset_bottom = 160.0
+text = "Moonbase material needs"
+label_settings = SubResource("LabelSettings_outline")
+autowrap_mode = 3
+
+[node name="AssignmentGridLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentCenter" unique_id=258676787]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_top = 165.0
+offset_right = 760.0
+offset_bottom = 190.0
+theme_override_font_sizes/font_size = 18
+text = "Cargo hold preview"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="AssignmentCargoHoldPanel" parent="RootMargin/Layout/AssignmentPanel/AssignmentCenter" unique_id=123747605 instance=ExtResource("5_hold_panel")]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -2.0
+offset_top = 424.0
+offset_right = 776.0
+offset_bottom = 902.0
+
+[node name="ActionRow" type="HBoxContainer" parent="RootMargin/Layout/AssignmentPanel/AssignmentCenter" unique_id=1443020821]
+layout_mode = 0
+offset_left = 216.0
+offset_top = 918.0
+offset_right = 556.0
+offset_bottom = 958.0
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="ResetButton" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCenter/ActionRow" unique_id=956878650]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Reset Assignments"
+
+[node name="ConfirmButton" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCenter/ActionRow" unique_id=937785345]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Confirm Assignments"
+
+[node name="AssignmentCargoListPanel" type="Control" parent="RootMargin/Layout/AssignmentPanel" unique_id=276015161]
+custom_minimum_size = Vector2(460, 760)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PanelArt" type="TextureRect" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel" unique_id=724393775]
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_cargo_panel")
+expand_mode = 1
+
+[node name="Margin" type="MarginContainer" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel" unique_id=1140003788]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 74
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="PieceScroll" type="ScrollContainer" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin" unique_id=798145873]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="PieceList" type="VBoxContainer" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll" unique_id=1200337864]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="PackingPanel" type="HBoxContainer" parent="RootMargin/Layout" unique_id=964763926]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="PackingInfoPanel" type="Control" parent="RootMargin/Layout/PackingPanel" unique_id=175896493]
+custom_minimum_size = Vector2(420, 760)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PanelArt" type="TextureRect" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel" unique_id=1164006632]
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_vehicle_panel")
+expand_mode = 1
+
+[node name="Margin" type="MarginContainer" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel" unique_id=2059010156]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="PackingInfoContent" type="VBoxContainer" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin" unique_id=1815059709]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PackingSummaryLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1343315316]
+unique_name_in_owner = true
+layout_mode = 2
+label_settings = SubResource("LabelSettings_outline")
+autowrap_mode = 3
+
+[node name="PackingWarningLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1249746964]
+unique_name_in_owner = true
+layout_mode = 2
+label_settings = SubResource("LabelSettings_outline")
+autowrap_mode = 3
+
+[node name="PackingLowerSpacer" type="Control" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=815957312]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PackingMeters" type="Control" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1262268724]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(360, 150)
+layout_mode = 2
+
+[node name="CapacityLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=1632236892]
+layout_mode = 0
+offset_right = 360.0
+offset_bottom = 24.0
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PayloadBar" type="ProgressBar" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=1817987798]
+layout_mode = 0
+offset_top = 28.0
+offset_right = 360.0
+offset_bottom = 48.0
+show_percentage = false
+
+[node name="FuelLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=1722204012]
+layout_mode = 0
+offset_top = 56.0
+offset_right = 360.0
+offset_bottom = 80.0
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="FuelBar" type="ProgressBar" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=16167561]
+layout_mode = 0
+offset_top = 84.0
+offset_right = 360.0
+offset_bottom = 104.0
+show_percentage = false
+
+[node name="WarningLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=1679711466]
+layout_mode = 0
+offset_top = 112.0
+offset_right = 360.0
+offset_bottom = 150.0
+label_settings = SubResource("LabelSettings_outline")
+autowrap_mode = 3
+
+[node name="PackingCenter" type="Control" parent="RootMargin/Layout/PackingPanel" unique_id=1619585161]
+custom_minimum_size = Vector2(780, 760)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PackingTopSpacer" type="Control" parent="RootMargin/Layout/PackingPanel/PackingCenter" unique_id=423588294]
+custom_minimum_size = Vector2(0, 179)
+layout_mode = 0
+
+[node name="PackingGridLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingCenter" unique_id=123347098]
+layout_mode = 0
+offset_top = 165.0
+offset_right = 760.0
+offset_bottom = 190.0
+theme_override_font_sizes/font_size = 18
+text = "Cargo hold"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PackingCargoHoldPanel" parent="RootMargin/Layout/PackingPanel/PackingCenter" unique_id=1665084216 instance=ExtResource("5_hold_panel")]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -2.0
+offset_top = 424.0
+offset_right = 776.0
+offset_bottom = 902.0
+
+[node name="LaunchButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingCenter" unique_id=725150069]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 340.0
+offset_top = 918.0
+offset_right = 440.0
+offset_bottom = 958.0
+text = "Launch"
+
+[node name="PackingListPanel" type="Control" parent="RootMargin/Layout/PackingPanel" unique_id=120780363]
+custom_minimum_size = Vector2(460, 760)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="PanelArt" type="TextureRect" parent="RootMargin/Layout/PackingPanel/PackingListPanel" unique_id=661041032]
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("4_cargo_panel")
+expand_mode = 1
+
+[node name="Margin" type="MarginContainer" parent="RootMargin/Layout/PackingPanel/PackingListPanel" unique_id=1652788559]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 74
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="PackingListContent" type="VBoxContainer" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin" unique_id=707193509]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="PiecesTitle" type="Label" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin/PackingListContent" unique_id=766975588]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Pieces to place"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PieceScroll" type="ScrollContainer" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin/PackingListContent" unique_id=1169264651]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="PackingPieceList" type="VBoxContainer" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin/PackingListContent/PieceScroll" unique_id=2103548900]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="RotateButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin/PackingListContent" unique_id=1410236689]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Rotate Selected"
+
+[node name="ClearButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin/PackingListContent" unique_id=1065009539]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Clear Placements"

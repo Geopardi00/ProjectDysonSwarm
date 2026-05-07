@@ -1,0 +1,41 @@
+[gd_scene format=3 uid="uid://dhequ46dd2nt1"]
+
+[ext_resource type="Script" uid="uid://b3xvunmtfwkko" path="res://scenes/ui/CargoHoldPanel.gd" id="1_hold_panel"]
+[ext_resource type="Texture2D" uid="uid://ccghw0hhsn1jb" path="res://assets/ui/panels/panel_cargo_hold.png" id="2_panel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/CargoGridView.tscn" id="3_grid"]
+
+[node name="CargoHoldPanel" type="Control" unique_id=1779859015]
+custom_minimum_size = Vector2(778, 478)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 778.0
+offset_bottom = 478.0
+script = ExtResource("1_hold_panel")
+debug_draw_grid = true
+
+[node name="PanelArt" type="TextureRect" parent="." unique_id=1338356700]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="GridOverlay" parent="." unique_id=1884952064 instance=ExtResource("3_grid")]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 65.00001
+offset_top = 101.0
+offset_right = 685.0
+offset_bottom = 411.0
+grow_horizontal = 1
+grow_vertical = 1
+scale = Vector2(1.082494, 1.0684637)

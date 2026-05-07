@@ -1,0 +1,538 @@
+[gd_scene format=3 uid="uid://b5nuaixiqv3nw"]
+
+[ext_resource type="Script" uid="uid://bh760qdg4caml" path="res://scenes/ui/StrategyScreen.gd" id="1_strategy"]
+[ext_resource type="Texture2D" uid="uid://bhab58eau625x" path="res://assets/ui/panels/empty_panel.png" id="2_status_panel"]
+[ext_resource type="Texture2D" uid="uid://v18ueb4hewi0" path="res://assets/ui/panels/empty_panel_vehicle_info_frame.png" id="3_vehicle_panel"]
+[ext_resource type="Texture2D" uid="uid://dtifx5c1gwlmy" path="res://assets/ui/vehicles/big_rocket_icon.png" id="4_big_rocket"]
+[ext_resource type="Texture2D" uid="uid://qxu885v6cymm" path="res://assets/ui/vehicles/space_shuttle_icon.png" id="5_shuttle"]
+[ext_resource type="Texture2D" uid="uid://cjkbie8je4bhr" path="res://assets/ui/vehicles/spinlaunch_icon.png" id="6_spinlaunch"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_outline"]
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
+
+[node name="StrategyScreen" type="Control" unique_id=517629500]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_strategy")
+
+[node name="Layout" type="VBoxContainer" parent="." unique_id=162600246]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Layout" unique_id=2100907399]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="Layout/Header" unique_id=778938546]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 28
+text = "Strategy Screen"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="ResetButton" type="Button" parent="Layout/Header" unique_id=1797317022]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Reset Match"
+
+[node name="Panels" type="HBoxContainer" parent="Layout" unique_id=793753991]
+layout_mode = 2
+theme_override_constants/separation = 28
+
+[node name="StatusPanel" type="Control" parent="Layout/Panels" unique_id=1353185040]
+custom_minimum_size = Vector2(464, 781)
+layout_mode = 2
+
+[node name="PanelArt" type="TextureRect" parent="Layout/Panels/StatusPanel" unique_id=2117846116]
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_status_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Margin" type="MarginContainer" parent="Layout/Panels/StatusPanel" unique_id=1322191029]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 22.0
+offset_top = 82.0
+offset_right = 34.0
+offset_bottom = 87.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(0.80200756, 0.83734417)
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="StatusContent" type="VBoxContainer" parent="Layout/Panels/StatusPanel/Margin" unique_id=1063705909]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="DayLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=2094968988]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Day 0"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="FactionLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=1380148249]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Player faction"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="ReadinessLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=830871272]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Moonbase readiness"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="ReadinessBar" type="ProgressBar" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=1948301634]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="LaunchesLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=1575240056]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Launches"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="NeedsLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=1458594468]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Needs"
+label_settings = SubResource("LabelSettings_outline")
+autowrap_mode = 3
+
+[node name="CompetitorsLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=2071732319]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Competitors"
+label_settings = SubResource("LabelSettings_outline")
+autowrap_mode = 3
+
+[node name="NewsTitle" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=1011642923]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "News feed"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="NewsScroll" type="ScrollContainer" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=235786713]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="NewsLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent/NewsScroll" unique_id=2117533949]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "News"
+label_settings = SubResource("LabelSettings_outline")
+autowrap_mode = 3
+
+[node name="VehiclePanel" type="HBoxContainer" parent="Layout/Panels" unique_id=936157256]
+layout_mode = 2
+theme_override_constants/separation = 22
+
+[node name="BigRocketCard" type="Control" parent="Layout/Panels/VehiclePanel" unique_id=1145378095]
+custom_minimum_size = Vector2(300, 629)
+layout_mode = 2
+
+[node name="PanelArt" type="TextureRect" parent="Layout/Panels/VehiclePanel/BigRocketCard" unique_id=1866193995]
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_vehicle_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Margin" type="MarginContainer" parent="Layout/Panels/VehiclePanel/BigRocketCard" unique_id=1050210750]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="Content" type="VBoxContainer" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin" unique_id=1127648615]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="BigRocketTitleOffset" type="Control" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=1570831382]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+
+[node name="BigRocketTitle" type="Label" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=1040822183]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Big Rocket"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="BigRocketIconOffset" type="Control" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=619055056]
+custom_minimum_size = Vector2(0, 59)
+layout_mode = 2
+
+[node name="BigRocketIcon" type="TextureRect" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=1773600162]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 200)
+layout_mode = 2
+texture = ExtResource("4_big_rocket")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="BigRocketTopSpacer" type="Control" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=309834845]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BigRocketStats" type="Control" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=1342847524]
+custom_minimum_size = Vector2(220, 110)
+layout_mode = 2
+
+[node name="BigRocketPayloadLabel" type="Label" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content/BigRocketStats" unique_id=1569845249]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -22.0
+offset_right = 198.0
+offset_bottom = 24.0
+text = "Payload: 500"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="BigRocketFuelLabel" type="Label" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content/BigRocketStats" unique_id=1690369532]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -5.0
+offset_top = 23.0
+offset_right = 215.0
+offset_bottom = 47.0
+text = "Fuel needed: 200"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="BigRocketDaysLabel" type="Label" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content/BigRocketStats" unique_id=1727062341]
+unique_name_in_owner = true
+layout_mode = 0
+offset_top = 44.0
+offset_right = 220.0
+offset_bottom = 68.0
+text = "Days to launch: 30"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="BigRocketGridLabel" type="Label" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content/BigRocketStats" unique_id=505822799]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -7.0
+offset_top = 67.0
+offset_right = 213.0
+offset_bottom = 91.0
+text = "Cargo Grid: 5x10"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="BigRocketLowerSpacer" type="Control" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=478721572]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+
+[node name="BigRocketButton" type="Button" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=303592902]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+text = "Select Vehicle"
+
+[node name="ShuttleCard" type="Control" parent="Layout/Panels/VehiclePanel" unique_id=61266544]
+custom_minimum_size = Vector2(300, 629)
+layout_mode = 2
+
+[node name="PanelArt" type="TextureRect" parent="Layout/Panels/VehiclePanel/ShuttleCard" unique_id=1057810832]
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_vehicle_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Margin" type="MarginContainer" parent="Layout/Panels/VehiclePanel/ShuttleCard" unique_id=456739891]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="Content" type="VBoxContainer" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin" unique_id=1931730712]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="ShuttleTitleOffset" type="Control" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=12382775]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+
+[node name="ShuttleTitle" type="Label" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=1582791049]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Space Shuttle"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="ShuttleIconOffset" type="Control" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=1422175543]
+custom_minimum_size = Vector2(0, 79)
+layout_mode = 2
+
+[node name="ShuttleIcon" type="TextureRect" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=1993233732]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 180)
+layout_mode = 2
+texture = ExtResource("5_shuttle")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="ShuttleTopSpacer" type="Control" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=207475117]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ShuttleStats" type="Control" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=756492045]
+custom_minimum_size = Vector2(220, 110)
+layout_mode = 2
+
+[node name="ShuttlePayloadLabel" type="Label" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content/ShuttleStats" unique_id=208620097]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -23.0
+offset_right = 197.0
+offset_bottom = 24.0
+text = "Payload: 320"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="ShuttleFuelLabel" type="Label" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content/ShuttleStats" unique_id=2074869307]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -6.0
+offset_top = 23.0
+offset_right = 214.0
+offset_bottom = 47.0
+text = "Fuel needed: 120"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="ShuttleDaysLabel" type="Label" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content/ShuttleStats" unique_id=1916518787]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -1.0
+offset_top = 44.0
+offset_right = 219.0
+offset_bottom = 68.0
+text = "Days to launch: 20"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="ShuttleGridLabel" type="Label" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content/ShuttleStats" unique_id=496019806]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -13.0
+offset_top = 67.0
+offset_right = 207.0
+offset_bottom = 91.0
+text = "Cargo Grid: 4x8"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="ShuttleLowerSpacer" type="Control" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=624819292]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+
+[node name="ShuttleButton" type="Button" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=489353861]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+text = "Select Vehicle"
+
+[node name="SpinLaunchCard" type="Control" parent="Layout/Panels/VehiclePanel" unique_id=689646704]
+custom_minimum_size = Vector2(300, 629)
+layout_mode = 2
+
+[node name="PanelArt" type="TextureRect" parent="Layout/Panels/VehiclePanel/SpinLaunchCard" unique_id=1121744166]
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_vehicle_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Margin" type="MarginContainer" parent="Layout/Panels/VehiclePanel/SpinLaunchCard" unique_id=1568898211]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
+
+[node name="Content" type="VBoxContainer" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin" unique_id=162391069]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="SpinLaunchTitleOffset" type="Control" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=499265409]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+
+[node name="SpinLaunchTitle" type="Label" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=995763902]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "SpinLaunch"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="SpinLaunchIconOffset" type="Control" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=901819161]
+custom_minimum_size = Vector2(0, 110)
+layout_mode = 2
+
+[node name="SpinLaunchIcon" type="TextureRect" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=2027132484]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 150)
+layout_mode = 2
+texture = ExtResource("6_spinlaunch")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="SpinLaunchTopSpacer" type="Control" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=464737095]
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SpinLaunchStats" type="Control" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=1330556339]
+custom_minimum_size = Vector2(220, 110)
+layout_mode = 2
+
+[node name="SpinLaunchPayloadLabel" type="Label" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content/SpinLaunchStats" unique_id=1347469946]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -27.0
+offset_right = 193.0
+offset_bottom = 24.0
+text = "Payload: 20"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="SpinLaunchFuelLabel" type="Label" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content/SpinLaunchStats" unique_id=646578441]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -15.0
+offset_top = 22.0
+offset_right = 205.0
+offset_bottom = 46.0
+text = "Fuel needed: 0"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="SpinLaunchDaysLabel" type="Label" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content/SpinLaunchStats" unique_id=346475798]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -6.0
+offset_top = 44.0
+offset_right = 214.0
+offset_bottom = 68.0
+text = "Days to launch: 5"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="SpinLaunchGridLabel" type="Label" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content/SpinLaunchStats" unique_id=1861356331]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -13.0
+offset_top = 67.0
+offset_right = 207.0
+offset_bottom = 91.0
+text = "Cargo Grid: 1x2"
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
+[node name="SpinLaunchLowerSpacer" type="Control" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=135235960]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+
+[node name="SpinLaunchButton" type="Button" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=1553686673]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 42)
+layout_mode = 2
+text = "Select Vehicle"
+
+[node name="DebugRow" type="HBoxContainer" parent="Layout" unique_id=848875156]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DebugLabel" type="Label" parent="Layout/DebugRow" unique_id=142278201]
+layout_mode = 2
+text = "Debug:"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="DebugAddNewsButton" type="Button" parent="Layout/DebugRow" unique_id=1093203959]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Add Test News"
+
+[node name="DebugForcePlayerWinButton" type="Button" parent="Layout/DebugRow" unique_id=138862066]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Force Player Win"
+
+[node name="DebugForceCpuWinButton" type="Button" parent="Layout/DebugRow" unique_id=572570606]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Force CPU Win"

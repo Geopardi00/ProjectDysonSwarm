@@ -26,8 +26,8 @@ const MATERIAL_ICONS := {
 }
 
 const PANEL_FRAMES := {
-	"vehicle_info": "res://assets/ui/panels/panel_vehicle_info_frame.png",
-	"available_cargo": "res://assets/ui/panels/panel_available_cargo_frame.png",
+	"vehicle_info": "res://assets/ui/panels/empty_panel_vehicle_info_frame.png",
+	"available_cargo": "res://assets/ui/panels/empty_panel.png",
 	"cargo_hold": "res://assets/ui/panels/panel_cargo_hold.png",
 }
 
