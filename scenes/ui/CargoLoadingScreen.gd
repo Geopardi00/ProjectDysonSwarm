@@ -36,7 +36,7 @@ var payload_bar: ProgressBar
 var fuel_bar: ProgressBar
 var assignment_panel: HBoxContainer
 var packing_panel: HBoxContainer
-var piece_list: VBoxContainer
+var piece_list: Control
 var material_buttons: Control
 var material_amount_labels: Dictionary = {}
 var confirm_button: Button
@@ -180,21 +180,35 @@ func _get_material_amount_label_name(material: String) -> String:
 
 
 func _rebuild_assignment_piece_buttons() -> void:
-	for child in piece_list.get_children():
-		child.queue_free()
 	piece_buttons.clear()
 
-	for group: Dictionary in _get_assignment_piece_groups():
+	var groups := _get_assignment_piece_groups()
+	var slot_buttons := _get_piece_slot_buttons()
+	for index in range(slot_buttons.size()):
+		var button := slot_buttons[index]
+		if index >= groups.size():
+			button.visible = false
+			button.disabled = true
+			button.text = ""
+			button.icon = null
+			if button.has_meta("shape_id"):
+				button.remove_meta("shape_id")
+			continue
+		var group: Dictionary = groups[index]
 		var piece: CargoPiece = group["pieces"][0]
-		var button := Button.new()
-		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.visible = true
+		button.disabled = false
+		button.text = ""
+		button.tooltip_text = piece.display_name
 		button.icon = UiAssetsScript.get_cargo_piece_texture(piece.shape_id)
-		button.expand_icon = true
-		button.add_theme_constant_override("icon_max_width", 96)
-		button.text = _format_assignment_group_button_text(group)
-		button.pressed.connect(_on_assignment_group_pressed.bind(piece.shape_id))
+		button.expand_icon = false
+		button.flat = true
+		button.toggle_mode = true
+		button.set_meta("shape_id", piece.shape_id)
+		var pressed_callable := _on_piece_slot_pressed.bind(button)
+		if not button.pressed.is_connected(pressed_callable):
+			button.pressed.connect(pressed_callable)
 		piece_buttons[piece.shape_id] = button
-		piece_list.add_child(button)
 
 
 func _rebuild_packing_piece_buttons() -> void:
@@ -303,7 +317,25 @@ func _refresh_assignment_piece_button_text() -> void:
 		var piece: CargoPiece = group["pieces"][0]
 		var button := piece_buttons.get(piece.shape_id, null) as Button
 		if button != null:
-			button.text = _format_assignment_group_button_text(group)
+			button.text = ""
+			button.button_pressed = piece.shape_id == selected_shape_id
+
+
+func _get_piece_slot_buttons() -> Array[Button]:
+	var buttons: Array[Button] = []
+	for child in piece_list.get_children():
+		if child is Button:
+			buttons.append(child)
+	buttons.sort_custom(func(a: Button, b: Button) -> bool:
+		return a.name.naturalnocasecmp_to(b.name) < 0
+	)
+	return buttons
+
+
+func _on_piece_slot_pressed(button: Button) -> void:
+	if not button.has_meta("shape_id"):
+		return
+	_on_assignment_group_pressed(String(button.get_meta("shape_id")))
 
 
 func _rebuild_copy_buttons() -> void:

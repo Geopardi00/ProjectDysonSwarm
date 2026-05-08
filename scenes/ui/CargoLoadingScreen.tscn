@@ -132,10 +132,10 @@ autowrap_mode = 3
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 150)
 layout_mode = 0
-offset_left = 90.0
-offset_top = 25.0
-offset_right = 270.0
-offset_bottom = 175.0
+offset_left = 137.28664
+offset_top = 103.352875
+offset_right = 317.28662
+offset_bottom = 253.35287
 expand_mode = 2
 stretch_mode = 3
 
@@ -436,10 +436,100 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 horizontal_scroll_mode = 0
 
-[node name="PieceList" type="VBoxContainer" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll" unique_id=1200337864]
+[node name="PieceList" type="Control" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll" unique_id=1200337864]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_constants/separation = 6
+custom_minimum_size = Vector2(360, 640)
+
+[node name="PieceSlot01Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 6.0
+offset_right = 144.0
+offset_bottom = 58.0
+tooltip_text = "Cargo piece slot 1"
+flat = true
+
+[node name="PieceSlot02Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 66.0
+offset_right = 144.0
+offset_bottom = 118.0
+tooltip_text = "Cargo piece slot 2"
+flat = true
+
+[node name="PieceSlot03Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 126.0
+offset_right = 144.0
+offset_bottom = 178.0
+tooltip_text = "Cargo piece slot 3"
+flat = true
+
+[node name="PieceSlot04Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 186.0
+offset_right = 144.0
+offset_bottom = 238.0
+tooltip_text = "Cargo piece slot 4"
+flat = true
+
+[node name="PieceSlot05Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 246.0
+offset_right = 144.0
+offset_bottom = 298.0
+tooltip_text = "Cargo piece slot 5"
+flat = true
+
+[node name="PieceSlot06Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 306.0
+offset_right = 144.0
+offset_bottom = 358.0
+tooltip_text = "Cargo piece slot 6"
+flat = true
+
+[node name="PieceSlot07Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 366.0
+offset_right = 144.0
+offset_bottom = 418.0
+tooltip_text = "Cargo piece slot 7"
+flat = true
+
+[node name="PieceSlot08Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 426.0
+offset_right = 144.0
+offset_bottom = 478.0
+tooltip_text = "Cargo piece slot 8"
+flat = true
+
+[node name="PieceSlot09Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 486.0
+offset_right = 144.0
+offset_bottom = 538.0
+tooltip_text = "Cargo piece slot 9"
+flat = true
+
+[node name="PieceSlot10Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList"]
+layout_mode = 0
+offset_left = 24.0
+offset_top = 546.0
+offset_right = 144.0
+offset_bottom = 598.0
+tooltip_text = "Cargo piece slot 10"
+flat = true
 
 [node name="PackingPanel" type="HBoxContainer" parent="RootMargin/Layout" unique_id=964763926]
 unique_name_in_owner = true
@@ -546,7 +636,7 @@ size_flags_vertical = 3
 
 [node name="PackingTopSpacer" type="Control" parent="RootMargin/Layout/PackingPanel/PackingCenter" unique_id=423588294]
 custom_minimum_size = Vector2(0, 179)
-layout_mode = 0
+anchors_preset = 0
 
 [node name="PackingGridLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingCenter" unique_id=123347098]
 layout_mode = 0

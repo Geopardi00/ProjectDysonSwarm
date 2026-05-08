@@ -1,6 +1,6 @@
 # Project Dyson Swarm - State of Game
 
-Last updated: 2026-05-07
+Last updated: 2026-05-08
 
 ## Current Prototype Status
 
@@ -76,7 +76,7 @@ Currently wired:
 - Faction logos on faction select.
 - Vehicle icons on strategy vehicle cards.
 - Material icons on assignment material buttons.
-- Cargo piece images on assignment and packing lists.
+- Cargo piece images on editor-placeable assignment slots and packing lists.
 - Empty panel textures for vehicle info / available cargo style panels.
 - Vehicle-specific cargo hold panel textures for Big Rocket, Space Shuttle, and SpinLaunch.
 - Strategy screen, cargo loading screen, cargo grid view, and cargo hold panel are now scene-backed for easier 2D editor placement.
@@ -109,7 +109,7 @@ Assignment:
 - Left panel: selected piece image preview, copy buttons, payload/fuel meters, material buttons, per-material assigned-unit labels.
 - Material buttons and their assigned-unit labels are hand-placeable in the 2D editor.
 - Center: moonbase needs and manually placeable cargo hold panel.
-- Right panel: available cargo groups.
+- Right panel: available cargo groups use fixed, editor-placeable icon slots with no runtime text.
 - ASCII piece previews have been removed from the visible list.
 - Reset/confirm buttons live under the center cargo hold panel.
 
