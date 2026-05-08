@@ -110,6 +110,7 @@ Assignment:
 - Material buttons and their assigned-unit labels are hand-placeable in the 2D editor.
 - Center: moonbase needs and manually placeable cargo hold panel.
 - Right panel: available cargo groups use fixed, editor-placeable icon slots with no runtime text.
+- Assignment cargo group icons are centered inside their slot rectangles; slot rectangles can be hand-placed and the list scrolls from their positions.
 - ASCII piece previews have been removed from the visible list.
 - Reset/confirm buttons live under the center cargo hold panel.
 

@@ -20,6 +20,7 @@ var packing_status_text := ""
 var moonbase_remaining_requirements: Dictionary = {}
 var piece_buttons: Dictionary = {}
 var packing_piece_buttons: Dictionary = {}
+var half_size_piece_textures: Dictionary = {}
 
 var root: VBoxContainer
 var vehicle_label: Label
@@ -200,8 +201,10 @@ func _rebuild_assignment_piece_buttons() -> void:
 		button.disabled = false
 		button.text = ""
 		button.tooltip_text = piece.display_name
-		button.icon = UiAssetsScript.get_cargo_piece_texture(piece.shape_id)
+		button.icon = _get_half_size_piece_texture(piece.shape_id)
 		button.expand_icon = false
+		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
 		button.flat = true
 		button.toggle_mode = true
 		button.set_meta("shape_id", piece.shape_id)
@@ -209,6 +212,7 @@ func _rebuild_assignment_piece_buttons() -> void:
 		if not button.pressed.is_connected(pressed_callable):
 			button.pressed.connect(pressed_callable)
 		piece_buttons[piece.shape_id] = button
+	_fit_piece_list_scroll_area()
 
 
 func _rebuild_packing_piece_buttons() -> void:
@@ -330,6 +334,33 @@ func _get_piece_slot_buttons() -> Array[Button]:
 		return a.name.naturalnocasecmp_to(b.name) < 0
 	)
 	return buttons
+
+
+func _fit_piece_list_scroll_area() -> void:
+	var content_size := Vector2(360, 640)
+	for button in _get_piece_slot_buttons():
+		if not button.visible:
+			continue
+		content_size.x = maxf(content_size.x, button.position.x + button.size.x + 16.0)
+		content_size.y = maxf(content_size.y, button.position.y + button.size.y + 16.0)
+	piece_list.custom_minimum_size = content_size
+
+
+func _get_half_size_piece_texture(shape_id: String) -> Texture2D:
+	if half_size_piece_textures.has(shape_id):
+		return half_size_piece_textures[shape_id]
+	var texture := UiAssetsScript.get_cargo_piece_texture(shape_id)
+	if texture == null:
+		return null
+	var image := texture.get_image()
+	if image == null:
+		return texture
+	var width := maxi(1, int(roundi(image.get_width() * 1.0)))
+	var height := maxi(1, int(roundi(image.get_height() * 1.0)))
+	image.resize(width, height, Image.INTERPOLATE_LANCZOS)
+	var scaled_texture := ImageTexture.create_from_image(image)
+	half_size_piece_textures[shape_id] = scaled_texture
+	return scaled_texture
 
 
 func _on_piece_slot_pressed(button: Button) -> void:
