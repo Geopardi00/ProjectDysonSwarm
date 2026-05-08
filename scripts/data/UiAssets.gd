@@ -2,6 +2,7 @@ extends RefCounted
 class_name UiAssets
 
 const BACKGROUND := "res://assets/ui/backgrounds/ui_bg_space_loading_1920x1080.png"
+const TITLE_LOGO := "res://assets/ui/title/title_logo.png"
 
 const VEHICLE_ICONS := {
 	"big_rocket": "res://assets/ui/vehicles/big_rocket_icon.png",
@@ -68,6 +69,10 @@ static func get_texture(path: String) -> Texture2D:
 
 static func get_background() -> Texture2D:
 	return get_texture(BACKGROUND)
+
+
+static func get_title_logo() -> Texture2D:
+	return get_texture(TITLE_LOGO)
 
 
 static func get_vehicle_icon(vehicle_id: String) -> Texture2D:

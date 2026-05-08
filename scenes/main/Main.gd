@@ -6,6 +6,7 @@ const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 const StrategyScreenScene := preload("res://scenes/ui/StrategyScreen.tscn")
 
 const SHOW_DEBUG_ACTIONS := true
+const CORNER_LOGO_SIZE := Vector2(180, 64)
 
 @onready var root_margin: MarginContainer = $RootMargin
 @onready var cargo_loading_screen: Control = %CargoLoadingScreen
@@ -14,11 +15,13 @@ var game_state: GameState
 var launch_manager: LaunchManager
 var selected_faction := "USA"
 var active_screen: Control
+var corner_logo: TextureRect
 var last_launch_result: Dictionary = {}
 
 
 func _ready() -> void:
 	_add_scene_background()
+	_add_corner_logo()
 	game_state = GameState.new()
 	add_child(game_state)
 
@@ -29,7 +32,7 @@ func _ready() -> void:
 	cargo_loading_screen.assignment_cancelled.connect(_on_assignment_cancelled)
 
 	_clear_root_margin()
-	_show_faction_select()
+	_show_opening_screen()
 
 
 func test_big_rocket_success() -> Dictionary:
@@ -56,7 +59,38 @@ func _launch_test_manifest(vehicle_id: String, manifest_id: String) -> Dictionar
 
 func _show_faction_select() -> void:
 	cargo_loading_screen.visible = false
+	_set_corner_logo_visible(true)
 	_set_active_screen(_build_faction_select_screen())
+
+
+func _show_opening_screen() -> void:
+	cargo_loading_screen.visible = false
+	_set_corner_logo_visible(false)
+	_set_active_screen(_build_opening_screen())
+
+
+func _build_opening_screen() -> Control:
+	var layout := VBoxContainer.new()
+	layout.set_anchors_preset(Control.PRESET_FULL_RECT)
+	layout.alignment = BoxContainer.ALIGNMENT_CENTER
+	layout.add_theme_constant_override("separation", 28)
+
+	var logo := TextureRect.new()
+	logo.custom_minimum_size = Vector2(760, 280)
+	logo.texture = UiAssetsScript.get_title_logo()
+	logo.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layout.add_child(logo)
+
+	var start_button := Button.new()
+	start_button.text = "Start"
+	start_button.custom_minimum_size = Vector2(220, 44)
+	start_button.pressed.connect(_show_faction_select)
+	layout.add_child(start_button)
+
+	UiAssetsScript.apply_text_outline(layout)
+	return layout
 
 
 func _build_faction_select_screen() -> Control:
@@ -132,6 +166,7 @@ func _build_faction_card(faction_id: String, display_name: String) -> Button:
 
 func _show_strategy_screen() -> void:
 	cargo_loading_screen.visible = false
+	_set_corner_logo_visible(true)
 	var strategy_screen := StrategyScreenScene.instantiate()
 	strategy_screen.vehicle_selected.connect(_open_assignment_screen)
 	strategy_screen.reset_requested.connect(_on_reset_button_pressed)
@@ -145,6 +180,7 @@ func _show_strategy_screen() -> void:
 func _show_launch_result(result: Dictionary) -> void:
 	last_launch_result = result
 	cargo_loading_screen.visible = false
+	_set_corner_logo_visible(true)
 	_set_active_screen(_build_launch_result_screen(result))
 
 
@@ -174,6 +210,7 @@ func _build_launch_result_screen(result: Dictionary) -> Control:
 
 func _show_game_over_screen() -> void:
 	cargo_loading_screen.visible = false
+	_set_corner_logo_visible(true)
 	_set_active_screen(_build_game_over_screen())
 
 
@@ -241,6 +278,7 @@ func _build_debug_row() -> Control:
 
 func _open_assignment_screen(vehicle_id: String) -> void:
 	_clear_active_screen()
+	_set_corner_logo_visible(true)
 	cargo_loading_screen.start_assignment(vehicle_id, game_state.moonbase.remaining_requirements.duplicate(true))
 
 
@@ -337,6 +375,30 @@ func _add_scene_background() -> void:
 	background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(background)
 	move_child(background, 0)
+
+
+func _add_corner_logo() -> void:
+	var texture := UiAssetsScript.get_title_logo()
+	if texture == null:
+		return
+	corner_logo = TextureRect.new()
+	corner_logo.name = "CornerLogo"
+	corner_logo.custom_minimum_size = CORNER_LOGO_SIZE
+	corner_logo.offset_left = 18.0
+	corner_logo.offset_top = 14.0
+	corner_logo.offset_right = corner_logo.offset_left + CORNER_LOGO_SIZE.x
+	corner_logo.offset_bottom = corner_logo.offset_top + CORNER_LOGO_SIZE.y
+	corner_logo.texture = texture
+	corner_logo.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	corner_logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	corner_logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	corner_logo.visible = false
+	add_child(corner_logo)
+
+
+func _set_corner_logo_visible(is_visible: bool) -> void:
+	if corner_logo != null:
+		corner_logo.visible = is_visible
 
 
 func _with_margin(content: Control) -> Control:

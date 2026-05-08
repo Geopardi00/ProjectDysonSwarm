@@ -9,6 +9,7 @@ const CargoAssignmentScript := preload("res://scripts/cargo/CargoAssignment.gd")
 const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 
 const MATERIAL_ICON_SIZE := Vector2i(24, 24)
+const PACKING_PIECE_SLOT_SIZE := Vector2(320, 180)
 const ASSIGNMENT_PREVIEW_TINT_ALPHA := 0.68
 const MATERIAL_TINTS := {
 	"fuel": Color("#E8452E"),
@@ -57,6 +58,8 @@ var confirm_button: Button
 var packing_piece_list: VBoxContainer
 var packing_summary_label: Label
 var packing_warning_label: Label
+var packing_selected_piece_preview: TextureRect
+var packing_selected_cargo_label: Label
 var packing_info_labels: Dictionary = {}
 var packing_manifest_labels: Dictionary = {}
 var packing_manifest_buttons: Dictionary = {}
@@ -113,8 +116,11 @@ func _bind_scene_nodes() -> void:
 	material_buttons = %MaterialButtons
 	confirm_button = %ConfirmButton
 	packing_piece_list = %PackingPieceList
+	packing_piece_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	packing_summary_label = %PackingSummaryLabel
 	packing_warning_label = %PackingWarningLabel
+	packing_selected_piece_preview = %PackingSelectedPiecePreview
+	packing_selected_cargo_label = %PackingSelectedCargoLabel
 	packing_summary_label.visible = false
 	packing_warning_label.visible = false
 	_bind_packing_info_labels()
@@ -159,14 +165,7 @@ func _register_meter_block(meters: Node) -> void:
 
 func _bind_packing_info_labels() -> void:
 	packing_info_labels = {
-		"rotation": %PackingRotationLabel,
-		"selected": %PackingSelectedLabel,
-		"material": %PackingMaterialLabel,
-		"payload": %PackingPayloadLabel,
-		"manifest_title": %PackingManifestTitleLabel,
 		"fuel_status": %PackingFuelStatusLabel,
-		"unplaced": %PackingUnplacedLabel,
-		"status": %PackingStatusLabel,
 	}
 	packing_manifest_labels = {
 		GameDataScript.MATERIAL_FUEL: %PackingManifestFuelLabel,
@@ -291,11 +290,18 @@ func _rebuild_packing_piece_buttons() -> void:
 
 	for piece: CargoPiece in packing_state.get_unplaced_pieces():
 		var button := Button.new()
-		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		button.icon = UiAssetsScript.get_cargo_piece_texture(piece.shape_id)
-		button.expand_icon = true
-		button.add_theme_constant_override("icon_max_width", 96)
-		button.text = _format_packing_piece_button_text(piece)
+		button.custom_minimum_size = PACKING_PIECE_SLOT_SIZE
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.text = ""
+		button.tooltip_text = _format_packing_piece_button_text(piece)
+		button.icon = _get_half_size_piece_texture(piece.shape_id)
+		button.modulate = _get_material_tint(piece.material)
+		button.expand_icon = false
+		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		button.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
+		button.flat = true
+		button.toggle_mode = true
+		button.button_pressed = piece.instance_id == selected_piece_id
 		button.pressed.connect(_on_packing_piece_pressed.bind(piece.instance_id))
 		packing_piece_buttons[piece.instance_id] = button
 		packing_piece_list.add_child(button)
@@ -390,15 +396,7 @@ func _update_meters(payload_title: String, payload_value: int, max_payload: int,
 
 func _update_packing_info_labels(required_fuel: int, placed_fuel: int) -> void:
 	var selected_piece := packing_state.get_assigned_piece(selected_piece_id)
-	_set_packing_info_text("rotation", "Rotation: %d" % selected_rotation)
-	if selected_piece != null:
-		_set_packing_info_text("selected", "Selected: %s" % selected_piece.display_name)
-		_set_packing_info_text("material", "Material: %s" % _format_material_name(selected_piece.material))
-		_set_packing_info_text("payload", "Payload: %d" % selected_piece.get_payload_units())
-	else:
-		_set_packing_info_text("selected", "Selected: none")
-		_set_packing_info_text("material", "")
-		_set_packing_info_text("payload", "")
+	_update_packing_selected_piece_preview(selected_piece)
 
 	var manifest := packing_state.get_manifest()
 	for material: String in GameDataScript.MATERIALS:
@@ -413,8 +411,25 @@ func _update_packing_info_labels(required_fuel: int, placed_fuel: int) -> void:
 	if placed_fuel < required_fuel:
 		fuel_text = "Not enough fuel placed. Launch will crash."
 	_set_packing_info_text("fuel_status", fuel_text)
-	_set_packing_info_text("unplaced", "Unplaced assigned pieces: %d" % packing_state.get_unplaced_pieces().size())
-	_set_packing_info_text("status", packing_status_text)
+
+
+func _update_packing_selected_piece_preview(selected_piece: CargoPiece) -> void:
+	if selected_piece == null:
+		packing_selected_piece_preview.texture = null
+		packing_selected_piece_preview.modulate = Color.WHITE
+		packing_selected_piece_preview.visible = false
+		packing_selected_cargo_label.text = ""
+		packing_selected_cargo_label.visible = false
+		return
+
+	packing_selected_piece_preview.texture = UiAssetsScript.get_cargo_piece_texture(selected_piece.shape_id)
+	packing_selected_piece_preview.modulate = _get_material_tint(selected_piece.material)
+	packing_selected_piece_preview.visible = packing_selected_piece_preview.texture != null
+	packing_selected_cargo_label.text = "%s %d units" % [
+		_format_material_name(selected_piece.material),
+		selected_piece.get_payload_units(),
+	]
+	packing_selected_cargo_label.visible = true
 
 
 func _set_packing_info_text(label_key: String, text: String) -> void:
@@ -587,7 +602,11 @@ func _get_selected_piece_preview_tint() -> Color:
 	var assigned_piece := assignment.get_assigned_piece(selected_piece_id)
 	if assigned_piece == null:
 		return Color.WHITE
-	var tint := MATERIAL_TINTS.get(assigned_piece.material, Color.WHITE) as Color
+	return _get_material_tint(assigned_piece.material)
+
+
+func _get_material_tint(material: String) -> Color:
+	var tint := MATERIAL_TINTS.get(material, Color.WHITE) as Color
 	tint.a = ASSIGNMENT_PREVIEW_TINT_ALPHA
 	return tint
 

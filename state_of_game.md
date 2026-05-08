@@ -8,6 +8,7 @@ Milestones 1-5 are implemented and Milestone 7 has an editor-driven art/UI pass 
 
 Working loop:
 
+- Opening screen shows the title logo over the space background before faction select.
 - Faction select screen lets the player choose USA, China, or EU.
 - Strategy screen shows day, player faction, readiness, moonbase needs, CPU progress, news, and vehicle selection.
 - Vehicle selection supports Big Rocket, Space Shuttle, and SpinLaunch.
@@ -73,6 +74,7 @@ assets/ui/
 Currently wired:
 
 - Space background image on main and cargo screens.
+- Title logo on the opening screen and as a small upper-left overlay during normal game screens.
 - Faction logos on faction select.
 - Vehicle icons on strategy vehicle cards.
 - Material icons on assignment material buttons.
@@ -93,7 +95,8 @@ This centralizes asset paths and provides text outline styling.
 
 Faction select:
 
-- Shows title, faction logo cards, and start button.
+- Reached after the opening screen start button.
+- Shows title, faction logo cards, and start match button.
 - Faction choice is flavor only for now.
 
 Strategy / vehicle selection:
@@ -117,16 +120,18 @@ Assignment:
 
 Packing:
 
-- Left panel: hand-placeable status rows, payload/fuel meters, and a lower placed-manifest section.
+- Left panel: selected piece preview, payload/fuel meters, and a lower placed-manifest section.
+- Selected packing piece preview tints to the selected piece's assigned material color at 68% opacity and shows material/unit text below it.
 - Packing placed manifest uses separate icon, material-name, and placed-unit nodes per material.
 - Center: manually placeable cargo hold panel with functional clickable packing overlay.
-- Right panel: assigned pieces to place plus rotate/clear controls.
-- Launch button lives under the center cargo hold panel.
+- Right panel: assigned pieces to place render as centered, tinted block previews with no visible text.
+- Rotate is keyboard-only with `R`.
+- Clear placements and launch buttons live under the center cargo hold panel.
 - Assignment and packing cargo hold panel positions are independently hand-tunable but currently matched.
 
 ## Known Rough Edges
 
-- Some UI is still generated dynamically, especially cargo piece list buttons and copy buttons.
+- Some UI is still generated dynamically, especially packing piece preview buttons and copy buttons.
 - Large layout surfaces are now scene/editor-backed, but exact pixel polish is still in progress.
 - Cargo hold panel art and click/grid alignment have been tuned for Big Rocket but may need verification for Shuttle and SpinLaunch.
 - Material needs panel is text-first; it can later become icon/progress-bar based.
@@ -148,7 +153,7 @@ Latest checks passed before this checkpoint:
 
 - Cargo smoke test passed.
 - Cargo UI smoke test passed.
-- Strategy screen smoke test passed.
+- Strategy screen smoke test passed. Recent Strategy test needed normal Godot user-log access outside the sandbox.
 - Main scene loaded headless during this visual pass.
 
 ## Suggested Next Steps

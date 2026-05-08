@@ -549,7 +549,6 @@ flat = true
 
 [node name="PackingPanel" type="HBoxContainer" parent="RootMargin/Layout" unique_id=964763926]
 unique_name_in_owner = true
-visible = false
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 16
@@ -612,6 +611,7 @@ autowrap_mode = 3
 
 [node name="PackingRotationLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=2052851972]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_right = 360.0
 offset_bottom = 26.0
@@ -620,6 +620,7 @@ label_settings = SubResource("LabelSettings_outline")
 
 [node name="PackingSelectedLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1395641376]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_left = 3.0
 offset_top = 52.0
@@ -630,6 +631,7 @@ label_settings = SubResource("LabelSettings_outline")
 
 [node name="PackingMaterialLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=59839054]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_left = 9.0
 offset_top = 114.0
@@ -639,14 +641,37 @@ label_settings = SubResource("LabelSettings_outline")
 
 [node name="PackingPayloadLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1906262873]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_top = 84.0
 offset_right = 360.0
 offset_bottom = 110.0
 label_settings = SubResource("LabelSettings_outline")
 
+[node name="PackingSelectedPiecePreview" type="TextureRect" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1861553293]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 150)
+layout_mode = 0
+offset_left = 120.0
+offset_top = 114.0
+offset_right = 300.0
+offset_bottom = 264.0
+expand_mode = 2
+stretch_mode = 3
+
+[node name="PackingSelectedCargoLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=302480756]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 94.0
+offset_top = 402.0
+offset_right = 334.0
+offset_bottom = 428.0
+label_settings = SubResource("LabelSettings_outline")
+horizontal_alignment = 1
+
 [node name="PackingManifestTitleLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1079792202]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_left = 25.0
 offset_top = 439.0
@@ -896,16 +921,17 @@ label_settings = SubResource("LabelSettings_outline")
 [node name="PackingFuelStatusLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=748286497]
 unique_name_in_owner = true
 layout_mode = 0
-offset_left = 23.0
-offset_top = 464.0
-offset_right = 383.0
-offset_bottom = 490.0
+offset_left = 37.0
+offset_top = 597.0
+offset_right = 397.0
+offset_bottom = 623.0
 text = "Not enough fuel placed. Launch will crash."
 label_settings = SubResource("LabelSettings_outline")
 autowrap_mode = 3
 
 [node name="PackingUnplacedLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=2036020356]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_left = 25.0
 offset_top = 493.0
@@ -916,10 +942,12 @@ label_settings = SubResource("LabelSettings_outline")
 
 [node name="PackingStatusLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1563988679]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
-offset_top = 436.0
-offset_right = 360.0
-offset_bottom = 482.0
+offset_left = 13.0
+offset_top = 279.0
+offset_right = 373.0
+offset_bottom = 325.0
 label_settings = SubResource("LabelSettings_outline")
 autowrap_mode = 3
 
@@ -937,37 +965,43 @@ offset_bottom = 470.0
 
 [node name="CapacityLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=1632236892]
 layout_mode = 0
-offset_right = 360.0
-offset_bottom = 24.0
+offset_left = 39.0
+offset_top = 154.0
+offset_right = 399.0
+offset_bottom = 178.0
 label_settings = SubResource("LabelSettings_outline")
 
 [node name="PayloadBar" type="ProgressBar" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=1817987798]
 layout_mode = 0
-offset_top = 121.0
-offset_right = 360.0
-offset_bottom = 141.0
+offset_left = 36.0
+offset_top = 182.0
+offset_right = 396.0
+offset_bottom = 202.0
 show_percentage = false
 
 [node name="FuelLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=1722204012]
 layout_mode = 0
-offset_top = 56.0
-offset_right = 360.0
-offset_bottom = 80.0
+offset_left = 39.0
+offset_top = 217.0
+offset_right = 399.0
+offset_bottom = 241.0
 label_settings = SubResource("LabelSettings_outline")
 
 [node name="FuelBar" type="ProgressBar" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=16167561]
 layout_mode = 0
-offset_top = 202.0
-offset_right = 360.0
-offset_bottom = 222.0
+offset_left = 36.0
+offset_top = 245.0
+offset_right = 396.0
+offset_bottom = 265.0
 show_percentage = false
 
 [node name="WarningLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=1679711466]
 visible = false
 layout_mode = 0
-offset_top = 112.0
-offset_right = 360.0
-offset_bottom = 150.0
+offset_left = 32.0
+offset_top = -362.0
+offset_right = 392.0
+offset_bottom = -324.0
 label_settings = SubResource("LabelSettings_outline")
 autowrap_mode = 3
 
@@ -1007,6 +1041,15 @@ offset_right = 440.0
 offset_bottom = 958.0
 text = "Launch"
 
+[node name="ClearButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingCenter" unique_id=1065009539]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 168.0
+offset_top = 918.0
+offset_right = 328.0
+offset_bottom = 958.0
+text = "Clear Placements"
+
 [node name="PackingListPanel" type="Control" parent="RootMargin/Layout/PackingPanel" unique_id=120780363]
 custom_minimum_size = Vector2(460, 760)
 layout_mode = 2
@@ -1030,6 +1073,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 19.0
+offset_top = 21.5
+offset_right = -18.0
+offset_bottom = -17.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 28
@@ -1055,14 +1102,11 @@ horizontal_scroll_mode = 0
 [node name="PackingPieceList" type="VBoxContainer" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin/PackingListContent/PieceScroll" unique_id=2103548900]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
 [node name="RotateButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin/PackingListContent" unique_id=1410236689]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 text = "Rotate Selected"
-
-[node name="ClearButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin/PackingListContent" unique_id=1065009539]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Clear Placements"
