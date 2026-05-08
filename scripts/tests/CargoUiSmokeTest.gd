@@ -40,6 +40,21 @@ func _run() -> void:
 	if screen.assignment.get_assigned_piece(big_pieces[1].instance_id).material != "silicon":
 		_fail("Second grouped copy did not keep its different assigned material.")
 		return
+	screen._on_reset_pressed()
+	screen._on_assignment_group_pressed(big_pieces[0].shape_id)
+	var copy_a_button := screen.copy_buttons_row.get_child(0) as Button
+	var copy_b_button := screen.copy_buttons_row.get_child(1) as Button
+	copy_a_button.pressed.emit()
+	screen._on_material_pressed("fuel")
+	copy_b_button = screen.copy_buttons_row.get_child(1) as Button
+	copy_b_button.pressed.emit()
+	screen._on_material_pressed("silicon")
+	if screen.assignment.get_assigned_piece(big_pieces[0].instance_id).material != "fuel":
+		_fail("Copy A button did not assign material to the first copy.")
+		return
+	if screen.assignment.get_assigned_piece(big_pieces[1].instance_id).material != "silicon":
+		_fail("Copy B button did not assign material to the second copy.")
+		return
 
 	screen.start_assignment("space_shuttle", {"copper": 10})
 	if not screen.moonbase_needs_label.text.contains("Copper: 10 / 140 remaining"):

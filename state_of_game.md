@@ -107,6 +107,7 @@ Strategy / vehicle selection:
 Assignment:
 
 - Left panel: selected piece image preview, copy buttons, payload/fuel meters, material buttons, per-material assigned-unit labels.
+- Selected assignment piece preview tints to the selected copy's assigned material color at 68% opacity.
 - Material buttons and their assigned-unit labels are hand-placeable in the 2D editor.
 - Center: moonbase needs and manually placeable cargo hold panel.
 - Right panel: available cargo groups use fixed, editor-placeable icon slots with no runtime text.
@@ -116,7 +117,8 @@ Assignment:
 
 Packing:
 
-- Left panel: placed manifest, warnings, payload/fuel info.
+- Left panel: hand-placeable status rows, payload/fuel meters, and a lower placed-manifest section.
+- Packing placed manifest uses separate icon, material-name, and placed-unit nodes per material.
 - Center: manually placeable cargo hold panel with functional clickable packing overlay.
 - Right panel: assigned pieces to place plus rotate/clear controls.
 - Launch button lives under the center cargo hold panel.

@@ -8,6 +8,18 @@ const GameDataScript := preload("res://scripts/data/GameData.gd")
 const CargoAssignmentScript := preload("res://scripts/cargo/CargoAssignment.gd")
 const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 
+const MATERIAL_ICON_SIZE := Vector2i(24, 24)
+const ASSIGNMENT_PREVIEW_TINT_ALPHA := 0.68
+const MATERIAL_TINTS := {
+	"fuel": Color("#E8452E"),
+	"carbon_metals": Color("#4F5B66"),
+	"silicon": Color("#2F7FE8"),
+	"copper": Color("#C8752B"),
+	"electronics": Color("#31B85C"),
+	"rare_metals": Color("#8F55D9"),
+	"propellant": Color("#19B7B2"),
+}
+
 enum CargoPhase { ASSIGNMENT, PACKING }
 
 var assignment: CargoAssignment
@@ -21,6 +33,7 @@ var moonbase_remaining_requirements: Dictionary = {}
 var piece_buttons: Dictionary = {}
 var packing_piece_buttons: Dictionary = {}
 var half_size_piece_textures: Dictionary = {}
+var fixed_size_material_icons: Dictionary = {}
 
 var root: VBoxContainer
 var vehicle_label: Label
@@ -44,6 +57,10 @@ var confirm_button: Button
 var packing_piece_list: VBoxContainer
 var packing_summary_label: Label
 var packing_warning_label: Label
+var packing_info_labels: Dictionary = {}
+var packing_manifest_labels: Dictionary = {}
+var packing_manifest_buttons: Dictionary = {}
+var packing_manifest_icons: Dictionary = {}
 var packing_grid_view: Control
 var launch_button: Button
 var meters_container: VBoxContainer
@@ -98,6 +115,9 @@ func _bind_scene_nodes() -> void:
 	packing_piece_list = %PackingPieceList
 	packing_summary_label = %PackingSummaryLabel
 	packing_warning_label = %PackingWarningLabel
+	packing_summary_label.visible = false
+	packing_warning_label.visible = false
+	_bind_packing_info_labels()
 	packing_grid_view = %PackingCargoHoldPanel
 	launch_button = %LaunchButton
 
@@ -137,6 +157,55 @@ func _register_meter_block(meters: Node) -> void:
 	})
 
 
+func _bind_packing_info_labels() -> void:
+	packing_info_labels = {
+		"rotation": %PackingRotationLabel,
+		"selected": %PackingSelectedLabel,
+		"material": %PackingMaterialLabel,
+		"payload": %PackingPayloadLabel,
+		"manifest_title": %PackingManifestTitleLabel,
+		"fuel_status": %PackingFuelStatusLabel,
+		"unplaced": %PackingUnplacedLabel,
+		"status": %PackingStatusLabel,
+	}
+	packing_manifest_labels = {
+		GameDataScript.MATERIAL_FUEL: %PackingManifestFuelLabel,
+		"carbon_metals": %PackingManifestCarbonMetalsLabel,
+		"silicon": %PackingManifestSiliconLabel,
+		"copper": %PackingManifestCopperLabel,
+		"electronics": %PackingManifestElectronicsLabel,
+		"rare_metals": %PackingManifestRareMetalsLabel,
+		"propellant": %PackingManifestPropellantLabel,
+	}
+	packing_manifest_buttons = {
+		GameDataScript.MATERIAL_FUEL: %PackingManifestFuelButton,
+		"carbon_metals": %PackingManifestCarbonMetalsButton,
+		"silicon": %PackingManifestSiliconButton,
+		"copper": %PackingManifestCopperButton,
+		"electronics": %PackingManifestElectronicsButton,
+		"rare_metals": %PackingManifestRareMetalsButton,
+		"propellant": %PackingManifestPropellantButton,
+	}
+	packing_manifest_icons = {
+		GameDataScript.MATERIAL_FUEL: %PackingManifestFuelIcon,
+		"carbon_metals": %PackingManifestCarbonMetalsIcon,
+		"silicon": %PackingManifestSiliconIcon,
+		"copper": %PackingManifestCopperIcon,
+		"electronics": %PackingManifestElectronicsIcon,
+		"rare_metals": %PackingManifestRareMetalsIcon,
+		"propellant": %PackingManifestPropellantIcon,
+	}
+	for material: String in GameDataScript.MATERIALS:
+		var button := packing_manifest_buttons.get(material, null) as Button
+		if button != null:
+			button.icon = null
+			button.expand_icon = false
+			button.focus_mode = Control.FOCUS_NONE
+		var icon_rect := packing_manifest_icons.get(material, null) as TextureRect
+		if icon_rect != null:
+			icon_rect.texture = _get_fixed_size_material_icon(material)
+
+
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not visible or phase != CargoPhase.PACKING:
 		return
@@ -157,8 +226,8 @@ func _build_material_buttons() -> void:
 			button.size = Vector2(110, 30)
 			material_buttons.add_child(button)
 		button.text = _format_material_name(material)
-		button.icon = UiAssetsScript.get_material_icon(material)
-		button.expand_icon = true
+		button.icon = _get_fixed_size_material_icon(material)
+		button.expand_icon = false
 		button.add_theme_constant_override("icon_max_width", 30)
 		button.pressed.connect(_on_material_pressed.bind(material))
 
@@ -287,6 +356,9 @@ func _refresh_packing() -> void:
 	_update_meter_warnings(warning_label.text)
 	packing_summary_label.text = _format_packing_summary()
 	packing_warning_label.text = _get_packing_warning_text(required_fuel, placed_fuel)
+	packing_summary_label.visible = false
+	packing_warning_label.visible = false
+	_update_packing_info_labels(required_fuel, placed_fuel)
 	launch_button.disabled = packing_state.get_placed_payload() <= 0
 	_rebuild_packing_piece_buttons()
 
@@ -314,6 +386,43 @@ func _update_meters(payload_title: String, payload_value: int, max_payload: int,
 		next_fuel_label.text = "%s: %d / %d" % [fuel_title, fuel_value, required_fuel]
 		next_fuel_bar.max_value = maxi(maxi(required_fuel, fuel_value), 1)
 		next_fuel_bar.value = fuel_value
+
+
+func _update_packing_info_labels(required_fuel: int, placed_fuel: int) -> void:
+	var selected_piece := packing_state.get_assigned_piece(selected_piece_id)
+	_set_packing_info_text("rotation", "Rotation: %d" % selected_rotation)
+	if selected_piece != null:
+		_set_packing_info_text("selected", "Selected: %s" % selected_piece.display_name)
+		_set_packing_info_text("material", "Material: %s" % _format_material_name(selected_piece.material))
+		_set_packing_info_text("payload", "Payload: %d" % selected_piece.get_payload_units())
+	else:
+		_set_packing_info_text("selected", "Selected: none")
+		_set_packing_info_text("material", "")
+		_set_packing_info_text("payload", "")
+
+	var manifest := packing_state.get_manifest()
+	for material: String in GameDataScript.MATERIALS:
+		var label := packing_manifest_labels.get(material, null) as Label
+		if label == null:
+			continue
+		var amount := int(manifest.get(material, 0))
+		label.visible = true
+		label.text = "%d units" % amount
+
+	var fuel_text := "Fuel requirement satisfied."
+	if placed_fuel < required_fuel:
+		fuel_text = "Not enough fuel placed. Launch will crash."
+	_set_packing_info_text("fuel_status", fuel_text)
+	_set_packing_info_text("unplaced", "Unplaced assigned pieces: %d" % packing_state.get_unplaced_pieces().size())
+	_set_packing_info_text("status", packing_status_text)
+
+
+func _set_packing_info_text(label_key: String, text: String) -> void:
+	var label := packing_info_labels.get(label_key, null) as Label
+	if label == null:
+		return
+	label.text = text
+	label.visible = text != ""
 
 
 func _refresh_assignment_piece_button_text() -> void:
@@ -363,6 +472,43 @@ func _get_half_size_piece_texture(shape_id: String) -> Texture2D:
 	return scaled_texture
 
 
+func _get_fixed_size_material_icon(material: String) -> Texture2D:
+	if fixed_size_material_icons.has(material):
+		return fixed_size_material_icons[material]
+	var texture := UiAssetsScript.get_material_icon(material)
+	if texture == null:
+		return null
+	var image := texture.get_image()
+	if image == null:
+		return texture
+	var used_rect := image.get_used_rect()
+	if used_rect.size.x <= 0 or used_rect.size.y <= 0:
+		used_rect = Rect2i(Vector2i.ZERO, image.get_size())
+
+	var cropped := Image.create(used_rect.size.x, used_rect.size.y, false, Image.FORMAT_RGBA8)
+	cropped.fill(Color.TRANSPARENT)
+	cropped.blit_rect(image, used_rect, Vector2i.ZERO)
+
+	var scale := minf(
+		float(MATERIAL_ICON_SIZE.x) / float(cropped.get_width()),
+		float(MATERIAL_ICON_SIZE.y) / float(cropped.get_height())
+	)
+	var width := maxi(1, int(roundi(cropped.get_width() * scale)))
+	var height := maxi(1, int(roundi(cropped.get_height() * scale)))
+	cropped.resize(width, height, Image.INTERPOLATE_LANCZOS)
+
+	var canvas := Image.create(MATERIAL_ICON_SIZE.x, MATERIAL_ICON_SIZE.y, false, Image.FORMAT_RGBA8)
+	canvas.fill(Color.TRANSPARENT)
+	var target := Vector2i(
+		int((MATERIAL_ICON_SIZE.x - width) / 2),
+		int((MATERIAL_ICON_SIZE.y - height) / 2)
+	)
+	canvas.blit_rect(cropped, Rect2i(Vector2i.ZERO, Vector2i(width, height)), target)
+	var fixed_texture := ImageTexture.create_from_image(canvas)
+	fixed_size_material_icons[material] = fixed_texture
+	return fixed_texture
+
+
 func _on_piece_slot_pressed(button: Button) -> void:
 	if not button.has_meta("shape_id"):
 		return
@@ -381,6 +527,8 @@ func _rebuild_copy_buttons() -> void:
 		var button := Button.new()
 		button.custom_minimum_size = Vector2(172, 36)
 		button.clip_text = true
+		button.toggle_mode = true
+		button.button_pressed = piece.instance_id == selected_piece_id
 		var assigned_piece := assignment.get_assigned_piece(piece.instance_id)
 		var material_text := "Unassigned"
 		if assigned_piece != null:
@@ -426,11 +574,22 @@ func _update_selected_piece_preview() -> void:
 	var group := _get_assignment_group(selected_shape_id)
 	if group.is_empty():
 		selected_piece_preview.texture = null
+		selected_piece_preview.modulate = Color.WHITE
 		selected_piece_preview.visible = false
 		return
 
 	selected_piece_preview.texture = UiAssetsScript.get_cargo_piece_texture(selected_shape_id)
+	selected_piece_preview.modulate = _get_selected_piece_preview_tint()
 	selected_piece_preview.visible = selected_piece_preview.texture != null
+
+
+func _get_selected_piece_preview_tint() -> Color:
+	var assigned_piece := assignment.get_assigned_piece(selected_piece_id)
+	if assigned_piece == null:
+		return Color.WHITE
+	var tint := MATERIAL_TINTS.get(assigned_piece.material, Color.WHITE) as Color
+	tint.a = ASSIGNMENT_PREVIEW_TINT_ALPHA
+	return tint
 
 
 func _format_moonbase_needs() -> String:

@@ -141,6 +141,7 @@ stretch_mode = 3
 
 [node name="CopyButtonsRow" type="HBoxContainer" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/DetailContent" unique_id=788983612]
 unique_name_in_owner = true
+z_index = 10
 layout_mode = 0
 offset_left = 4.3116746
 offset_top = 404.89337
@@ -158,45 +159,46 @@ anchors_preset = 0
 offset_top = 320.0
 offset_right = 360.0
 offset_bottom = 470.0
+mouse_filter = 2
 
 [node name="CapacityLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters" unique_id=1197825848]
 layout_mode = 0
-offset_left = 3.0689185
-offset_top = 146.57213
-offset_right = 363.0689
-offset_bottom = 170.57213
+offset_left = 10.525458
+offset_top = 151.71199
+offset_right = 370.52545
+offset_bottom = 175.71199
 label_settings = SubResource("LabelSettings_outline")
 
 [node name="PayloadBar" type="ProgressBar" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters" unique_id=576764530]
 layout_mode = 0
-offset_left = 0.583405
-offset_top = 172.84268
-offset_right = 360.5834
-offset_bottom = 192.84268
+offset_left = 9.2827015
+offset_top = 182.55138
+offset_right = 369.2827
+offset_bottom = 202.55138
 show_percentage = false
 
 [node name="FuelLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters" unique_id=903370975]
 layout_mode = 0
-offset_left = 6.797188
-offset_top = 232.23701
-offset_right = 366.79718
-offset_bottom = 256.237
+offset_left = 10.525457
+offset_top = 224.81273
+offset_right = 370.52545
+offset_bottom = 248.81271
 label_settings = SubResource("LabelSettings_outline")
 
 [node name="FuelBar" type="ProgressBar" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters" unique_id=2144957944]
 layout_mode = 0
-offset_left = 3.0689182
+offset_left = 9.2827015
 offset_top = 258.5076
-offset_right = 363.0689
+offset_right = 369.2827
 offset_bottom = 278.50757
 show_percentage = false
 
 [node name="WarningLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters" unique_id=1971404195]
 layout_mode = 0
 offset_left = 4.311675
-offset_top = 293.9158
+offset_top = 303.62442
 offset_right = 364.31168
-offset_bottom = 331.9158
+offset_bottom = 341.62442
 label_settings = SubResource("LabelSettings_outline")
 autowrap_mode = 3
 
@@ -211,7 +213,7 @@ offset_bottom = 585.0
 layout_mode = 0
 offset_left = 49.05091
 offset_top = 184.6037
-offset_right = 129.0509
+offset_right = 257.834
 offset_bottom = 215.6037
 theme_override_constants/icon_max_width = 30
 text = "Fuel"
@@ -231,7 +233,7 @@ label_settings = SubResource("LabelSettings_outline")
 layout_mode = 0
 offset_left = 49.05091
 offset_top = 226.86505
-offset_right = 179.0509
+offset_right = 256.59125
 offset_bottom = 257.86505
 theme_override_constants/icon_max_width = 30
 text = "Carbon Metals"
@@ -251,7 +253,7 @@ label_settings = SubResource("LabelSettings_outline")
 layout_mode = 0
 offset_left = 49.05091
 offset_top = 265.69983
-offset_right = 129.0509
+offset_right = 256.59125
 offset_bottom = 296.69983
 theme_override_constants/icon_max_width = 30
 text = "Silicon"
@@ -271,7 +273,7 @@ label_settings = SubResource("LabelSettings_outline")
 layout_mode = 0
 offset_left = 49.05093
 offset_top = 306.819
-offset_right = 139.05093
+offset_right = 255.34853
 offset_bottom = 337.819
 theme_override_constants/icon_max_width = 30
 text = "Copper"
@@ -291,7 +293,7 @@ label_settings = SubResource("LabelSettings_outline")
 layout_mode = 0
 offset_left = 50.29367
 offset_top = 346.79593
-offset_right = 155.29367
+offset_right = 254.10576
 offset_bottom = 377.79593
 theme_override_constants/icon_max_width = 30
 text = "Electronics"
@@ -311,7 +313,7 @@ label_settings = SubResource("LabelSettings_outline")
 layout_mode = 0
 offset_left = 50.29368
 offset_top = 386.7729
-offset_right = 165.29367
+offset_right = 254.10577
 offset_bottom = 417.7729
 theme_override_constants/icon_max_width = 30
 text = "Rare Metals"
@@ -320,9 +322,9 @@ expand_icon = true
 
 [node name="RareMetalsAmountLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons" unique_id=1913813428]
 layout_mode = 0
-offset_left = 342.3415
+offset_left = 343.58426
 offset_top = 387.91513
-offset_right = 462.3415
+offset_right = 463.58426
 offset_bottom = 411.91513
 text = "0 units"
 label_settings = SubResource("LabelSettings_outline")
@@ -331,7 +333,7 @@ label_settings = SubResource("LabelSettings_outline")
 layout_mode = 0
 offset_left = 50.29367
 offset_top = 425.60767
-offset_right = 155.29367
+offset_right = 254.10576
 offset_bottom = 456.60767
 theme_override_constants/icon_max_width = 30
 text = "Propellant"
@@ -575,6 +577,10 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 51.5
+offset_right = -25.0
+offset_bottom = -24.5
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 28
@@ -582,30 +588,352 @@ theme_override_constants/margin_top = 28
 theme_override_constants/margin_right = 28
 theme_override_constants/margin_bottom = 28
 
-[node name="PackingInfoContent" type="VBoxContainer" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin" unique_id=1815059709]
+[node name="PackingInfoContent" type="Control" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin" unique_id=1815059709]
 layout_mode = 2
-theme_override_constants/separation = 10
 
 [node name="PackingSummaryLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1343315316]
 unique_name_in_owner = true
-layout_mode = 2
+visible = false
+layout_mode = 0
+offset_left = 1.0
+offset_right = 402.0
+offset_bottom = 23.0
 label_settings = SubResource("LabelSettings_outline")
 autowrap_mode = 3
 
 [node name="PackingWarningLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1249746964]
 unique_name_in_owner = true
-layout_mode = 2
+visible = false
+layout_mode = 0
+offset_right = 427.0
+offset_bottom = 85.0
+label_settings = SubResource("LabelSettings_outline")
+autowrap_mode = 3
+
+[node name="PackingRotationLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=2052851972]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 360.0
+offset_bottom = 26.0
+text = "Rotation: 0"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PackingSelectedLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1395641376]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 3.0
+offset_top = 52.0
+offset_right = 363.0
+offset_bottom = 78.0
+text = "Selected: none"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PackingMaterialLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=59839054]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 9.0
+offset_top = 114.0
+offset_right = 369.0
+offset_bottom = 140.0
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PackingPayloadLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1906262873]
+unique_name_in_owner = true
+layout_mode = 0
+offset_top = 84.0
+offset_right = 360.0
+offset_bottom = 110.0
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PackingManifestTitleLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1079792202]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 25.0
+offset_top = 439.0
+offset_right = 385.0
+offset_bottom = 465.0
+text = "Placed manifest:"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PackingManifestFuelButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=960287081]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 68.0
+offset_top = 632.0
+offset_right = 253.87285
+offset_bottom = 663.0
+scale = Vector2(0.9253639, 0.9253639)
+focus_mode = 0
+mouse_filter = 2
+text = "Fuel"
+
+[node name="PackingManifestFuelIcon" type="TextureRect" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1122381347]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 68.0
+offset_top = 634.0
+offset_right = 92.0
+offset_bottom = 658.0
+mouse_filter = 2
+texture = ExtResource("6_fuel_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PackingManifestFuelLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1052666172]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 312.0
+offset_top = 635.0
+offset_right = 432.0
+offset_bottom = 659.0
+text = "0 units"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PackingManifestCarbonMetalsButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1013074406]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 68.0
+offset_top = 666.0
+offset_right = 251.97534
+offset_bottom = 697.0
+scale = Vector2(0.9349079, 0.9349079)
+focus_mode = 0
+mouse_filter = 2
+text = "Carbon Metals"
+
+[node name="PackingManifestCarbonMetalsIcon" type="TextureRect" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1682820821]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 69.0
+offset_top = 668.0
+offset_right = 93.0
+offset_bottom = 692.0
+mouse_filter = 2
+texture = ExtResource("7_carbon_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PackingManifestCarbonMetalsLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1313375632]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 312.0
+offset_top = 669.0
+offset_right = 432.0
+offset_bottom = 693.0
+text = "0 units"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PackingManifestSiliconButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=157659311]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 68.0
+offset_top = 703.0
+offset_right = 259.11234
+offset_bottom = 734.0
+scale = Vector2(0.89999413, 0.89999413)
+focus_mode = 0
+mouse_filter = 2
+text = "Silicon"
+
+[node name="PackingManifestSiliconIcon" type="TextureRect" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1760030932]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 69.0
+offset_top = 705.0
+offset_right = 93.0
+offset_bottom = 729.0
+mouse_filter = 2
+texture = ExtResource("8_silicon_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PackingManifestSiliconLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1405149128]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 312.0
+offset_top = 705.0
+offset_right = 432.0
+offset_bottom = 729.0
+text = "0 units"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PackingManifestCopperButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=580956661]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 68.0
+offset_top = 738.0
+offset_right = 259.208
+offset_bottom = 769.0
+scale = Vector2(0.8995437, 0.8995437)
+focus_mode = 0
+mouse_filter = 2
+text = "Copper"
+
+[node name="PackingManifestCopperIcon" type="TextureRect" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1099985436]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 67.0
+offset_top = 740.0
+offset_right = 91.0
+offset_bottom = 764.0
+mouse_filter = 2
+texture = ExtResource("9_copper_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PackingManifestCopperLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1088010029]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 312.0
+offset_top = 741.0
+offset_right = 432.0
+offset_bottom = 765.0
+text = "0 units"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PackingManifestElectronicsButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=297674813]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 68.0
+offset_top = 775.0
+offset_right = 259.17764
+offset_bottom = 806.0
+scale = Vector2(0.8996867, 0.8996867)
+focus_mode = 0
+mouse_filter = 2
+text = "Electronics"
+
+[node name="PackingManifestElectronicsIcon" type="TextureRect" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=568586459]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 69.0
+offset_top = 777.0
+offset_right = 93.0
+offset_bottom = 801.0
+mouse_filter = 2
+texture = ExtResource("10_electronics_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PackingManifestElectronicsLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=347856106]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 312.0
+offset_top = 778.0
+offset_right = 432.0
+offset_bottom = 802.0
+text = "0 units"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PackingManifestRareMetalsButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1822795675]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 68.0
+offset_top = 811.0
+offset_right = 258.04498
+offset_bottom = 842.0
+scale = Vector2(0.89978695, 0.89978695)
+focus_mode = 0
+mouse_filter = 2
+text = "Rare Metals"
+
+[node name="PackingManifestRareMetalsIcon" type="TextureRect" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=117796351]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 69.0
+offset_top = 813.0
+offset_right = 93.0
+offset_bottom = 837.0
+mouse_filter = 2
+texture = ExtResource("11_rare_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PackingManifestRareMetalsLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1537127933]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 312.0
+offset_top = 815.0
+offset_right = 432.0
+offset_bottom = 839.0
+text = "0 units"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PackingManifestPropellantButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1413254782]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 68.0
+offset_top = 847.0
+offset_right = 257.94513
+offset_bottom = 878.0
+scale = Vector2(0.90026, 0.90026)
+focus_mode = 0
+mouse_filter = 2
+text = "Propellant"
+
+[node name="PackingManifestPropellantIcon" type="TextureRect" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1925723477]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 67.0
+offset_top = 849.0
+offset_right = 91.0
+offset_bottom = 873.0
+mouse_filter = 2
+texture = ExtResource("12_propellant_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="PackingManifestPropellantLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=634675193]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 312.0
+offset_top = 851.0
+offset_right = 432.0
+offset_bottom = 875.0
+text = "0 units"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PackingFuelStatusLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=748286497]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 23.0
+offset_top = 464.0
+offset_right = 383.0
+offset_bottom = 490.0
+text = "Not enough fuel placed. Launch will crash."
+label_settings = SubResource("LabelSettings_outline")
+autowrap_mode = 3
+
+[node name="PackingUnplacedLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=2036020356]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 25.0
+offset_top = 493.0
+offset_right = 385.0
+offset_bottom = 519.0
+text = "Unplaced assigned pieces: 0"
+label_settings = SubResource("LabelSettings_outline")
+
+[node name="PackingStatusLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1563988679]
+unique_name_in_owner = true
+layout_mode = 0
+offset_top = 436.0
+offset_right = 360.0
+offset_bottom = 482.0
 label_settings = SubResource("LabelSettings_outline")
 autowrap_mode = 3
 
 [node name="PackingLowerSpacer" type="Control" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=815957312]
-layout_mode = 2
+anchors_preset = 0
 size_flags_vertical = 3
 
 [node name="PackingMeters" type="Control" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent" unique_id=1262268724]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(360, 150)
-layout_mode = 2
+anchors_preset = 0
+offset_top = 320.0
+offset_right = 360.0
+offset_bottom = 470.0
 
 [node name="CapacityLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=1632236892]
 layout_mode = 0
@@ -615,9 +943,9 @@ label_settings = SubResource("LabelSettings_outline")
 
 [node name="PayloadBar" type="ProgressBar" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=1817987798]
 layout_mode = 0
-offset_top = 28.0
+offset_top = 121.0
 offset_right = 360.0
-offset_bottom = 48.0
+offset_bottom = 141.0
 show_percentage = false
 
 [node name="FuelLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=1722204012]
@@ -629,12 +957,13 @@ label_settings = SubResource("LabelSettings_outline")
 
 [node name="FuelBar" type="ProgressBar" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=16167561]
 layout_mode = 0
-offset_top = 84.0
+offset_top = 202.0
 offset_right = 360.0
-offset_bottom = 104.0
+offset_bottom = 222.0
 show_percentage = false
 
 [node name="WarningLabel" type="Label" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters" unique_id=1679711466]
+visible = false
 layout_mode = 0
 offset_top = 112.0
 offset_right = 360.0
