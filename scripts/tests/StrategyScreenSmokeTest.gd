@@ -12,6 +12,9 @@ func _run() -> void:
 	root.add_child(main)
 	await process_frame
 
+	main._on_faction_button_pressed("USA")
+	await process_frame
+
 	main._on_start_match_pressed()
 	await process_frame
 

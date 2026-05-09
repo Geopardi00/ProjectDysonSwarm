@@ -7,13 +7,19 @@ const StrategyScreenScene := preload("res://scenes/ui/StrategyScreen.tscn")
 
 const SHOW_DEBUG_ACTIONS := true
 const CORNER_LOGO_SIZE := Vector2(180, 64)
+const FACTION_SELECT_LOGO_SIZE := Vector2(256, 256)
+const FACTION_LOGO_HIGHLIGHT_SCALE := Vector2(1.08, 1.08)
+const FACTION_LOGO_NORMAL_SCALE := Vector2.ONE
+const FACTION_LOGO_HIGHLIGHT_MODULATE := Color(1.18, 1.08, 0.86, 1.0)
+const FACTION_LOGO_NORMAL_MODULATE := Color.WHITE
+const FACTION_LOGO_HALO_MODULATE := Color(1.0, 0.72, 0.22, 0.42)
 
 @onready var root_margin: MarginContainer = $RootMargin
 @onready var cargo_loading_screen: Control = %CargoLoadingScreen
 
 var game_state: GameState
 var launch_manager: LaunchManager
-var selected_faction := "USA"
+var selected_faction := ""
 var active_screen: Control
 var corner_logo: TextureRect
 var last_launch_result: Dictionary = {}
@@ -94,74 +100,108 @@ func _build_opening_screen() -> Control:
 
 
 func _build_faction_select_screen() -> Control:
-	var layout := VBoxContainer.new()
-	layout.add_theme_constant_override("separation", 16)
+	var layout := Control.new()
+	layout.set_anchors_preset(Control.PRESET_FULL_RECT)
 
-	var title := Label.new()
-	title.text = "Project Dyson Swarm"
-	title.add_theme_font_size_override("font_size", 32)
-	layout.add_child(title)
-
-	var subtitle := Label.new()
-	subtitle.text = "Choose your faction. Bonuses are not active yet; this is flavor and CPU setup."
-	layout.add_child(subtitle)
+	var prompt := Label.new()
+	prompt.text = "Select faction"
+	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	prompt.add_theme_font_size_override("font_size", 24)
+	prompt.anchor_left = 0.0
+	prompt.anchor_right = 1.0
+	prompt.anchor_top = 0.5
+	prompt.anchor_bottom = 0.5
+	prompt.offset_top = -FACTION_SELECT_LOGO_SIZE.y * 0.5 - 58.0
+	prompt.offset_bottom = prompt.offset_top + 32.0
+	layout.add_child(prompt)
 
 	var faction_row := HBoxContainer.new()
-	faction_row.add_theme_constant_override("separation", 12)
+	faction_row.anchor_left = 0.0
+	faction_row.anchor_right = 1.0
+	faction_row.anchor_top = 0.5
+	faction_row.anchor_bottom = 0.5
+	faction_row.offset_top = -FACTION_SELECT_LOGO_SIZE.y * 0.5
+	faction_row.offset_bottom = FACTION_SELECT_LOGO_SIZE.y * 0.5
+	faction_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	faction_row.add_theme_constant_override("separation", 80)
 	layout.add_child(faction_row)
 
 	for faction_id: String in GameDataScript.FACTIONS.keys():
-		var faction: Dictionary = GameDataScript.FACTIONS[faction_id]
-		var button := _build_faction_card(faction_id, String(faction.get("display_name", faction_id)))
+		var button := _build_faction_logo_button(faction_id)
 		faction_row.add_child(button)
 
 	var start_button := Button.new()
-	start_button.text = "Start Match"
+	start_button.text = "Start"
+	start_button.anchor_left = 0.5
+	start_button.anchor_right = 0.5
+	start_button.anchor_top = 0.5
+	start_button.anchor_bottom = 0.5
+	start_button.offset_left = -120.0
+	start_button.offset_top = 164.0
+	start_button.offset_right = 120.0
+	start_button.offset_bottom = 208.0
 	start_button.custom_minimum_size = Vector2(240, 44)
+	start_button.disabled = selected_faction == ""
+	start_button.modulate = Color(1.18, 1.03, 0.74, 1.0) if selected_faction != "" else Color(0.62, 0.62, 0.62, 1.0)
 	start_button.pressed.connect(_on_start_match_pressed)
 	layout.add_child(start_button)
 
 	UiAssetsScript.apply_text_outline(layout)
-	return _with_margin(layout)
+	return layout
 
 
-func _build_faction_card(faction_id: String, display_name: String) -> Button:
+func _build_faction_logo_button(faction_id: String) -> Button:
 	var button := Button.new()
-	button.custom_minimum_size = Vector2(250, 180)
+	button.custom_minimum_size = FACTION_SELECT_LOGO_SIZE
 	button.toggle_mode = true
 	button.button_pressed = faction_id == selected_faction
+	button.flat = true
 	button.text = ""
 	button.pressed.connect(_on_faction_button_pressed.bind(faction_id))
+	button.mouse_entered.connect(_set_faction_logo_highlight.bind(button, true))
+	button.mouse_exited.connect(_set_faction_logo_highlight.bind(button, false))
 
-	var content := VBoxContainer.new()
-	content.set_anchors_preset(Control.PRESET_FULL_RECT)
-	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	content.alignment = BoxContainer.ALIGNMENT_CENTER
-	content.add_theme_constant_override("separation", 8)
-	button.add_child(content)
+	var halo := TextureRect.new()
+	halo.name = "Halo"
+	halo.set_anchors_preset(Control.PRESET_FULL_RECT)
+	halo.offset_left = -14.0
+	halo.offset_top = -14.0
+	halo.offset_right = 14.0
+	halo.offset_bottom = 14.0
+	halo.pivot_offset = FACTION_SELECT_LOGO_SIZE * 0.5
+	halo.texture = UiAssetsScript.get_faction_logo(faction_id)
+	halo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	halo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	halo.modulate = FACTION_LOGO_HALO_MODULATE
+	halo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	halo.visible = faction_id == selected_faction
+	button.add_child(halo)
 
 	var logo := TextureRect.new()
-	logo.custom_minimum_size = Vector2(96, 96)
+	logo.name = "Logo"
+	logo.set_anchors_preset(Control.PRESET_FULL_RECT)
+	logo.pivot_offset = FACTION_SELECT_LOGO_SIZE * 0.5
 	logo.texture = UiAssetsScript.get_faction_logo(faction_id)
-	logo.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+	logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	logo.modulate = FACTION_LOGO_HIGHLIGHT_MODULATE if faction_id == selected_faction else FACTION_LOGO_NORMAL_MODULATE
+	logo.scale = FACTION_LOGO_HIGHLIGHT_SCALE if faction_id == selected_faction else FACTION_LOGO_NORMAL_SCALE
 	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	content.add_child(logo)
-
-	var name_label := Label.new()
-	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	name_label.text = display_name
-	name_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	content.add_child(name_label)
-
-	var flavor_label := Label.new()
-	flavor_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	flavor_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	flavor_label.text = _get_faction_flavor(faction_id)
-	flavor_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	content.add_child(flavor_label)
+	button.add_child(logo)
 
 	return button
+
+
+func _set_faction_logo_highlight(button: Button, is_hovered: bool) -> void:
+	var is_highlighted := is_hovered or button.button_pressed
+	var logo := button.get_node_or_null("Logo") as TextureRect
+	if logo != null:
+		logo.scale = FACTION_LOGO_HIGHLIGHT_SCALE if is_highlighted else FACTION_LOGO_NORMAL_SCALE
+		logo.modulate = FACTION_LOGO_HIGHLIGHT_MODULATE if is_highlighted else FACTION_LOGO_NORMAL_MODULATE
+
+	var halo := button.get_node_or_null("Halo") as TextureRect
+	if halo != null:
+		halo.visible = is_highlighted
 
 
 func _show_strategy_screen() -> void:
@@ -305,6 +345,8 @@ func _on_faction_button_pressed(faction_id: String) -> void:
 
 
 func _on_start_match_pressed() -> void:
+	if selected_faction == "":
+		return
 	game_state.start_new_match(selected_faction)
 	_show_strategy_screen()
 

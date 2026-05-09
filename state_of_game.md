@@ -1,6 +1,6 @@
 # Project Dyson Swarm - State of Game
 
-Last updated: 2026-05-08
+Last updated: 2026-05-09
 
 ## Current Prototype Status
 
@@ -9,7 +9,7 @@ Milestones 1-5 are implemented and Milestone 7 has an editor-driven art/UI pass 
 Working loop:
 
 - Opening screen shows the title logo over the space background before faction select.
-- Faction select screen lets the player choose USA, China, or EU.
+- Faction select screen lets the player choose USA, China, or EU before starting.
 - Strategy screen shows day, player faction, readiness, moonbase needs, CPU progress, news, and vehicle selection.
 - Vehicle selection supports Big Rocket, Space Shuttle, and SpinLaunch.
 - Cargo loading has two locked phases:
@@ -75,7 +75,7 @@ Currently wired:
 
 - Space background image on main and cargo screens.
 - Title logo on the opening screen and as a small upper-left overlay during normal game screens.
-- Faction logos on faction select.
+- Faction logos on faction select, with hover/selected highlight treatment.
 - Vehicle icons on strategy vehicle cards.
 - Material icons on assignment material buttons.
 - Cargo piece images on editor-placeable assignment slots and packing lists.
@@ -96,7 +96,11 @@ This centralizes asset paths and provides text outline styling.
 Faction select:
 
 - Reached after the opening screen start button.
-- Shows title, faction logo cards, and start match button.
+- Shows the upper-left title logo, centered faction logos, a small "Select faction" prompt, and a start button below.
+- No faction is selected by default.
+- Start is disabled/greyed out until the player selects a faction.
+- Hovering a faction logo slightly enlarges, brightens, and halos it.
+- The selected faction keeps the same highlight treatment.
 - Faction choice is flavor only for now.
 
 Strategy / vehicle selection:
@@ -153,7 +157,7 @@ Latest checks passed before this checkpoint:
 
 - Cargo smoke test passed.
 - Cargo UI smoke test passed.
-- Strategy screen smoke test passed. Recent Strategy test needed normal Godot user-log access outside the sandbox.
+- Strategy screen smoke test passed.
 - Main scene loaded headless during this visual pass.
 
 ## Suggested Next Steps
