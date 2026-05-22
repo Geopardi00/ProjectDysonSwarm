@@ -1597,8 +1597,17 @@ Current packing UI:
 - The cargo grid is displayed in a horizontal sketch-inspired layout.
 - Internal data still uses vehicle grid dimensions, such as Big Rocket 5x10 and Space Shuttle 4x8.
 - The visual grid is transposed for readability, such as Big Rocket shown as 10 columns by 5 rows.
+- The cargo hold grid display is horizontally mirrored so placed shapes match the handedness of the side-panel piece previews.
 - Player can select assigned pieces, rotate before placement, place them, pick placed pieces back up, remove pieces, clear all placements, and launch.
 - The placed manifest and fuel warning update from placed pieces only.
+
+Current main/menu UI:
+
+- Opening screen uses the title logo over the space background.
+- A larger upper-left title logo overlay is shown on normal game screens.
+- Launch result and win/loss screens lower their result text below the logo overlay.
+- Launch result uses a narrower centered Continue button with extra spacing from the result text.
+- Strategy vehicle cards are in an editor-tuned layout pass with manually placed titles, icons, stat labels, and buttons.
 
 Useful next planning targets:
 

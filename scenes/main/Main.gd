@@ -6,7 +6,11 @@ const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 const StrategyScreenScene := preload("res://scenes/ui/StrategyScreen.tscn")
 
 const SHOW_DEBUG_ACTIONS := true
-const CORNER_LOGO_SIZE := Vector2(180, 64)
+const CORNER_LOGO_SIZE := Vector2(272, 62.5)
+const LAUNCH_RESULT_MARGIN_TOP := 112
+const LAUNCH_RESULT_BUTTON_WIDTH := 220
+const LAUNCH_RESULT_BUTTON_TOP_GAP := 28
+const GAME_OVER_MARGIN_TOP := 112
 const FACTION_SELECT_LOGO_SIZE := Vector2(256, 256)
 const FACTION_LOGO_HIGHLIGHT_SCALE := Vector2(1.08, 1.08)
 const FACTION_LOGO_NORMAL_SCALE := Vector2.ONE
@@ -82,7 +86,7 @@ func _build_opening_screen() -> Control:
 	layout.add_theme_constant_override("separation", 28)
 
 	var logo := TextureRect.new()
-	logo.custom_minimum_size = Vector2(760, 280)
+	logo.custom_minimum_size = Vector2(1448, 333)
 	logo.texture = UiAssetsScript.get_title_logo()
 	logo.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -238,14 +242,19 @@ func _build_launch_result_screen(result: Dictionary) -> Control:
 	details.text = _format_launch_result(result)
 	layout.add_child(details)
 
+	var button_spacer := Control.new()
+	button_spacer.custom_minimum_size = Vector2(1, LAUNCH_RESULT_BUTTON_TOP_GAP)
+	layout.add_child(button_spacer)
+
 	var continue_button := Button.new()
 	continue_button.text = "Continue"
-	continue_button.custom_minimum_size = Vector2(220, 44)
+	continue_button.custom_minimum_size = Vector2(LAUNCH_RESULT_BUTTON_WIDTH, 44)
+	continue_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	continue_button.pressed.connect(_on_result_continue_pressed)
 	layout.add_child(continue_button)
 
 	UiAssetsScript.apply_text_outline(layout)
-	return _with_margin(layout)
+	return _with_margin(layout, LAUNCH_RESULT_MARGIN_TOP)
 
 
 func _show_game_over_screen() -> void:
@@ -287,7 +296,7 @@ func _build_game_over_screen() -> Control:
 	row.add_child(menu_button)
 
 	UiAssetsScript.apply_text_outline(layout)
-	return _with_margin(layout)
+	return _with_margin(layout, GAME_OVER_MARGIN_TOP)
 
 
 func _build_debug_row() -> Control:
@@ -426,8 +435,8 @@ func _add_corner_logo() -> void:
 	corner_logo = TextureRect.new()
 	corner_logo.name = "CornerLogo"
 	corner_logo.custom_minimum_size = CORNER_LOGO_SIZE
-	corner_logo.offset_left = 18.0
-	corner_logo.offset_top = 14.0
+	corner_logo.offset_left = 10.0
+	corner_logo.offset_top = 7.0
 	corner_logo.offset_right = corner_logo.offset_left + CORNER_LOGO_SIZE.x
 	corner_logo.offset_bottom = corner_logo.offset_top + CORNER_LOGO_SIZE.y
 	corner_logo.texture = texture
@@ -443,11 +452,11 @@ func _set_corner_logo_visible(is_visible: bool) -> void:
 		corner_logo.visible = is_visible
 
 
-func _with_margin(content: Control) -> Control:
+func _with_margin(content: Control, margin_top := 24) -> Control:
 	var margin := MarginContainer.new()
 	margin.set_anchors_preset(Control.PRESET_FULL_RECT)
 	margin.add_theme_constant_override("margin_left", 24)
-	margin.add_theme_constant_override("margin_top", 24)
+	margin.add_theme_constant_override("margin_top", margin_top)
 	margin.add_theme_constant_override("margin_right", 24)
 	margin.add_theme_constant_override("margin_bottom", 24)
 	margin.add_child(content)

@@ -151,11 +151,11 @@ func _draw_cell(cell: Vector2i, color: Color, filled: bool) -> void:
 func _position_to_cell(position: Vector2) -> Vector2i:
 	var local_position := position - _get_drawn_grid_rect().position
 	var display_cell := Vector2i(floori(local_position.x / cell_size), floori(local_position.y / cell_size))
-	return Vector2i(display_cell.y, display_cell.x)
+	return Vector2i(display_cell.y, grid_height - 1 - display_cell.x)
 
 
 func _data_cell_to_display_cell(cell: Vector2i) -> Vector2i:
-	return Vector2i(cell.y, cell.x)
+	return Vector2i(grid_height - 1 - cell.y, cell.x)
 
 
 func _is_cell_in_grid(cell: Vector2i) -> bool:

@@ -1,6 +1,6 @@
 # Project Dyson Swarm - State of Game
 
-Last updated: 2026-05-09
+Last updated: 2026-05-22
 
 ## Current Prototype Status
 
@@ -75,6 +75,7 @@ Currently wired:
 
 - Space background image on main and cargo screens.
 - Title logo on the opening screen and as a small upper-left overlay during normal game screens.
+- Title logo asset, opening-screen logo size, and upper-left overlay logo size/position have been retuned during the current visual pass.
 - Faction logos on faction select, with hover/selected highlight treatment.
 - Vehicle icons on strategy vehicle cards.
 - Material icons on assignment material buttons.
@@ -82,6 +83,8 @@ Currently wired:
 - Empty panel textures for vehicle info / available cargo style panels.
 - Vehicle-specific cargo hold panel textures for Big Rocket, Space Shuttle, and SpinLaunch.
 - Strategy screen, cargo loading screen, cargo grid view, and cargo hold panel are now scene-backed for easier 2D editor placement.
+- Strategy vehicle cards have an editor-tuned layout pass with manually placed titles, icons, stat labels, and buttons.
+- Launch result and game-over screens now lower their text content below the upper-left logo overlay.
 
 Important UI helper:
 
@@ -110,6 +113,7 @@ Strategy / vehicle selection:
 - Vehicle card names, icons, and stat labels are manually placeable in `StrategyScreen.tscn`.
 - Vehicle stat text uses separate labels: payload, fuel needed, days to launch, cargo grid.
 - `StrategyVehicleIconPlacementPreview.tscn` exists as a small tuning scene for vehicle-card placement.
+- Current vehicle-card pass uses fixed/manual placement to keep icon, stat, and button positions stable.
 
 Assignment:
 
@@ -129,9 +133,16 @@ Packing:
 - Packing placed manifest uses separate icon, material-name, and placed-unit nodes per material.
 - Center: manually placeable cargo hold panel with functional clickable packing overlay.
 - Right panel: assigned pieces to place render as centered, tinted block previews with no visible text.
+- Cargo hold grid display is horizontally mirrored to match the side-panel piece orientation while keeping the underlying grid data unchanged.
 - Rotate is keyboard-only with `R`.
 - Clear placements and launch buttons live under the center cargo hold panel.
 - Assignment and packing cargo hold panel positions are independently hand-tunable but currently matched.
+
+Launch result / game over:
+
+- The upper-left logo remains a separate overlay.
+- Launch result and win/loss text start lower on the screen to avoid overlapping the logo.
+- The launch result Continue button is narrower, centered, and placed lower under the result text.
 
 ## Known Rough Edges
 
@@ -159,6 +170,8 @@ Latest checks passed before this checkpoint:
 - Cargo UI smoke test passed.
 - Strategy screen smoke test passed.
 - Main scene loaded headless during this visual pass.
+- 2026-05-22 checkpoint: Cargo UI smoke test passed after cargo grid display mirroring.
+- 2026-05-22 checkpoint: Main scene loaded headless after launch-result and game-over layout tuning.
 
 ## Suggested Next Steps
 

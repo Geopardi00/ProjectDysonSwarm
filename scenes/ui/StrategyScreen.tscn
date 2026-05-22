@@ -27,7 +27,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="Header" type="HBoxContainer" parent="Layout" unique_id=2100907399]
 layout_mode = 2
@@ -45,9 +45,13 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Reset Match"
 
+[node name="PanelTopSpacer" type="Control" parent="Layout" unique_id=2082400930]
+custom_minimum_size = Vector2(0, 76)
+layout_mode = 2
+
 [node name="Panels" type="HBoxContainer" parent="Layout" unique_id=793753991]
 layout_mode = 2
-theme_override_constants/separation = 28
+theme_override_constants/separation = 76
 
 [node name="StatusPanel" type="Control" parent="Layout/Panels" unique_id=1353185040]
 custom_minimum_size = Vector2(464, 781)
@@ -152,12 +156,15 @@ label_settings = SubResource("LabelSettings_outline")
 autowrap_mode = 3
 
 [node name="VehiclePanel" type="HBoxContainer" parent="Layout/Panels" unique_id=936157256]
+custom_minimum_size = Vector2(0, 781)
 layout_mode = 2
 theme_override_constants/separation = 22
+alignment = 2
 
 [node name="BigRocketCard" type="Control" parent="Layout/Panels/VehiclePanel" unique_id=1145378095]
 custom_minimum_size = Vector2(300, 629)
 layout_mode = 2
+size_flags_vertical = 8
 
 [node name="PanelArt" type="TextureRect" parent="Layout/Panels/VehiclePanel/BigRocketCard" unique_id=1866193995]
 modulate = Color(1, 1, 1, 0.85)
@@ -172,30 +179,36 @@ texture = ExtResource("3_vehicle_panel")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Margin" type="MarginContainer" parent="Layout/Panels/VehiclePanel/BigRocketCard" unique_id=1050210750]
+[node name="Margin" type="Control" parent="Layout/Panels/VehiclePanel/BigRocketCard" unique_id=1050210750]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 28.0
+offset_right = -28.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="Control" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin" unique_id=1127648615]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 28
-theme_override_constants/margin_top = 28
-theme_override_constants/margin_right = 28
-theme_override_constants/margin_bottom = 28
-
-[node name="Content" type="VBoxContainer" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin" unique_id=1127648615]
-layout_mode = 2
-theme_override_constants/separation = 12
-alignment = 1
 
 [node name="BigRocketTitleOffset" type="Control" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=1570831382]
 custom_minimum_size = Vector2(0, 70)
-layout_mode = 2
+anchors_preset = 0
 
 [node name="BigRocketTitle" type="Label" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=1040822183]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 0
+offset_top = -1.0
+offset_right = 244.0
+offset_bottom = 27.0
 theme_override_font_sizes/font_size = 22
 text = "Big Rocket"
 label_settings = SubResource("LabelSettings_outline")
@@ -203,30 +216,39 @@ horizontal_alignment = 1
 
 [node name="BigRocketIconOffset" type="Control" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=619055056]
 custom_minimum_size = Vector2(0, 59)
-layout_mode = 2
+anchors_preset = 0
 
 [node name="BigRocketIcon" type="TextureRect" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=1773600162]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(220, 200)
-layout_mode = 2
+layout_mode = 0
+offset_left = 12.0
+offset_top = 112.0
+offset_right = 232.0
+offset_bottom = 312.0
 texture = ExtResource("4_big_rocket")
 expand_mode = 2
 stretch_mode = 5
 
 [node name="BigRocketTopSpacer" type="Control" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=309834845]
-layout_mode = 2
+anchors_preset = 0
 size_flags_vertical = 3
 
 [node name="BigRocketStats" type="Control" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=1342847524]
 custom_minimum_size = Vector2(220, 110)
-layout_mode = 2
+anchors_preset = 0
+offset_left = 12.0
+offset_top = 370.0
+offset_right = 232.0
+offset_bottom = 480.0
 
 [node name="BigRocketPayloadLabel" type="Label" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content/BigRocketStats" unique_id=1569845249]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = -22.0
+offset_top = 30.0
 offset_right = 198.0
-offset_bottom = 24.0
+offset_bottom = 54.0
 text = "Payload: 500"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
@@ -235,9 +257,9 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = -5.0
-offset_top = 23.0
+offset_top = 54.0
 offset_right = 215.0
-offset_bottom = 47.0
+offset_bottom = 78.0
 text = "Fuel needed: 200"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
@@ -245,9 +267,9 @@ horizontal_alignment = 1
 [node name="BigRocketDaysLabel" type="Label" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content/BigRocketStats" unique_id=1727062341]
 unique_name_in_owner = true
 layout_mode = 0
-offset_top = 44.0
+offset_top = 76.0
 offset_right = 220.0
-offset_bottom = 68.0
+offset_bottom = 100.0
 text = "Days to launch: 30"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
@@ -256,26 +278,31 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = -7.0
-offset_top = 67.0
+offset_top = 99.0
 offset_right = 213.0
-offset_bottom = 91.0
+offset_bottom = 123.0
 text = "Cargo Grid: 5x10"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
 
 [node name="BigRocketLowerSpacer" type="Control" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=478721572]
 custom_minimum_size = Vector2(0, 48)
-layout_mode = 2
+anchors_preset = 0
 
 [node name="BigRocketButton" type="Button" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=303592902]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 42)
-layout_mode = 2
+layout_mode = 0
+offset_left = 32.0
+offset_top = 518.0
+offset_right = 212.0
+offset_bottom = 560.0
 text = "Select Vehicle"
 
 [node name="ShuttleCard" type="Control" parent="Layout/Panels/VehiclePanel" unique_id=61266544]
 custom_minimum_size = Vector2(300, 629)
 layout_mode = 2
+size_flags_vertical = 8
 
 [node name="PanelArt" type="TextureRect" parent="Layout/Panels/VehiclePanel/ShuttleCard" unique_id=1057810832]
 modulate = Color(1, 1, 1, 0.85)
@@ -290,30 +317,36 @@ texture = ExtResource("3_vehicle_panel")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Margin" type="MarginContainer" parent="Layout/Panels/VehiclePanel/ShuttleCard" unique_id=456739891]
+[node name="Margin" type="Control" parent="Layout/Panels/VehiclePanel/ShuttleCard" unique_id=456739891]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 28.0
+offset_right = -28.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="Control" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin" unique_id=1931730712]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 28
-theme_override_constants/margin_top = 28
-theme_override_constants/margin_right = 28
-theme_override_constants/margin_bottom = 28
-
-[node name="Content" type="VBoxContainer" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin" unique_id=1931730712]
-layout_mode = 2
-theme_override_constants/separation = 12
-alignment = 1
 
 [node name="ShuttleTitleOffset" type="Control" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=12382775]
 custom_minimum_size = Vector2(0, 70)
-layout_mode = 2
+anchors_preset = 0
 
 [node name="ShuttleTitle" type="Label" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=1582791049]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 0
+offset_top = -2.0
+offset_right = 244.0
+offset_bottom = 26.0
 theme_override_font_sizes/font_size = 22
 text = "Space Shuttle"
 label_settings = SubResource("LabelSettings_outline")
@@ -321,30 +354,39 @@ horizontal_alignment = 1
 
 [node name="ShuttleIconOffset" type="Control" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=1422175543]
 custom_minimum_size = Vector2(0, 79)
-layout_mode = 2
+anchors_preset = 0
 
 [node name="ShuttleIcon" type="TextureRect" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=1993233732]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(220, 180)
-layout_mode = 2
+layout_mode = 0
+offset_left = 12.0
+offset_top = 132.0
+offset_right = 232.0
+offset_bottom = 312.0
 texture = ExtResource("5_shuttle")
 expand_mode = 2
 stretch_mode = 5
 
 [node name="ShuttleTopSpacer" type="Control" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=207475117]
-layout_mode = 2
+anchors_preset = 0
 size_flags_vertical = 3
 
 [node name="ShuttleStats" type="Control" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=756492045]
 custom_minimum_size = Vector2(220, 110)
-layout_mode = 2
+anchors_preset = 0
+offset_left = 12.0
+offset_top = 370.0
+offset_right = 232.0
+offset_bottom = 480.0
 
 [node name="ShuttlePayloadLabel" type="Label" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content/ShuttleStats" unique_id=208620097]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = -23.0
+offset_top = 29.0
 offset_right = 197.0
-offset_bottom = 24.0
+offset_bottom = 53.0
 text = "Payload: 320"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
@@ -353,9 +395,9 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = -6.0
-offset_top = 23.0
+offset_top = 52.0
 offset_right = 214.0
-offset_bottom = 47.0
+offset_bottom = 76.0
 text = "Fuel needed: 120"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
@@ -364,9 +406,9 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = -1.0
-offset_top = 44.0
+offset_top = 73.0
 offset_right = 219.0
-offset_bottom = 68.0
+offset_bottom = 97.0
 text = "Days to launch: 20"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
@@ -375,26 +417,31 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = -13.0
-offset_top = 67.0
+offset_top = 97.0
 offset_right = 207.0
-offset_bottom = 91.0
+offset_bottom = 121.0
 text = "Cargo Grid: 4x8"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
 
 [node name="ShuttleLowerSpacer" type="Control" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=624819292]
 custom_minimum_size = Vector2(0, 48)
-layout_mode = 2
+anchors_preset = 0
 
 [node name="ShuttleButton" type="Button" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=489353861]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 42)
-layout_mode = 2
+layout_mode = 0
+offset_left = 32.0
+offset_top = 518.0
+offset_right = 212.0
+offset_bottom = 560.0
 text = "Select Vehicle"
 
 [node name="SpinLaunchCard" type="Control" parent="Layout/Panels/VehiclePanel" unique_id=689646704]
 custom_minimum_size = Vector2(300, 629)
 layout_mode = 2
+size_flags_vertical = 8
 
 [node name="PanelArt" type="TextureRect" parent="Layout/Panels/VehiclePanel/SpinLaunchCard" unique_id=1121744166]
 modulate = Color(1, 1, 1, 0.85)
@@ -409,30 +456,36 @@ texture = ExtResource("3_vehicle_panel")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Margin" type="MarginContainer" parent="Layout/Panels/VehiclePanel/SpinLaunchCard" unique_id=1568898211]
+[node name="Margin" type="Control" parent="Layout/Panels/VehiclePanel/SpinLaunchCard" unique_id=1568898211]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 28.0
+offset_right = -28.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="Control" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin" unique_id=162391069]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 28
-theme_override_constants/margin_top = 28
-theme_override_constants/margin_right = 28
-theme_override_constants/margin_bottom = 28
-
-[node name="Content" type="VBoxContainer" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin" unique_id=162391069]
-layout_mode = 2
-theme_override_constants/separation = 12
-alignment = 1
 
 [node name="SpinLaunchTitleOffset" type="Control" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=499265409]
 custom_minimum_size = Vector2(0, 70)
-layout_mode = 2
+anchors_preset = 0
 
 [node name="SpinLaunchTitle" type="Label" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=995763902]
 unique_name_in_owner = true
-layout_mode = 2
+layout_mode = 0
+offset_top = -1.0
+offset_right = 244.0
+offset_bottom = 27.0
 theme_override_font_sizes/font_size = 22
 text = "SpinLaunch"
 label_settings = SubResource("LabelSettings_outline")
@@ -440,31 +493,40 @@ horizontal_alignment = 1
 
 [node name="SpinLaunchIconOffset" type="Control" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=901819161]
 custom_minimum_size = Vector2(0, 110)
-layout_mode = 2
+anchors_preset = 0
 
 [node name="SpinLaunchIcon" type="TextureRect" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=2027132484]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(220, 150)
-layout_mode = 2
+layout_mode = 0
+offset_left = 12.0
+offset_top = 161.0
+offset_right = 232.0
+offset_bottom = 311.0
 texture = ExtResource("6_spinlaunch")
 expand_mode = 2
 stretch_mode = 5
 
 [node name="SpinLaunchTopSpacer" type="Control" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=464737095]
 custom_minimum_size = Vector2(0, 20)
-layout_mode = 2
+anchors_preset = 0
 size_flags_vertical = 3
 
 [node name="SpinLaunchStats" type="Control" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=1330556339]
 custom_minimum_size = Vector2(220, 110)
-layout_mode = 2
+anchors_preset = 0
+offset_left = 12.0
+offset_top = 370.0
+offset_right = 232.0
+offset_bottom = 480.0
 
 [node name="SpinLaunchPayloadLabel" type="Label" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content/SpinLaunchStats" unique_id=1347469946]
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = -27.0
+offset_top = 29.0
 offset_right = 193.0
-offset_bottom = 24.0
+offset_bottom = 53.0
 text = "Payload: 20"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
@@ -473,9 +535,9 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = -15.0
-offset_top = 22.0
+offset_top = 52.0
 offset_right = 205.0
-offset_bottom = 46.0
+offset_bottom = 76.0
 text = "Fuel needed: 0"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
@@ -484,9 +546,9 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = -6.0
-offset_top = 44.0
+offset_top = 75.0
 offset_right = 214.0
-offset_bottom = 68.0
+offset_bottom = 99.0
 text = "Days to launch: 5"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
@@ -495,21 +557,25 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = -13.0
-offset_top = 67.0
+offset_top = 99.0
 offset_right = 207.0
-offset_bottom = 91.0
+offset_bottom = 123.0
 text = "Cargo Grid: 1x2"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
 
 [node name="SpinLaunchLowerSpacer" type="Control" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=135235960]
 custom_minimum_size = Vector2(0, 48)
-layout_mode = 2
+anchors_preset = 0
 
 [node name="SpinLaunchButton" type="Button" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=1553686673]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 42)
-layout_mode = 2
+layout_mode = 0
+offset_left = 32.0
+offset_top = 518.0
+offset_right = 212.0
+offset_bottom = 560.0
 text = "Select Vehicle"
 
 [node name="DebugRow" type="HBoxContainer" parent="Layout" unique_id=848875156]
