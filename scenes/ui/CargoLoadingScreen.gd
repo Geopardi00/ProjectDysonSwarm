@@ -323,7 +323,7 @@ func _refresh_assignment() -> void:
 	var assigned_payload := assignment.get_assigned_payload()
 	var assigned_fuel := assignment.get_assigned_fuel()
 
-	vehicle_label.text = "%s assignment" % String(vehicle.get("display_name", assignment.vehicle_id))
+	vehicle_label.text = ""
 	assignment_grid_label.text = "Cargo hold preview: %dx%d" % [
 		int(vehicle.get("grid_height", 0)),
 		int(vehicle.get("grid_width", 0)),
@@ -356,7 +356,7 @@ func _refresh_packing() -> void:
 	var placed_payload := packing_state.get_placed_payload()
 	var placed_fuel := packing_state.get_placed_fuel()
 
-	vehicle_label.text = "%s packing" % String(vehicle.get("display_name", packing_state.vehicle_id))
+	vehicle_label.text = ""
 	_update_meters("Placed payload", placed_payload, max_payload, "Placed fuel", placed_fuel, required_fuel)
 	warning_label.text = "Packing phase: assignments are locked."
 	_update_meter_warnings(warning_label.text)

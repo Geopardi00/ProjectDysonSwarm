@@ -17,6 +17,11 @@ const FACTION_LOGO_NORMAL_SCALE := Vector2.ONE
 const FACTION_LOGO_HIGHLIGHT_MODULATE := Color(1.18, 1.08, 0.86, 1.0)
 const FACTION_LOGO_NORMAL_MODULATE := Color.WHITE
 const FACTION_LOGO_HALO_MODULATE := Color(1.0, 0.72, 0.22, 0.42)
+const BACKGROUND_MUSIC_PATHS: Array[String] = [
+	"res://audio/music/bg_music1.mp3",
+	"res://audio/music/bg_music2.mp3",
+	"res://audio/music/bg_music3.mp3",
+]
 
 @onready var root_margin: MarginContainer = $RootMargin
 @onready var cargo_loading_screen: Control = %CargoLoadingScreen
@@ -27,11 +32,15 @@ var selected_faction := ""
 var active_screen: Control
 var corner_logo: TextureRect
 var last_launch_result: Dictionary = {}
+var music_player: AudioStreamPlayer
+var background_music_streams: Array[AudioStream] = []
+var current_music_index := 0
 
 
 func _ready() -> void:
 	_add_scene_background()
 	_add_corner_logo()
+	_start_background_music()
 	game_state = GameState.new()
 	add_child(game_state)
 
@@ -43,6 +52,43 @@ func _ready() -> void:
 
 	_clear_root_margin()
 	_show_opening_screen()
+
+
+func _start_background_music() -> void:
+	for music_path: String in BACKGROUND_MUSIC_PATHS:
+		var music_stream := _load_background_music_stream(music_path)
+		if music_stream == null:
+			push_warning("Could not load background music: %s" % music_path)
+			continue
+		background_music_streams.append(music_stream)
+	if background_music_streams.is_empty():
+		return
+	music_player = AudioStreamPlayer.new()
+	music_player.name = "BackgroundMusicPlayer"
+	music_player.finished.connect(_play_next_background_music)
+	add_child(music_player)
+	_play_background_music(0)
+
+
+func _load_background_music_stream(music_path: String) -> AudioStream:
+	if music_path.get_extension().to_lower() == "mp3":
+		var music_data := FileAccess.get_file_as_bytes(music_path)
+		if music_data.is_empty():
+			return null
+		var mp3_stream := AudioStreamMP3.new()
+		mp3_stream.data = music_data
+		return mp3_stream
+	return load(music_path) as AudioStream
+
+
+func _play_background_music(track_index: int) -> void:
+	current_music_index = wrapi(track_index, 0, background_music_streams.size())
+	music_player.stream = background_music_streams[current_music_index]
+	music_player.play()
+
+
+func _play_next_background_music() -> void:
+	_play_background_music(current_music_index + 1)
 
 
 func test_big_rocket_success() -> Dictionary:
