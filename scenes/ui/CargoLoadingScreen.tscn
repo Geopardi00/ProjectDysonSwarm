@@ -64,7 +64,6 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 22
-text = ""
 label_settings = SubResource("LabelSettings_outline")
 
 [node name="BackButton" type="Button" parent="RootMargin/Layout/Header" unique_id=985904312]
@@ -1069,57 +1068,97 @@ mouse_filter = 2
 texture = ExtResource("4_cargo_panel")
 expand_mode = 1
 
-[node name="Margin" type="MarginContainer" parent="RootMargin/Layout/PackingPanel/PackingListPanel" unique_id=1652788559]
+[node name="FrameRegions" type="Control" parent="RootMargin/Layout/PackingPanel/PackingListPanel" unique_id=1652788559]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 19.0
-offset_top = 21.5
-offset_right = -18.0
-offset_bottom = -17.5
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 28
-theme_override_constants/margin_top = 28
-theme_override_constants/margin_right = 28
-theme_override_constants/margin_bottom = 72
 
-[node name="PackingListContent" type="VBoxContainer" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin" unique_id=707193509]
-layout_mode = 2
-theme_override_constants/separation = 10
+[node name="HeaderRegion" type="Control" parent="RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions" unique_id=707193509]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 107.0
+offset_top = 33.0
+offset_right = 13.0
+offset_bottom = 87.0
+grow_horizontal = 2
 
-[node name="PiecesTitle" type="Label" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin/PackingListContent" unique_id=766975588]
-layout_mode = 2
+[node name="PiecesTitle" type="Label" parent="RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions/HeaderRegion" unique_id=766975588]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_font_sizes/font_size = 18
 text = "Cargo pieces"
 label_settings = SubResource("LabelSettings_outline")
+vertical_alignment = 1
 
-[node name="HeaderToScrollSpacer" type="Control" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin/PackingListContent"]
-custom_minimum_size = Vector2(0, 24)
-layout_mode = 2
+[node name="ContentRegion" type="Control" parent="RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions" unique_id=1984144237]
+clip_contents = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 100.0
+offset_right = -40.0
+offset_bottom = -50.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="PieceScroll" type="ScrollContainer" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin/PackingListContent" unique_id=1169264651]
-layout_mode = 2
-size_flags_vertical = 3
+[node name="PieceScroll" type="ScrollContainer" parent="RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions/ContentRegion" unique_id=1169264651]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 horizontal_scroll_mode = 0
 
-[node name="PackingPieceListMargin" type="MarginContainer" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin/PackingListContent/PieceScroll"]
+[node name="PackingPieceListMargin" type="MarginContainer" parent="RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions/ContentRegion/PieceScroll" unique_id=1149615137]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/margin_left = 18
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 18
-theme_override_constants/margin_bottom = 84
+theme_override_constants/margin_bottom = 16
 
-[node name="PackingPieceList" type="VBoxContainer" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin/PackingListContent/PieceScroll/PackingPieceListMargin" unique_id=2103548900]
+[node name="PackingPieceList" type="VBoxContainer" parent="RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions/ContentRegion/PieceScroll/PackingPieceListMargin" unique_id=2103548900]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 6
 
-[node name="RotateButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingListPanel/Margin/PackingListContent" unique_id=1410236689]
+[node name="FooterRegion" type="Control" parent="RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions" unique_id=1459735765]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = -50.0
+offset_right = -40.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="RotateButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions/FooterRegion" unique_id=1410236689]
 unique_name_in_owner = true
 visible = false
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -80.0
+offset_top = -20.0
+offset_right = 80.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
 text = "Rotate Selected"

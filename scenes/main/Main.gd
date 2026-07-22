@@ -140,12 +140,13 @@ func _build_opening_screen() -> Control:
 	layout.add_child(logo)
 
 	var start_button := Button.new()
-	start_button.text = "Start"
+	start_button.text = "START"
 	start_button.custom_minimum_size = Vector2(220, 44)
 	start_button.pressed.connect(_show_faction_select)
 	layout.add_child(start_button)
 
 	UiAssetsScript.apply_text_outline(layout)
+	UiAssetsScript.apply_semibold_font(start_button)
 	return layout
 
 
@@ -154,7 +155,7 @@ func _build_faction_select_screen() -> Control:
 	layout.set_anchors_preset(Control.PRESET_FULL_RECT)
 
 	var prompt := Label.new()
-	prompt.text = "Select faction"
+	prompt.text = "SELECT FACTION"
 	prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	prompt.add_theme_font_size_override("font_size", 24)
 	prompt.anchor_left = 0.0
@@ -181,7 +182,7 @@ func _build_faction_select_screen() -> Control:
 		faction_row.add_child(button)
 
 	var start_button := Button.new()
-	start_button.text = "Start"
+	start_button.text = "START"
 	start_button.anchor_left = 0.5
 	start_button.anchor_right = 0.5
 	start_button.anchor_top = 0.5
@@ -197,6 +198,8 @@ func _build_faction_select_screen() -> Control:
 	layout.add_child(start_button)
 
 	UiAssetsScript.apply_text_outline(layout)
+	UiAssetsScript.apply_semibold_font(prompt)
+	UiAssetsScript.apply_semibold_font(start_button)
 	return layout
 
 

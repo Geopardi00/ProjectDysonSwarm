@@ -3,6 +3,9 @@ class_name UiAssets
 
 const BACKGROUND := "res://assets/ui/backgrounds/ui_bg_space_loading_1920x1080.png"
 const TITLE_LOGO := "res://assets/ui/title/title_logo.png"
+const UI_FONT := preload("res://assets/ui/fonts/zekton/Zekton-Regular.otf")
+
+static var _semibold_ui_font: FontVariation
 
 const VEHICLE_ICONS := {
 	"big_rocket": "res://assets/ui/vehicles/big_rocket_icon.png",
@@ -101,9 +104,22 @@ static func get_cargo_piece_texture(shape_id: String) -> Texture2D:
 	return null
 
 
+static func get_semibold_ui_font() -> FontVariation:
+	if _semibold_ui_font == null:
+		_semibold_ui_font = FontVariation.new()
+		_semibold_ui_font.base_font = UI_FONT
+		_semibold_ui_font.variation_embolden = 0.8
+	return _semibold_ui_font
+
+
+static func apply_semibold_font(control: Control) -> void:
+	control.add_theme_font_override("font", get_semibold_ui_font())
+
+
 static func apply_text_outline(node: Node, outline_size: int = 4) -> void:
 	if node is Label or node is Button:
 		var control := node as Control
+		control.add_theme_font_override("font", UI_FONT)
 		control.add_theme_color_override("font_color", Color.WHITE)
 		control.add_theme_color_override("font_outline_color", Color.BLACK)
 		control.add_theme_constant_override("outline_size", outline_size)
