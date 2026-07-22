@@ -9,7 +9,7 @@ const SHOW_DEBUG_ACTIONS := true
 const CORNER_LOGO_SIZE := Vector2(272, 62.5)
 const LAUNCH_RESULT_MARGIN_TOP := 112
 const LAUNCH_RESULT_BUTTON_WIDTH := 220
-const LAUNCH_RESULT_BUTTON_TOP_GAP := 28
+const LAUNCH_RESULT_BUTTON_HEIGHT := 44
 const GAME_OVER_MARGIN_TOP := 112
 const FACTION_SELECT_LOGO_SIZE := Vector2(256, 256)
 const FACTION_LOGO_HIGHLIGHT_SCALE := Vector2(1.08, 1.08)
@@ -275,8 +275,20 @@ func _show_launch_result(result: Dictionary) -> void:
 
 
 func _build_launch_result_screen(result: Dictionary) -> Control:
+	var screen := Control.new()
+	screen.set_anchors_preset(Control.PRESET_FULL_RECT)
+
+	var text_margin := MarginContainer.new()
+	text_margin.set_anchors_preset(Control.PRESET_FULL_RECT)
+	text_margin.add_theme_constant_override("margin_left", 24)
+	text_margin.add_theme_constant_override("margin_top", LAUNCH_RESULT_MARGIN_TOP)
+	text_margin.add_theme_constant_override("margin_right", 24)
+	text_margin.add_theme_constant_override("margin_bottom", 24)
+	screen.add_child(text_margin)
+
 	var layout := VBoxContainer.new()
 	layout.add_theme_constant_override("separation", 12)
+	text_margin.add_child(layout)
 
 	var title := Label.new()
 	title.text = "Launch Result"
@@ -288,19 +300,18 @@ func _build_launch_result_screen(result: Dictionary) -> Control:
 	details.text = _format_launch_result(result)
 	layout.add_child(details)
 
-	var button_spacer := Control.new()
-	button_spacer.custom_minimum_size = Vector2(1, LAUNCH_RESULT_BUTTON_TOP_GAP)
-	layout.add_child(button_spacer)
-
 	var continue_button := Button.new()
 	continue_button.text = "Continue"
-	continue_button.custom_minimum_size = Vector2(LAUNCH_RESULT_BUTTON_WIDTH, 44)
-	continue_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	continue_button.set_anchors_preset(Control.PRESET_CENTER)
+	continue_button.offset_left = -LAUNCH_RESULT_BUTTON_WIDTH * 0.5
+	continue_button.offset_top = -LAUNCH_RESULT_BUTTON_HEIGHT * 0.5
+	continue_button.offset_right = LAUNCH_RESULT_BUTTON_WIDTH * 0.5
+	continue_button.offset_bottom = LAUNCH_RESULT_BUTTON_HEIGHT * 0.5
 	continue_button.pressed.connect(_on_result_continue_pressed)
-	layout.add_child(continue_button)
+	screen.add_child(continue_button)
 
-	UiAssetsScript.apply_text_outline(layout)
-	return _with_margin(layout, LAUNCH_RESULT_MARGIN_TOP)
+	UiAssetsScript.apply_text_outline(screen)
+	return screen
 
 
 func _show_game_over_screen() -> void:
