@@ -7,6 +7,9 @@ signal music_volume_changed(percent: float)
 signal sfx_volume_changed(percent: float)
 signal brightness_changed(percent: float)
 
+var button_navigation_delay := 0.08
+var button_navigation_pending := false
+
 @onready var panel_art: TextureRect = %PanelArt
 @onready var background: TextureRect = $Background
 @onready var options_page: VBoxContainer = %OptionsPage
@@ -27,9 +30,9 @@ func _ready() -> void:
 	music_volume_slider.value_changed.connect(_on_music_volume_value_changed)
 	sfx_volume_slider.value_changed.connect(_on_sfx_volume_value_changed)
 	brightness_slider.value_changed.connect(_on_brightness_value_changed)
-	%HowToPlayButton.pressed.connect(show_instructions_page)
-	%OptionsBackButton.pressed.connect(back_requested.emit)
-	%InstructionsBackButton.pressed.connect(show_options_page)
+	%HowToPlayButton.pressed.connect(_queue_button_navigation.bind(show_instructions_page))
+	%OptionsBackButton.pressed.connect(_queue_button_navigation.bind(back_requested.emit))
+	%InstructionsBackButton.pressed.connect(_queue_button_navigation.bind(show_options_page))
 	show_options_page()
 	UiAssets.apply_text_outline(self)
 	UiAssets.apply_semibold_font(%OptionsTitle)
@@ -67,6 +70,17 @@ func show_instructions_page() -> void:
 
 func is_showing_instructions() -> bool:
 	return instructions_page.visible
+
+
+func _queue_button_navigation(action: Callable) -> void:
+	if button_navigation_pending:
+		return
+	button_navigation_pending = true
+	if button_navigation_delay > 0.0:
+		await get_tree().create_timer(button_navigation_delay).timeout
+	if is_inside_tree() and action.is_valid():
+		action.call()
+	button_navigation_pending = false
 
 
 func _on_volume_value_changed(value: float) -> void:

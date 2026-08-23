@@ -29,6 +29,16 @@ const MATERIAL_ICONS := {
 	"propellant": "res://assets/ui/materials/propellant_icon.png",
 }
 
+const LARGE_MATERIAL_ICONS := {
+	"fuel": "res://assets/ui/materials/bigger/fuel_big.png",
+	"carbon_metals": "res://assets/ui/materials/bigger/carbon_big.png",
+	"silicon": "res://assets/ui/materials/bigger/silicon_big.png",
+	"copper": "res://assets/ui/materials/bigger/copper_big.png",
+	"electronics": "res://assets/ui/materials/bigger/electronics_big.png",
+	"rare_metals": "res://assets/ui/materials/bigger/rare_materials_big.png",
+	"propellant": "res://assets/ui/materials/bigger/propellant_big.png",
+}
+
 const PANEL_FRAMES := {
 	"vehicle_info": "res://assets/ui/panels/empty_panel_vehicle_info_frame.png",
 	"available_cargo": "res://assets/ui/panels/empty_panel.png",
@@ -88,6 +98,10 @@ static func get_faction_logo(faction_id: String) -> Texture2D:
 
 static func get_material_icon(material: String) -> Texture2D:
 	return get_texture(String(MATERIAL_ICONS.get(material, "")))
+
+
+static func get_large_material_icon(material: String) -> Texture2D:
+	return get_texture(String(LARGE_MATERIAL_ICONS.get(material, "")))
 
 
 static func get_panel_frame(frame_id: String) -> Texture2D:

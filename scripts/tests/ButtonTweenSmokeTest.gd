@@ -90,6 +90,29 @@ func _run() -> void:
 		_fail(main, "Excluded cargo material button lost sounds or gained a tween.")
 		return
 
+	main.button_navigation_delay = 0.08
+	main._show_opening_screen()
+	await process_frame
+	var delayed_opening_screen: Control = main.active_screen
+	var opening_options_button := main.active_screen.get_node("Layout/ButtonStack/OptionsButton") as Button
+	opening_options_button.pressed.emit()
+	if main.active_screen != delayed_opening_screen:
+		_fail(main, "Opening Options navigation ignored the configured button delay.")
+		return
+	await create_timer(0.12).timeout
+	if not main.active_screen is OptionsScreen:
+		_fail(main, "Opening Options navigation did not run after the configured delay.")
+		return
+	var options_back_button := main.active_screen.get_node("PanelCenter/Panel/ContentMargin/OptionsPage/OptionsBackButton") as Button
+	options_back_button.pressed.emit()
+	if not main.active_screen is OptionsScreen:
+		_fail(main, "Options Back navigation ignored the configured button delay.")
+		return
+	await create_timer(0.12).timeout
+	if main.active_screen is OptionsScreen:
+		_fail(main, "Options Back navigation did not run after the configured delay.")
+		return
+
 	_cleanup(main)
 	print("Button tween smoke test passed.")
 	quit(0)

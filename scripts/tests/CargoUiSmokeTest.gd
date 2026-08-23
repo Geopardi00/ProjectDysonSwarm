@@ -1,6 +1,24 @@
 extends SceneTree
 
 const CargoLoadingScreenScene := preload("res://scenes/ui/CargoLoadingScreen.tscn")
+const LARGE_MATERIAL_ICON_PATHS := {
+	"fuel": "res://assets/ui/materials/bigger/fuel_big.png",
+	"carbon_metals": "res://assets/ui/materials/bigger/carbon_big.png",
+	"silicon": "res://assets/ui/materials/bigger/silicon_big.png",
+	"copper": "res://assets/ui/materials/bigger/copper_big.png",
+	"electronics": "res://assets/ui/materials/bigger/electronics_big.png",
+	"rare_metals": "res://assets/ui/materials/bigger/rare_materials_big.png",
+	"propellant": "res://assets/ui/materials/bigger/propellant_big.png",
+}
+const TEST_MATERIALS: Array[String] = [
+	"fuel",
+	"carbon_metals",
+	"silicon",
+	"copper",
+	"electronics",
+	"rare_metals",
+	"propellant",
+]
 
 var did_emit_launch := false
 var did_emit_cancel := false
@@ -19,10 +37,16 @@ func _run() -> void:
 		_fail("Cargo Back button overlay did not have top GUI input priority.")
 		return
 	screen.assignment_cancelled.connect(func() -> void: did_emit_cancel = true)
+	screen.button_navigation_delay = 0.05
 	back_button.pressed.emit()
-	if not did_emit_cancel:
-		_fail("Cargo Back button did not emit assignment cancellation.")
+	if did_emit_cancel:
+		_fail("Cargo Back button ignored its configured navigation delay.")
 		return
+	await create_timer(0.08).timeout
+	if not did_emit_cancel:
+		_fail("Cargo Back button did not emit assignment cancellation after its configured delay.")
+		return
+	screen.button_navigation_delay = 0.08
 	var assignment_panel := screen.get_node("RootMargin/Layout/AssignmentPanel") as HBoxContainer
 	var assignment_info_margin := screen.get_node("RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin") as MarginContainer
 	var packing_info_margin := screen.get_node("RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin") as MarginContainer
@@ -82,6 +106,18 @@ func _run() -> void:
 	if screen.capacity_label.get_theme_font_size("font_size") != 18:
 		_fail("Cargo meter labels did not use the readability font size.")
 		return
+	var packing_selected_label := screen.get_node(
+		"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingSelectedCargoLabel"
+	) as Label
+	var configured_packing_label_size: int = screen.packing_selected_label_font_size
+	if packing_selected_label.get_theme_font_size("font_size") != configured_packing_label_size:
+		_fail("Packing selected-material label did not use its configured font size.")
+		return
+	screen.packing_selected_label_font_size = configured_packing_label_size + 2
+	if packing_selected_label.get_theme_font_size("font_size") != configured_packing_label_size + 2:
+		_fail("Packing selected-material font-size Inspector control did not update live.")
+		return
+	screen.packing_selected_label_font_size = configured_packing_label_size
 	screen.meter_text_font_size = 20
 	screen.meter_character_spacing = 2
 	var meter_font := screen.capacity_label.get_theme_font("font") as FontVariation
@@ -107,6 +143,12 @@ func _run() -> void:
 		return
 	screen._on_assignment_copy_pressed(big_pieces[0].instance_id)
 	screen._on_material_pressed("fuel")
+	if (
+		screen.selected_piece_preview.texture == null
+		or not screen.selected_piece_preview.texture.resource_path.contains("/cargo_pieces/")
+	):
+		_fail("Assignment phase no longer used its cargo-shape preview.")
+		return
 	screen._on_assignment_copy_pressed(big_pieces[1].instance_id)
 	screen._on_material_pressed("silicon")
 	if screen.assignment.get_assigned_piece(big_pieces[0].instance_id).material != "fuel":
@@ -162,26 +204,49 @@ func _run() -> void:
 		_fail("Cargo screen moonbase needs panel did not update after reset.")
 		return
 
-	if not screen.assignment.assign_material(pieces[0].instance_id, "fuel"):
-		_fail("Could not reassign fuel after reset.")
-		return
-	if not screen.assignment.assign_material(pieces[1].instance_id, "copper"):
-		_fail("Could not reassign copper after reset.")
-		return
+	for index: int in range(TEST_MATERIALS.size()):
+		if not screen.assignment.assign_material(pieces[index].instance_id, TEST_MATERIALS[index]):
+			_fail("Could not assign %s for the packing material-preview test." % TEST_MATERIALS[index])
+			return
 
 	screen._on_confirm_pressed()
 	if screen.phase != screen.CargoPhase.PACKING:
 		_fail("Cargo screen did not move to packing phase.")
 		return
+	if screen.packing_selected_material_preview.visible:
+		_fail("Packing material preview was visible before a piece was selected.")
+		return
 
-	screen.selected_piece_id = pieces[0].instance_id
+	for index: int in range(TEST_MATERIALS.size()):
+		var material := TEST_MATERIALS[index]
+		screen._on_packing_piece_pressed(pieces[index].instance_id)
+		var preview_texture: Texture2D = screen.packing_selected_material_preview.texture
+		if (
+			preview_texture == null
+			or preview_texture.resource_path != String(LARGE_MATERIAL_ICON_PATHS[material])
+			or screen.packing_selected_material_preview.modulate != Color.WHITE
+		):
+			_fail("Packing selection did not show the untinted large %s icon." % material)
+			return
+		if screen.packing_selected_cargo_label.text == "" or not screen.packing_selected_cargo_label.visible:
+			_fail("Packing material preview did not keep its material/unit label.")
+			return
+
+	screen._on_packing_piece_pressed(pieces[0].instance_id)
+	var fuel_preview_path: String = screen.packing_selected_material_preview.texture.resource_path
 	screen._rotate_selected_piece()
 	if screen.selected_rotation != 90:
 		_fail("Cargo screen did not rotate selected piece before placement.")
 		return
+	if screen.packing_selected_material_preview.texture.resource_path != fuel_preview_path:
+		_fail("Rotating a piece changed its selected-material icon.")
+		return
 	screen._on_grid_cell_clicked(Vector2i(0, 0), MOUSE_BUTTON_LEFT)
 	if screen.packing_state.get_placed_payload() != pieces[0].get_payload_units():
 		_fail("Cargo screen did not place selected piece.")
+		return
+	if screen.packing_selected_material_preview.visible or screen.packing_selected_cargo_label.visible:
+		_fail("Packing material preview did not hide after placement.")
 		return
 	screen._on_grid_cell_clicked(Vector2i(0, 0), MOUSE_BUTTON_LEFT)
 	if screen.selected_piece_id != pieces[0].instance_id:
@@ -190,9 +255,18 @@ func _run() -> void:
 	if screen.packing_state.get_placed_payload() != 0:
 		_fail("Picked up piece still counted as placed payload.")
 		return
+	if (
+		not screen.packing_selected_material_preview.visible
+		or screen.packing_selected_material_preview.texture.resource_path != fuel_preview_path
+	):
+		_fail("Picking up a placed piece did not restore its large material icon.")
+		return
 	screen._on_grid_cell_clicked(Vector2i(1, 0), MOUSE_BUTTON_LEFT)
 	if screen.packing_state.get_placed_payload() != pieces[0].get_payload_units():
 		_fail("Cargo screen did not move picked-up piece.")
+		return
+	if screen.packing_selected_material_preview.visible:
+		_fail("Packing material preview remained visible after moving the piece.")
 		return
 
 	screen._on_launch_pressed()

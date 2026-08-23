@@ -119,9 +119,10 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 @export_range(0.0, 0.5, 0.01, "suffix:s") var button_release_duration := 0.09
 @export_range(1.0, 1.5, 0.01) var button_hover_brightness := 1.08
 @export_range(0.5, 1.0, 0.01) var button_press_brightness := 0.88
+@export_range(0.0, 0.5, 0.01, "suffix:s") var button_navigation_delay := 0.08
 
 @onready var root_margin: MarginContainer = $RootMargin
-@onready var cargo_loading_screen: Control = %CargoLoadingScreen
+@onready var cargo_loading_screen: CargoLoadingScreen = %CargoLoadingScreen
 
 var game_state: GameState
 var launch_manager: LaunchManager
@@ -151,6 +152,7 @@ var brightness_filter: ColorRect
 var settings_loaded := false
 var pause_overlay: PauseMenuScreen
 var pause_options_screen: OptionsScreen
+var button_navigation_pending := false
 
 
 func _ready() -> void:
@@ -180,6 +182,7 @@ func _ready() -> void:
 
 	cargo_loading_screen.launch_requested.connect(_on_launch_requested)
 	cargo_loading_screen.assignment_cancelled.connect(_on_assignment_cancelled)
+	cargo_loading_screen.button_navigation_delay = button_navigation_delay
 
 	_clear_root_margin()
 	_show_opening_screen()
@@ -339,6 +342,17 @@ func _kill_ui_button_tween(button: Button) -> void:
 	if active_tween is Tween and active_tween.is_valid():
 		active_tween.kill()
 	button.remove_meta(UI_TWEEN_ACTIVE_META)
+
+
+func _queue_button_navigation(action: Callable) -> void:
+	if button_navigation_pending:
+		return
+	button_navigation_pending = true
+	if button_navigation_delay > 0.0:
+		await get_tree().create_timer(button_navigation_delay).timeout
+	if is_inside_tree() and action.is_valid():
+		action.call()
+	button_navigation_pending = false
 
 
 func _on_ui_button_hovered(button: Button) -> void:
@@ -671,6 +685,7 @@ func _open_options_screen(back_callback: Callable) -> void:
 	cargo_loading_screen.visible = false
 	_set_corner_logo_visible(false)
 	var options_screen := OptionsScreenScene.instantiate() as OptionsScreen
+	options_screen.button_navigation_delay = button_navigation_delay
 	options_screen.back_requested.connect(back_callback)
 	options_screen.master_volume_changed.connect(_on_master_volume_changed)
 	options_screen.music_volume_changed.connect(_on_music_volume_changed)
@@ -756,7 +771,7 @@ func _build_opening_menu_button(button_name: String, button_text: String, callba
 	button.text = button_text
 	button.custom_minimum_size = Vector2(opening_button_width, opening_button_height)
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	button.pressed.connect(callback)
+	button.pressed.connect(_queue_button_navigation.bind(callback))
 	return button
 
 
@@ -809,11 +824,11 @@ func _open_pause_menu() -> void:
 	if pause_overlay != null or not _can_open_pause_menu():
 		return
 	pause_overlay = PauseMenuScreenScene.instantiate() as PauseMenuScreen
-	pause_overlay.resume_requested.connect(_close_pause_menu)
-	pause_overlay.options_requested.connect(_show_pause_options)
-	pause_overlay.instructions_requested.connect(_show_pause_instructions)
-	pause_overlay.quit_to_main_requested.connect(_quit_to_opening_menu)
-	pause_overlay.exit_game_requested.connect(_exit_game)
+	pause_overlay.resume_requested.connect(_queue_button_navigation.bind(_close_pause_menu))
+	pause_overlay.options_requested.connect(_queue_button_navigation.bind(_show_pause_options))
+	pause_overlay.instructions_requested.connect(_queue_button_navigation.bind(_show_pause_instructions))
+	pause_overlay.quit_to_main_requested.connect(_queue_button_navigation.bind(_quit_to_opening_menu))
+	pause_overlay.exit_game_requested.connect(_queue_button_navigation.bind(_exit_game))
 	add_child(pause_overlay)
 
 
@@ -841,6 +856,7 @@ func _show_pause_options_page(show_instructions: bool) -> void:
 	if pause_options_screen != null and is_instance_valid(pause_options_screen):
 		pause_options_screen.queue_free()
 	pause_options_screen = OptionsScreenScene.instantiate() as OptionsScreen
+	pause_options_screen.button_navigation_delay = button_navigation_delay
 	pause_options_screen.back_requested.connect(_return_to_pause_menu)
 	pause_options_screen.master_volume_changed.connect(_on_master_volume_changed)
 	pause_options_screen.music_volume_changed.connect(_on_music_volume_changed)
@@ -924,21 +940,21 @@ func _build_faction_select_screen() -> Control:
 	start_button.custom_minimum_size = Vector2(240, 44)
 	start_button.disabled = selected_faction == ""
 	start_button.modulate = Color(1.18, 1.03, 0.74, 1.0) if selected_faction != "" else Color(0.62, 0.62, 0.62, 1.0)
-	start_button.pressed.connect(_on_start_match_pressed)
+	start_button.pressed.connect(_queue_button_navigation.bind(_on_start_match_pressed))
 	menu_stack.add_child(start_button)
 
 	var options_button := Button.new()
 	options_button.name = "OptionsButton"
 	options_button.text = "OPTIONS"
 	options_button.custom_minimum_size = Vector2(240, 44)
-	options_button.pressed.connect(_show_faction_options_screen)
+	options_button.pressed.connect(_queue_button_navigation.bind(_show_faction_options_screen))
 	menu_stack.add_child(options_button)
 
 	var exit_button := Button.new()
 	exit_button.name = "ExitButton"
 	exit_button.text = "EXIT GAME"
 	exit_button.custom_minimum_size = Vector2(240, 44)
-	exit_button.pressed.connect(_exit_game)
+	exit_button.pressed.connect(_queue_button_navigation.bind(_exit_game))
 	menu_stack.add_child(exit_button)
 
 	UiAssetsScript.apply_text_outline(layout)
@@ -1006,11 +1022,11 @@ func _show_strategy_screen() -> void:
 	cargo_loading_screen.visible = false
 	_set_corner_logo_visible(true)
 	var strategy_screen := StrategyScreenScene.instantiate()
-	strategy_screen.vehicle_selected.connect(_open_assignment_screen)
-	strategy_screen.reset_requested.connect(_on_reset_button_pressed)
+	strategy_screen.vehicle_selected.connect(_on_strategy_vehicle_selected)
+	strategy_screen.reset_requested.connect(_queue_button_navigation.bind(_on_reset_button_pressed))
 	strategy_screen.debug_add_news_requested.connect(_on_debug_add_news_pressed)
-	strategy_screen.debug_force_player_win_requested.connect(_on_debug_force_player_win_pressed)
-	strategy_screen.debug_force_cpu_win_requested.connect(_on_debug_force_cpu_win_pressed)
+	strategy_screen.debug_force_player_win_requested.connect(_queue_button_navigation.bind(_on_debug_force_player_win_pressed))
+	strategy_screen.debug_force_cpu_win_requested.connect(_queue_button_navigation.bind(_on_debug_force_cpu_win_pressed))
 	_set_active_screen(strategy_screen)
 	strategy_screen.setup(game_state.get_summary(), SHOW_DEBUG_ACTIONS)
 
@@ -1055,7 +1071,7 @@ func _build_launch_result_screen(result: Dictionary) -> Control:
 	continue_button.offset_top = -LAUNCH_RESULT_BUTTON_HEIGHT * 0.5
 	continue_button.offset_right = LAUNCH_RESULT_BUTTON_WIDTH * 0.5
 	continue_button.offset_bottom = LAUNCH_RESULT_BUTTON_HEIGHT * 0.5
-	continue_button.pressed.connect(_on_result_continue_pressed)
+	continue_button.pressed.connect(_queue_button_navigation.bind(_on_result_continue_pressed))
 	screen.add_child(continue_button)
 
 	UiAssetsScript.apply_text_outline(screen)
@@ -1092,12 +1108,12 @@ func _build_game_over_screen() -> Control:
 
 	var again_button := Button.new()
 	again_button.text = "Play Again" if bool(summary["player_won"]) else "Try Again"
-	again_button.pressed.connect(_on_play_again_pressed)
+	again_button.pressed.connect(_queue_button_navigation.bind(_on_play_again_pressed))
 	row.add_child(again_button)
 
 	var menu_button := Button.new()
 	menu_button.text = "Main Menu"
-	menu_button.pressed.connect(_on_main_menu_pressed)
+	menu_button.pressed.connect(_queue_button_navigation.bind(_on_main_menu_pressed))
 	row.add_child(menu_button)
 
 	UiAssetsScript.apply_text_outline(layout)
@@ -1119,12 +1135,12 @@ func _build_debug_row() -> Control:
 
 	var win_button := Button.new()
 	win_button.text = "Force Player Win"
-	win_button.pressed.connect(_on_debug_force_player_win_pressed)
+	win_button.pressed.connect(_queue_button_navigation.bind(_on_debug_force_player_win_pressed))
 	row.add_child(win_button)
 
 	var lose_button := Button.new()
 	lose_button.text = "Force CPU Win"
-	lose_button.pressed.connect(_on_debug_force_cpu_win_pressed)
+	lose_button.pressed.connect(_queue_button_navigation.bind(_on_debug_force_cpu_win_pressed))
 	row.add_child(lose_button)
 
 	return row
@@ -1134,6 +1150,10 @@ func _open_assignment_screen(vehicle_id: String) -> void:
 	_clear_active_screen()
 	_set_corner_logo_visible(true)
 	cargo_loading_screen.start_assignment(vehicle_id, game_state.moonbase.remaining_requirements.duplicate(true))
+
+
+func _on_strategy_vehicle_selected(vehicle_id: String) -> void:
+	_queue_button_navigation(_open_assignment_screen.bind(vehicle_id))
 
 
 func _on_launch_requested(vehicle_id: String, manifest: Dictionary) -> void:

@@ -51,6 +51,12 @@ const MATERIAL_TINTS := {
 		meter_character_spacing = value
 		_update_editor_meter_text()
 
+@export_category("Packing Selection Preview")
+@export_range(10, 40, 1, "suffix:px") var packing_selected_label_font_size := 18:
+	set(value):
+		packing_selected_label_font_size = value
+		_apply_packing_selected_label_style()
+
 @export_category("Back Button")
 @export_range(60.0, 400.0, 1.0, "suffix:px") var back_button_width := 140.0:
 	set(value):
@@ -82,6 +88,8 @@ var selected_shape_id := ""
 var selected_piece_id := ""
 var selected_rotation := 0
 var packing_status_text := ""
+var button_navigation_delay := 0.08
+var button_navigation_pending := false
 var moonbase_remaining_requirements: Dictionary = {}
 var piece_buttons: Dictionary = {}
 var packing_piece_buttons: Dictionary = {}
@@ -110,7 +118,7 @@ var confirm_button: Button
 var packing_piece_list: VBoxContainer
 var packing_summary_label: Label
 var packing_warning_label: Label
-var packing_selected_piece_preview: TextureRect
+var packing_selected_material_preview: TextureRect
 var packing_selected_cargo_label: Label
 var packing_info_labels: Dictionary = {}
 var packing_manifest_labels: Dictionary = {}
@@ -125,6 +133,7 @@ var meter_sets: Array[Dictionary] = []
 func _ready() -> void:
 	_apply_back_button_style()
 	_apply_meter_text_style()
+	_apply_packing_selected_label_style()
 	_apply_packing_manifest_style()
 	_apply_packing_manifest_style.call_deferred()
 	if Engine.is_editor_hint():
@@ -173,6 +182,18 @@ func _apply_meter_text_style() -> void:
 		spaced_font.base_font = UiAssetsScript.UI_FONT
 		spaced_font.spacing_glyph = meter_character_spacing
 		label.add_theme_font_override("font", spaced_font)
+	queue_redraw()
+
+
+func _apply_packing_selected_label_style() -> void:
+	var label := get_node_or_null(
+		"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingSelectedCargoLabel"
+	) as Label
+	if label == null:
+		return
+	label.label_settings = null
+	UiAssetsScript.apply_text_outline(label)
+	label.add_theme_font_size_override("font_size", packing_selected_label_font_size)
 	queue_redraw()
 
 
@@ -267,7 +288,7 @@ func _bind_scene_nodes() -> void:
 	packing_piece_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	packing_summary_label = %PackingSummaryLabel
 	packing_warning_label = %PackingWarningLabel
-	packing_selected_piece_preview = %PackingSelectedPiecePreview
+	packing_selected_material_preview = %PackingSelectedMaterialPreview
 	packing_selected_cargo_label = %PackingSelectedCargoLabel
 	packing_summary_label.visible = false
 	packing_warning_label.visible = false
@@ -275,12 +296,12 @@ func _bind_scene_nodes() -> void:
 	packing_grid_view = %PackingCargoHoldPanel
 	launch_button = %LaunchButton
 
-	%BackButton.pressed.connect(_on_back_pressed)
+	%BackButton.pressed.connect(_queue_button_navigation.bind(_on_back_pressed))
 	%ResetButton.pressed.connect(_on_reset_pressed)
-	confirm_button.pressed.connect(_on_confirm_pressed)
+	confirm_button.pressed.connect(_queue_button_navigation.bind(_on_confirm_pressed))
 	%RotateButton.pressed.connect(_rotate_selected_piece)
 	%ClearButton.pressed.connect(_on_clear_placements_pressed)
-	launch_button.pressed.connect(_on_launch_pressed)
+	launch_button.pressed.connect(_queue_button_navigation.bind(_on_launch_pressed))
 	packing_grid_view.grid_cell_clicked.connect(_on_grid_cell_clicked)
 
 	meter_sets.clear()
@@ -567,16 +588,16 @@ func _update_packing_info_labels(required_fuel: int, placed_fuel: int) -> void:
 
 func _update_packing_selected_piece_preview(selected_piece: CargoPiece) -> void:
 	if selected_piece == null:
-		packing_selected_piece_preview.texture = null
-		packing_selected_piece_preview.modulate = Color.WHITE
-		packing_selected_piece_preview.visible = false
+		packing_selected_material_preview.texture = null
+		packing_selected_material_preview.modulate = Color.WHITE
+		packing_selected_material_preview.visible = false
 		packing_selected_cargo_label.text = ""
 		packing_selected_cargo_label.visible = false
 		return
 
-	packing_selected_piece_preview.texture = UiAssetsScript.get_cargo_piece_texture(selected_piece.shape_id)
-	packing_selected_piece_preview.modulate = _get_material_tint(selected_piece.material)
-	packing_selected_piece_preview.visible = packing_selected_piece_preview.texture != null
+	packing_selected_material_preview.texture = UiAssetsScript.get_large_material_icon(selected_piece.material)
+	packing_selected_material_preview.modulate = Color.WHITE
+	packing_selected_material_preview.visible = packing_selected_material_preview.texture != null
 	packing_selected_cargo_label.text = "%s %d units" % [
 		_format_material_name(selected_piece.material),
 		selected_piece.get_payload_units(),
@@ -590,6 +611,17 @@ func _set_packing_info_text(label_key: String, text: String) -> void:
 		return
 	label.text = text
 	label.visible = text != ""
+
+
+func _queue_button_navigation(action: Callable) -> void:
+	if button_navigation_pending:
+		return
+	button_navigation_pending = true
+	if button_navigation_delay > 0.0:
+		await get_tree().create_timer(button_navigation_delay).timeout
+	if is_inside_tree() and action.is_valid():
+		action.call()
+	button_navigation_pending = false
 
 
 func _refresh_assignment_piece_button_text() -> void:
