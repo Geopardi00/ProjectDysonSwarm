@@ -13,6 +13,15 @@ func _run() -> void:
 	var screen = CargoLoadingScreenScene.instantiate()
 	root.add_child(screen)
 	await process_frame
+	if screen.capacity_label.get_theme_font_size("font_size") != 18:
+		_fail("Cargo meter labels did not use the readability font size.")
+		return
+	screen.meter_text_font_size = 20
+	screen.meter_character_spacing = 2
+	var meter_font := screen.capacity_label.get_theme_font("font") as FontVariation
+	if screen.capacity_label.get_theme_font_size("font_size") != 20 or meter_font == null or meter_font.spacing_glyph != 2:
+		_fail("Cargo meter text Inspector controls did not update the labels.")
+		return
 
 	screen.launch_requested.connect(_on_launch_requested)
 	screen.start_assignment("big_rocket")

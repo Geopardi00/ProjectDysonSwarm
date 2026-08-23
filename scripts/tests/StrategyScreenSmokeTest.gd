@@ -50,13 +50,20 @@ func _run() -> void:
 	strategy_screen.news_text_y = 90.0
 	strategy_screen.big_rocket_panel_x = 7.0
 	strategy_screen.big_rocket_stats_y = 9.0
+	strategy_screen.day_font_size = 23
+	strategy_screen.status_info_font_size = 18
+	strategy_screen.readiness_percent_font_size = 15
+	strategy_screen.news_body_font_size = 19
 	await process_frame
 	var panels := strategy_screen.get_node("Layout/Panels") as HBoxContainer
 	var status_margin := strategy_screen.get_node("Layout/Panels/StatusPanel/Margin") as MarginContainer
+	var readiness_bar := strategy_screen.get_node("Layout/Panels/StatusPanel/Margin/StatusContent/ReadinessBar") as ProgressBar
 	var news_margin := strategy_screen.get_node("Layout/Panels/NewsPanel/Margin") as MarginContainer
+	var news_scroll := strategy_screen.get_node("Layout/Panels/NewsPanel/Margin/NewsContent/NewsScroll") as ScrollContainer
 	var big_rocket_art := strategy_screen.get_node("Layout/Panels/VehiclePanel/BigRocketCard/PanelArt") as Control
 	var big_rocket_title := strategy_screen.get_node("Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content/BigRocketTitle") as Control
 	var big_rocket_stats := strategy_screen.get_node("Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content/BigRocketStats") as Control
+	var readiness_label := strategy_screen.get_node("Layout/Panels/StatusPanel/Margin/StatusContent/ReadinessLabel") as Label
 	if panels.get_theme_constant("separation") != 24:
 		_fail("Strategy screen panel spacing slider did not update the layout.")
 		return
@@ -69,6 +76,32 @@ func _run() -> void:
 		or big_rocket_stats.position.y != 379.0
 	):
 		_fail("Strategy screen vehicle panel and text sliders did not update independently.")
+		return
+	if (
+		strategy_screen.day_label.get_theme_font_size("font_size") != 23
+		or readiness_label.get_theme_font_size("font_size") != 18
+		or readiness_bar.get_theme_font_size("font_size") != 15
+		or strategy_screen.news_label.get_theme_font_size("font_size") != 19
+	):
+		_fail("Strategy screen font-size sliders did not update the preview controls.")
+		return
+	var safe_status_right := status_panel.global_position.x + status_panel.size.x + strategy_screen.status_panel_x - strategy_screen.status_content_right_inset
+	if status_margin.scale != Vector2.ONE or readiness_bar.get_global_rect().end.x > safe_status_right:
+		_fail("Strategy screen readiness bar extends beyond the status panel safe bounds.")
+		return
+	var long_news: Array[String] = []
+	for index: int in range(40):
+		long_news.append("News item %d fills the scrolling feed." % index)
+	strategy_screen.news_label.text = "\n".join(long_news)
+	await process_frame
+	if not news_scroll.get_v_scroll_bar().visible:
+		_fail("Strategy screen long news feed did not enable vertical scrolling.")
+		return
+	var safe_right := news_panel.global_position.x + news_panel.size.x + strategy_screen.news_panel_x - strategy_screen.news_feed_right_inset
+	var safe_bottom := news_panel.global_position.y + news_panel.size.y + strategy_screen.news_panel_y - strategy_screen.news_feed_bottom_inset
+	var scroll_rect := news_scroll.get_global_rect()
+	if scroll_rect.end.x > safe_right or scroll_rect.end.y > safe_bottom:
+		_fail("Strategy screen news scroll area extends beyond its configured safe bounds.")
 		return
 
 	print("Strategy screen smoke test passed.")

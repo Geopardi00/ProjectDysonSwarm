@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://b5nuaixiqv3nw"]
 
 [ext_resource type="Script" uid="uid://bh760qdg4caml" path="res://scenes/ui/StrategyScreen.gd" id="1_strategy"]
+[ext_resource type="FontFile" uid="uid://i1vysh7sha26" path="res://assets/ui/fonts/zekton/Zekton-Regular.otf" id="2_0kx2o"]
 [ext_resource type="Texture2D" uid="uid://bhab58eau625x" path="res://assets/ui/panels/empty_panel.png" id="2_status_panel"]
 [ext_resource type="Texture2D" uid="uid://v18ueb4hewi0" path="res://assets/ui/panels/empty_panel_vehicle_info_frame.png" id="3_vehicle_panel"]
 [ext_resource type="Texture2D" uid="uid://dtifx5c1gwlmy" path="res://assets/ui/vehicles/big_rocket_icon.png" id="4_big_rocket"]
@@ -19,6 +20,11 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_strategy")
+day_font_size = 18
+faction_font_size = 16
+status_info_font_size = 14
+news_title_font_size = 18
+news_body_font_size = 14
 status_panel_y = 31.0
 status_text_y = 101.0
 big_rocket_title_y = -2.0
@@ -49,12 +55,20 @@ theme_override_constants/separation = 8
 [node name="Title" type="Label" parent="Layout/Header" unique_id=778938546]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 theme_override_font_sizes/font_size = 28
 label_settings = SubResource("LabelSettings_outline")
 
 [node name="ResetButton" type="Button" parent="Layout/Header" unique_id=1797317022]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Reset Match"
 
 [node name="PanelTopSpacer" type="Control" parent="Layout" unique_id=2082400930]
@@ -92,11 +106,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 22.0
 offset_top = 132.0
-offset_right = 34.0
-offset_bottom = 137.0
+offset_right = -40.0
+offset_bottom = -39.0
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(0.80200756, 0.83734417)
 theme_override_constants/margin_left = 28
 theme_override_constants/margin_top = 28
 theme_override_constants/margin_right = 28
@@ -109,44 +122,68 @@ theme_override_constants/separation = 10
 [node name="DayLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=2094968988]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
+theme_override_font_sizes/font_size = 18
 text = "Day 0"
-label_settings = SubResource("LabelSettings_outline")
 
 [node name="FactionLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=1380148249]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
+theme_override_font_sizes/font_size = 16
 text = "Player faction"
-label_settings = SubResource("LabelSettings_outline")
 
 [node name="ReadinessLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=830871272]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
+theme_override_font_sizes/font_size = 14
 text = "Moonbase readiness"
-label_settings = SubResource("LabelSettings_outline")
 
 [node name="ReadinessBar" type="ProgressBar" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=1948301634]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_font_sizes/font_size = 16
 
 [node name="LaunchesLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=1575240056]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
+theme_override_font_sizes/font_size = 14
 text = "Launches"
-label_settings = SubResource("LabelSettings_outline")
 
 [node name="NeedsLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=1458594468]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
+theme_override_font_sizes/font_size = 14
 text = "Needs"
-label_settings = SubResource("LabelSettings_outline")
 autowrap_mode = 3
 
 [node name="CompetitorsLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=2071732319]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
+theme_override_font_sizes/font_size = 14
 text = "Competitors"
-label_settings = SubResource("LabelSettings_outline")
 autowrap_mode = 3
 
 [node name="VehiclePanel" type="HBoxContainer" parent="Layout/Panels" unique_id=936157256]
@@ -203,6 +240,10 @@ layout_mode = 0
 offset_top = 3.0
 offset_right = 244.0
 offset_bottom = 31.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 theme_override_font_sizes/font_size = 22
 text = "Big Rocket"
 label_settings = SubResource("LabelSettings_outline")
@@ -243,6 +284,10 @@ offset_left = 38.0
 offset_top = 30.0
 offset_right = 258.0
 offset_bottom = 54.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Payload: 500"
 label_settings = SubResource("LabelSettings_outline")
 
@@ -253,6 +298,10 @@ offset_left = 38.0
 offset_top = 55.0
 offset_right = 258.0
 offset_bottom = 79.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Fuel needed: 200"
 label_settings = SubResource("LabelSettings_outline")
 
@@ -263,6 +312,10 @@ offset_left = 38.0
 offset_top = 76.0
 offset_right = 258.0
 offset_bottom = 100.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Days to launch: 30"
 label_settings = SubResource("LabelSettings_outline")
 
@@ -273,6 +326,10 @@ offset_left = 38.0
 offset_top = 99.0
 offset_right = 258.0
 offset_bottom = 123.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Cargo Grid: 5x10"
 label_settings = SubResource("LabelSettings_outline")
 
@@ -288,6 +345,10 @@ offset_left = 32.0
 offset_top = 522.0
 offset_right = 212.0
 offset_bottom = 564.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Select Vehicle"
 
 [node name="ShuttleCard" type="Control" parent="Layout/Panels/VehiclePanel" unique_id=61266544]
@@ -338,6 +399,10 @@ layout_mode = 0
 offset_top = 2.0
 offset_right = 244.0
 offset_bottom = 30.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 theme_override_font_sizes/font_size = 22
 text = "Space Shuttle"
 label_settings = SubResource("LabelSettings_outline")
@@ -378,6 +443,10 @@ offset_left = 38.0
 offset_top = 29.0
 offset_right = 258.0
 offset_bottom = 53.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Payload: 320"
 label_settings = SubResource("LabelSettings_outline")
 
@@ -388,6 +457,10 @@ offset_left = 38.0
 offset_top = 52.0
 offset_right = 258.0
 offset_bottom = 76.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Fuel needed: 120"
 label_settings = SubResource("LabelSettings_outline")
 
@@ -398,6 +471,10 @@ offset_left = 38.0
 offset_top = 73.0
 offset_right = 258.0
 offset_bottom = 97.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Days to launch: 20"
 label_settings = SubResource("LabelSettings_outline")
 
@@ -408,6 +485,10 @@ offset_left = 38.0
 offset_top = 97.0
 offset_right = 258.0
 offset_bottom = 121.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Cargo Grid: 4x8"
 label_settings = SubResource("LabelSettings_outline")
 
@@ -423,6 +504,10 @@ offset_left = 32.0
 offset_top = 522.0
 offset_right = 212.0
 offset_bottom = 564.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Select Vehicle"
 
 [node name="SpinLaunchCard" type="Control" parent="Layout/Panels/VehiclePanel" unique_id=689646704]
@@ -473,6 +558,10 @@ layout_mode = 0
 offset_top = 3.0
 offset_right = 244.0
 offset_bottom = 31.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 theme_override_font_sizes/font_size = 22
 text = "SpinLaunch"
 label_settings = SubResource("LabelSettings_outline")
@@ -514,6 +603,10 @@ offset_left = 38.0
 offset_top = 29.0
 offset_right = 258.0
 offset_bottom = 53.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Payload: 20"
 label_settings = SubResource("LabelSettings_outline")
 
@@ -524,6 +617,10 @@ offset_left = 38.0
 offset_top = 52.0
 offset_right = 258.0
 offset_bottom = 76.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Fuel needed: 0"
 label_settings = SubResource("LabelSettings_outline")
 
@@ -534,6 +631,10 @@ offset_left = 38.0
 offset_top = 75.0
 offset_right = 258.0
 offset_bottom = 99.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Days to launch: 5"
 label_settings = SubResource("LabelSettings_outline")
 
@@ -544,6 +645,10 @@ offset_left = 38.0
 offset_top = 99.0
 offset_right = 258.0
 offset_bottom = 123.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Cargo Grid: 1x2"
 label_settings = SubResource("LabelSettings_outline")
 
@@ -559,6 +664,10 @@ offset_left = 32.0
 offset_top = 522.0
 offset_right = 212.0
 offset_bottom = 564.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Select Vehicle"
 
 [node name="NewsPanel" type="Control" parent="Layout/Panels" unique_id=1031578001]
@@ -587,11 +696,10 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 22.0
 offset_top = 132.0
-offset_right = 34.0
-offset_bottom = 137.0
+offset_right = -40.0
+offset_bottom = -39.0
 grow_horizontal = 2
 grow_vertical = 2
-scale = Vector2(0.80200756, 0.83734417)
 theme_override_constants/margin_left = 28
 theme_override_constants/margin_top = 28
 theme_override_constants/margin_right = 28
@@ -603,9 +711,12 @@ theme_override_constants/separation = 10
 
 [node name="NewsTitle" type="Label" parent="Layout/Panels/NewsPanel/Margin/NewsContent" unique_id=1001051413]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
+theme_override_font_sizes/font_size = 18
 text = "News feed"
-label_settings = SubResource("LabelSettings_outline")
 
 [node name="NewsScroll" type="ScrollContainer" parent="Layout/Panels/NewsPanel/Margin/NewsContent" unique_id=1648969419]
 layout_mode = 2
@@ -615,11 +726,14 @@ horizontal_scroll_mode = 0
 
 [node name="NewsLabel" type="Label" parent="Layout/Panels/NewsPanel/Margin/NewsContent/NewsScroll" unique_id=891385377]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(360, 0)
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
+theme_override_font_sizes/font_size = 14
 text = "News"
-label_settings = SubResource("LabelSettings_outline")
 autowrap_mode = 3
 
 [node name="DebugRow" type="HBoxContainer" parent="Layout" unique_id=848875156]
@@ -629,20 +743,36 @@ theme_override_constants/separation = 8
 
 [node name="DebugLabel" type="Label" parent="Layout/DebugRow" unique_id=142278201]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Debug:"
 label_settings = SubResource("LabelSettings_outline")
 
 [node name="DebugAddNewsButton" type="Button" parent="Layout/DebugRow" unique_id=1093203959]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Add Test News"
 
 [node name="DebugForcePlayerWinButton" type="Button" parent="Layout/DebugRow" unique_id=138862066]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Force Player Win"
 
 [node name="DebugForceCpuWinButton" type="Button" parent="Layout/DebugRow" unique_id=572570606]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Force CPU Win"

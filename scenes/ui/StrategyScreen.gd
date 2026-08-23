@@ -25,6 +25,32 @@ const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 		side_panel_width = value
 		_queue_layout_preview()
 
+@export_category("Status and News Font Sizes")
+@export_range(10, 64, 1, "suffix:px") var day_font_size := 40:
+	set(value):
+		day_font_size = value
+		_queue_layout_preview()
+@export_range(10, 48, 1, "suffix:px") var faction_font_size := 24:
+	set(value):
+		faction_font_size = value
+		_queue_layout_preview()
+@export_range(10, 40, 1, "suffix:px") var status_info_font_size := 16:
+	set(value):
+		status_info_font_size = value
+		_queue_layout_preview()
+@export_range(10, 40, 1, "suffix:px") var readiness_percent_font_size := 16:
+	set(value):
+		readiness_percent_font_size = value
+		_queue_layout_preview()
+@export_range(10, 48, 1, "suffix:px") var news_title_font_size := 20:
+	set(value):
+		news_title_font_size = value
+		_queue_layout_preview()
+@export_range(10, 40, 1, "suffix:px") var news_body_font_size := 16:
+	set(value):
+		news_body_font_size = value
+		_queue_layout_preview()
+
 @export_category("Status Panel")
 @export_range(-150.0, 150.0, 1.0, "suffix:px") var status_panel_x := 0.0:
 	set(value):
@@ -41,6 +67,14 @@ const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 @export_range(0.0, 180.0, 1.0, "suffix:px") var status_text_y := 82.0:
 	set(value):
 		status_text_y = value
+		_queue_layout_preview()
+@export_range(20.0, 120.0, 1.0, "suffix:px") var status_content_right_inset := 40.0:
+	set(value):
+		status_content_right_inset = value
+		_queue_layout_preview()
+@export_range(20.0, 160.0, 1.0, "suffix:px") var status_content_bottom_inset := 70.0:
+	set(value):
+		status_content_bottom_inset = value
 		_queue_layout_preview()
 
 @export_category("Big Rocket Panel")
@@ -162,6 +196,14 @@ const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 	set(value):
 		news_text_y = value
 		_queue_layout_preview()
+@export_range(20.0, 120.0, 1.0, "suffix:px") var news_feed_right_inset := 40.0:
+	set(value):
+		news_feed_right_inset = value
+		_queue_layout_preview()
+@export_range(20.0, 160.0, 1.0, "suffix:px") var news_feed_bottom_inset := 70.0:
+	set(value):
+		news_feed_bottom_inset = value
+		_queue_layout_preview()
 
 @onready var day_label: Label = %DayLabel
 @onready var faction_label: Label = %FactionLabel
@@ -249,11 +291,18 @@ func _apply_layout_settings() -> void:
 	if news_panel != null:
 		news_panel.custom_minimum_size.x = side_panel_width
 	_set_stretched_offsets(status_art, Vector4.ZERO, Vector2(status_panel_x, status_panel_y))
-	_set_stretched_offsets(status_margin, Vector4(22.0, 82.0, 34.0, 87.0), Vector2(status_panel_x, status_panel_y))
 	_set_stretched_offsets(news_art, Vector4.ZERO, Vector2(news_panel_x, news_panel_y))
-	_set_stretched_offsets(news_margin, Vector4(22.0, 82.0, 34.0, 87.0), Vector2(news_panel_x, news_panel_y))
-	_set_text_margin_position(status_margin, status_panel_x + status_text_x, status_panel_y + status_text_y)
-	_set_text_margin_position(news_margin, news_panel_x + news_text_x, news_panel_y + news_text_y)
+	_set_status_content_bounds(status_margin)
+	_set_news_feed_bounds(news_margin)
+	_apply_font_size("Layout/Panels/StatusPanel/Margin/StatusContent/DayLabel", day_font_size)
+	_apply_font_size("Layout/Panels/StatusPanel/Margin/StatusContent/FactionLabel", faction_font_size)
+	_apply_font_size("Layout/Panels/StatusPanel/Margin/StatusContent/ReadinessLabel", status_info_font_size)
+	_apply_font_size("Layout/Panels/StatusPanel/Margin/StatusContent/LaunchesLabel", status_info_font_size)
+	_apply_font_size("Layout/Panels/StatusPanel/Margin/StatusContent/NeedsLabel", status_info_font_size)
+	_apply_font_size("Layout/Panels/StatusPanel/Margin/StatusContent/CompetitorsLabel", status_info_font_size)
+	_apply_font_size("Layout/Panels/StatusPanel/Margin/StatusContent/ReadinessBar", readiness_percent_font_size)
+	_apply_font_size("Layout/Panels/NewsPanel/Margin/NewsContent/NewsTitle", news_title_font_size)
+	_apply_font_size("Layout/Panels/NewsPanel/Margin/NewsContent/NewsScroll/NewsLabel", news_body_font_size)
 	_apply_vehicle_panel_layout(
 		"BigRocketCard",
 		Vector2(big_rocket_panel_x, big_rocket_panel_y),
@@ -292,6 +341,7 @@ func _apply_layout_settings() -> void:
 	var layout := get_node_or_null("Layout") as VBoxContainer
 	if layout != null:
 		layout.queue_sort()
+	UiAssetsScript.apply_text_outline(self)
 	queue_redraw()
 
 
@@ -302,6 +352,41 @@ func _set_text_margin_position(margin: MarginContainer, x: float, y: float) -> v
 	margin.offset_top = y
 	margin.offset_right = x + 12.0
 	margin.offset_bottom = y + 5.0
+
+
+func _set_news_feed_bounds(margin: MarginContainer) -> void:
+	if margin == null:
+		return
+	margin.scale = Vector2.ONE
+	margin.offset_left = news_panel_x + news_text_x
+	margin.offset_top = news_panel_y + news_text_y
+	margin.offset_right = news_panel_x - news_feed_right_inset
+	margin.offset_bottom = news_panel_y - news_feed_bottom_inset
+
+
+func _set_status_content_bounds(margin: MarginContainer) -> void:
+	if margin == null:
+		return
+	margin.scale = Vector2.ONE
+	margin.offset_left = status_panel_x + status_text_x
+	margin.offset_top = status_panel_y + status_text_y
+	margin.offset_right = status_panel_x - status_content_right_inset
+	margin.offset_bottom = status_panel_y - status_content_bottom_inset
+
+
+func _apply_font_size(node_path: String, font_size: Variant) -> void:
+	# Exported @tool properties initialize in declaration order. During a hot
+	# reload, a setter can refresh the preview before later properties have a
+	# value, so skip those temporary Nil values until initialization completes.
+	if font_size == null:
+		return
+	var control := get_node_or_null(node_path) as Control
+	if control == null:
+		return
+	var resolved_size := int(font_size)
+	if control is Label:
+		(control as Label).label_settings = null
+	control.add_theme_font_size_override("font_size", resolved_size)
 
 
 func _apply_vehicle_panel_layout(

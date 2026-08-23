@@ -1,3 +1,4 @@
+@tool
 extends Control
 class_name CargoLoadingScreen
 
@@ -11,6 +12,14 @@ const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 const MATERIAL_ICON_SIZE := Vector2i(24, 24)
 const PACKING_PIECE_SLOT_SIZE := Vector2(320, 180)
 const ASSIGNMENT_PREVIEW_TINT_ALPHA := 0.68
+const METER_LABEL_PATHS: Array[String] = [
+	"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters/CapacityLabel",
+	"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters/FuelLabel",
+	"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters/WarningLabel",
+	"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters/CapacityLabel",
+	"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters/FuelLabel",
+	"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters/WarningLabel",
+]
 const MATERIAL_TINTS := {
 	"fuel": Color("#E8452E"),
 	"carbon_metals": Color("#4F5B66"),
@@ -20,6 +29,16 @@ const MATERIAL_TINTS := {
 	"rare_metals": Color("#8F55D9"),
 	"propellant": Color("#19B7B2"),
 }
+
+@export_category("Meter Text Readability")
+@export_range(10, 32, 1, "suffix:px") var meter_text_font_size := 18:
+	set(value):
+		meter_text_font_size = value
+		_update_editor_meter_text()
+@export_range(-2, 6, 1, "suffix:px") var meter_character_spacing := 0:
+	set(value):
+		meter_character_spacing = value
+		_update_editor_meter_text()
 
 enum CargoPhase { ASSIGNMENT, PACKING }
 
@@ -71,10 +90,34 @@ var meter_sets: Array[Dictionary] = []
 
 
 func _ready() -> void:
+	_apply_meter_text_style()
+	if Engine.is_editor_hint():
+		return
 	_bind_scene_nodes()
 	_build_material_buttons()
 	UiAssetsScript.apply_text_outline(self)
 	visible = false
+
+
+func _update_editor_meter_text() -> void:
+	if not is_inside_tree():
+		return
+	_apply_meter_text_style()
+
+
+func _apply_meter_text_style() -> void:
+	for label_path: String in METER_LABEL_PATHS:
+		var label := get_node_or_null(label_path) as Label
+		if label == null:
+			continue
+		label.label_settings = null
+		UiAssetsScript.apply_text_outline(label)
+		label.add_theme_font_size_override("font_size", meter_text_font_size)
+		var spaced_font := FontVariation.new()
+		spaced_font.base_font = UiAssetsScript.UI_FONT
+		spaced_font.spacing_glyph = meter_character_spacing
+		label.add_theme_font_override("font", spaced_font)
+	queue_redraw()
 
 
 func start_assignment(vehicle_id: String, remaining_requirements: Dictionary = {}) -> void:
