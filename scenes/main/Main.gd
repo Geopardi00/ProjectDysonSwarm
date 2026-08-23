@@ -5,6 +5,8 @@ const GameDataScript := preload("res://scripts/data/GameData.gd")
 const LaunchManagerScript := preload("res://scripts/launch/LaunchManager.gd")
 const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 const StrategyScreenScene := preload("res://scenes/ui/StrategyScreen.tscn")
+const OPENING_CUTSCENE_PATH := "res://assets/cutscene/0001-0360.ogv"
+const CUTSCENE_EXPLOSION_SOUND_PATH := "res://audio/sfx/explosion.wav"
 
 const SHOW_DEBUG_ACTIONS := true
 const CORNER_LOGO_SIZE := Vector2(272, 62.5)
@@ -50,6 +52,9 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 		opening_button_height = value
 		_update_editor_opening_preview()
 
+@export_category("Opening Cutscene")
+@export_range(0.0, 15.0, 0.05, "suffix:s") var cutscene_explosion_time := 2.0
+
 @onready var root_margin: MarginContainer = $RootMargin
 @onready var cargo_loading_screen: Control = %CargoLoadingScreen
 
@@ -62,6 +67,10 @@ var last_launch_result: Dictionary = {}
 var music_player: AudioStreamPlayer
 var background_music_streams: Array[AudioStream] = []
 var current_music_index := 0
+var opening_cutscene_layer: Control
+var opening_cutscene_player: VideoStreamPlayer
+var cutscene_explosion_player: AudioStreamPlayer
+var cutscene_explosion_played := false
 
 
 func _ready() -> void:
@@ -152,6 +161,88 @@ func _show_faction_select() -> void:
 	_set_active_screen(_build_faction_select_screen())
 
 
+func _show_opening_cutscene() -> void:
+	if opening_cutscene_layer != null:
+		return
+	var cutscene_stream := load(OPENING_CUTSCENE_PATH) as VideoStream
+	if cutscene_stream == null:
+		push_warning("Could not load opening cutscene: %s" % OPENING_CUTSCENE_PATH)
+		_show_faction_select()
+		return
+
+	opening_cutscene_layer = Control.new()
+	opening_cutscene_layer.name = "OpeningCutscene"
+	opening_cutscene_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	opening_cutscene_layer.mouse_filter = Control.MOUSE_FILTER_STOP
+
+	var black_background := ColorRect.new()
+	black_background.set_anchors_preset(Control.PRESET_FULL_RECT)
+	black_background.color = Color.BLACK
+	black_background.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	opening_cutscene_layer.add_child(black_background)
+
+	opening_cutscene_player = VideoStreamPlayer.new()
+	opening_cutscene_player.name = "Video"
+	opening_cutscene_player.set_anchors_preset(Control.PRESET_FULL_RECT)
+	opening_cutscene_player.expand = true
+	opening_cutscene_player.stream = cutscene_stream
+	opening_cutscene_player.finished.connect(_finish_opening_cutscene)
+	opening_cutscene_layer.add_child(opening_cutscene_player)
+
+	var explosion_stream := load(CUTSCENE_EXPLOSION_SOUND_PATH) as AudioStream
+	if explosion_stream != null:
+		cutscene_explosion_player = AudioStreamPlayer.new()
+		cutscene_explosion_player.name = "ExplosionSound"
+		cutscene_explosion_player.stream = explosion_stream
+		opening_cutscene_layer.add_child(cutscene_explosion_player)
+	else:
+		push_warning("Could not load cutscene explosion sound: %s" % CUTSCENE_EXPLOSION_SOUND_PATH)
+	cutscene_explosion_played = false
+
+	var skip_hint := Label.new()
+	skip_hint.text = "ESC TO SKIP"
+	skip_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	skip_hint.anchor_left = 0.0
+	skip_hint.anchor_right = 1.0
+	skip_hint.anchor_top = 1.0
+	skip_hint.anchor_bottom = 1.0
+	skip_hint.offset_left = 24.0
+	skip_hint.offset_top = -52.0
+	skip_hint.offset_right = -24.0
+	skip_hint.offset_bottom = -20.0
+	skip_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	UiAssetsScript.apply_text_outline(skip_hint)
+	UiAssetsScript.apply_semibold_font(skip_hint)
+	opening_cutscene_layer.add_child(skip_hint)
+
+	add_child(opening_cutscene_layer)
+	opening_cutscene_player.play()
+
+
+func _finish_opening_cutscene() -> void:
+	if opening_cutscene_layer == null:
+		return
+	if opening_cutscene_player != null:
+		opening_cutscene_player.stop()
+	opening_cutscene_layer.queue_free()
+	opening_cutscene_layer = null
+	opening_cutscene_player = null
+	cutscene_explosion_player = null
+	cutscene_explosion_played = false
+	_show_faction_select()
+
+
+func _process(_delta: float) -> void:
+	if opening_cutscene_player == null or cutscene_explosion_player == null:
+		return
+	if cutscene_explosion_played or not opening_cutscene_player.is_playing():
+		return
+	if opening_cutscene_player.stream_position < cutscene_explosion_time:
+		return
+	cutscene_explosion_played = true
+	cutscene_explosion_player.play()
+
+
 func _show_opening_screen() -> void:
 	cargo_loading_screen.visible = false
 	_set_corner_logo_visible(false)
@@ -159,7 +250,11 @@ func _show_opening_screen() -> void:
 
 
 func _build_opening_screen() -> Control:
+	var screen := Control.new()
+	screen.name = "OpeningScreen"
+
 	var layout := VBoxContainer.new()
+	layout.name = "Layout"
 	layout.set_anchors_preset(Control.PRESET_FULL_RECT)
 	layout.offset_top = opening_vertical_offset
 	layout.offset_bottom = opening_vertical_offset
@@ -167,6 +262,7 @@ func _build_opening_screen() -> Control:
 	layout.add_theme_constant_override("separation", int(opening_title_button_spacing))
 
 	var logo := TextureRect.new()
+	logo.name = "TitleLogo"
 	logo.custom_minimum_size = Vector2(opening_title_width, opening_title_height)
 	logo.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	logo.texture = UiAssetsScript.get_title_logo()
@@ -176,15 +272,17 @@ func _build_opening_screen() -> Control:
 	layout.add_child(logo)
 
 	var start_button := Button.new()
+	start_button.name = "StartButton"
 	start_button.text = "START"
 	start_button.custom_minimum_size = Vector2(opening_button_width, opening_button_height)
 	start_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	start_button.pressed.connect(_show_faction_select)
+	start_button.pressed.connect(_show_opening_cutscene)
 	layout.add_child(start_button)
 
 	UiAssetsScript.apply_text_outline(layout)
 	UiAssetsScript.apply_semibold_font(start_button)
-	return layout
+	screen.add_child(layout)
+	return screen
 
 
 func _update_editor_opening_preview() -> void:
@@ -206,6 +304,12 @@ func _update_editor_opening_preview() -> void:
 	start_button.custom_minimum_size = Vector2(opening_button_width, opening_button_height)
 	UiAssetsScript.apply_text_outline(layout)
 	UiAssetsScript.apply_semibold_font(start_button)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if opening_cutscene_layer != null and event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		_finish_opening_cutscene()
 
 
 func _build_faction_select_screen() -> Control:
