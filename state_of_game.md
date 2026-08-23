@@ -1,6 +1,6 @@
 # Project Dyson Swarm - State of Game
 
-Last updated: 2026-05-22
+Last updated: 2026-08-23
 
 ## Current Prototype Status
 
@@ -8,7 +8,8 @@ Milestones 1-5 are implemented and Milestone 7 has an editor-driven art/UI pass 
 
 Working loop:
 
-- Opening screen shows the title logo over the space background before faction select.
+- Opening screen shows the title logo over the space background with Start, Options, and Exit Game buttons.
+- Options provides persistent live master-volume and brightness controls plus a scrollable How To Play page.
 - Faction select screen lets the player choose USA, China, or EU before starting.
 - Strategy screen shows day, player faction, readiness, moonbase needs, CPU progress, news, and vehicle selection.
 - Vehicle selection supports Big Rocket, Space Shuttle, and SpinLaunch.
@@ -82,6 +83,7 @@ Currently wired:
 - Cargo piece images on editor-placeable assignment slots and packing lists.
 - Empty panel textures for vehicle info / available cargo style panels.
 - Vehicle-specific cargo hold panel textures for Big Rocket, Space Shuttle, and SpinLaunch.
+- Options and How To Play share the centered `panel_options.png` artwork at 85% opacity over the normal space background.
 - Strategy screen, cargo loading screen, cargo grid view, and cargo hold panel are now scene-backed for easier 2D editor placement.
 - Strategy vehicle cards have an editor-tuned layout pass with manually placed titles, icons, stat labels, and buttons.
 - Launch result and game-over screens now lower their text content below the upper-left logo overlay.
@@ -96,6 +98,14 @@ This centralizes asset paths and provides text outline styling.
 
 ## Current Screen Layouts
 
+Opening / options:
+
+- Opening buttons are stacked Start, Options, and Exit Game beneath the title logo.
+- The opening title, button dimensions, and gaps have Inspector controls with matching editor/runtime placement.
+- Options changes Master-bus volume and fullscreen brightness live and saves them to `user://settings.cfg`.
+- How To Play opens inside the same options panel and documents the faction-neutral goal, cargo flow, controls, and launch outcomes.
+- Back and `Esc` return from instructions to Options and from Options to the opening menu.
+
 Faction select:
 
 - Reached after the opening screen start button.
@@ -108,16 +118,20 @@ Faction select:
 
 Strategy / vehicle selection:
 
-- Left panel: day, player status, moonbase needs, CPU competitors, news.
-- Right area: three vehicle cards.
+- Left panel: day, player status, readiness, moonbase needs, and CPU competitors.
+- Center area: three independently positionable vehicle cards.
+- Right panel: independently scrollable news feed constrained inside the panel's dark content area.
 - Vehicle card names, icons, and stat labels are manually placeable in `StrategyScreen.tscn`.
 - Vehicle stat text uses separate labels: payload, fuel needed, days to launch, cargo grid.
+- Status, news, and vehicle-card text sizes and positions have Inspector controls with live editor preview.
 - `StrategyVehicleIconPlacementPreview.tscn` exists as a small tuning scene for vehicle-card placement.
 - Current vehicle-card pass uses fixed/manual placement to keep icon, stat, and button positions stable.
 
 Assignment:
 
+- The Back button is an independent top-right overlay, so its width, height, font size, and margins can be tuned without moving assignment content.
 - Left panel: selected piece image preview, copy buttons, payload/fuel meters, material buttons, per-material assigned-unit labels.
+- Payload, fuel, and warning text have Inspector-controlled font size and character spacing for readability.
 - Selected assignment piece preview tints to the selected copy's assigned material color at 68% opacity.
 - Material buttons and their assigned-unit labels are hand-placeable in the 2D editor.
 - Center: moonbase needs and manually placeable cargo hold panel.
@@ -161,6 +175,8 @@ Run from the project root:
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/CargoSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/CargoUiSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/StrategyScreenSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/OpeningCutsceneSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/OptionsMenuSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --quit-after 1 res://scenes/main/Main.tscn
 ```
 
@@ -169,9 +185,14 @@ Latest checks passed before this checkpoint:
 - Cargo smoke test passed.
 - Cargo UI smoke test passed.
 - Strategy screen smoke test passed.
+- Opening cutscene smoke test passed.
+- Options menu smoke test passed.
 - Main scene loaded headless during this visual pass.
 - 2026-05-22 checkpoint: Cargo UI smoke test passed after cargo grid display mirroring.
 - 2026-05-22 checkpoint: Main scene loaded headless after launch-result and game-over layout tuning.
+- 2026-08-23 checkpoint: Added the persistent Options/How To Play flow, Start/Options/Exit opening stack, fullscreen brightness control, and opening-layout parity.
+- 2026-08-23 checkpoint: Split strategy status and news into left/right panels, constrained scrolling and readiness content, and added editor-previewable positioning/font controls.
+- 2026-08-23 checkpoint: Improved cargo text/icon readability and separated the Back button from the cargo content layout; its Inspector controls now apply in editor and runtime without shifting assignment content.
 
 ## Suggested Next Steps
 

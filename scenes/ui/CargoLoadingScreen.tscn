@@ -51,6 +51,8 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_cargo_loading")
 meter_character_spacing = 2
+back_button_height = 42.0
+back_button_font_size = 20
 
 [node name="Background" type="TextureRect" parent="." unique_id=1203145530]
 layout_mode = 1
@@ -82,6 +84,7 @@ layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="Header" type="HBoxContainer" parent="RootMargin/Layout" unique_id=4795930]
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_override_constants/separation = 12
 
@@ -91,13 +94,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_font_sizes/font_size = 22
 label_settings = SubResource("LabelSettings_outline")
-
-[node name="BackButton" type="Button" parent="RootMargin/Layout/Header" unique_id=985904312]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(140, 48)
-layout_mode = 2
-theme_override_font_sizes/font_size = 21
-text = "Back"
 
 [node name="AssignmentPanel" type="HBoxContainer" parent="RootMargin/Layout" unique_id=2051998405]
 unique_name_in_owner = true
@@ -1220,3 +1216,19 @@ offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
 text = "Rotate Selected"
+
+[node name="BackButton" type="Button" parent="." unique_id=985904312]
+unique_name_in_owner = true
+z_index = 100
+custom_minimum_size = Vector2(140, 42)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -164.0
+offset_top = 12.0
+offset_right = -24.0
+offset_bottom = 54.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 20
+text = "Back"

@@ -40,6 +40,28 @@ const MATERIAL_TINTS := {
 		meter_character_spacing = value
 		_update_editor_meter_text()
 
+@export_category("Back Button")
+@export_range(60.0, 400.0, 1.0, "suffix:px") var back_button_width := 140.0:
+	set(value):
+		back_button_width = value
+		_apply_back_button_style()
+@export_range(24.0, 120.0, 1.0, "suffix:px") var back_button_height := 40.0:
+	set(value):
+		back_button_height = value
+		_apply_back_button_style()
+@export_range(10, 48, 1, "suffix:px") var back_button_font_size := 21:
+	set(value):
+		back_button_font_size = value
+		_apply_back_button_style()
+@export_range(0.0, 100.0, 1.0, "suffix:px") var back_button_top_margin := 12.0:
+	set(value):
+		back_button_top_margin = value
+		_apply_back_button_style()
+@export_range(0.0, 100.0, 1.0, "suffix:px") var back_button_right_margin := 24.0:
+	set(value):
+		back_button_right_margin = value
+		_apply_back_button_style()
+
 enum CargoPhase { ASSIGNMENT, PACKING }
 
 var assignment: CargoAssignment
@@ -90,6 +112,7 @@ var meter_sets: Array[Dictionary] = []
 
 
 func _ready() -> void:
+	_apply_back_button_style()
 	_apply_meter_text_style()
 	if Engine.is_editor_hint():
 		return
@@ -103,6 +126,26 @@ func _update_editor_meter_text() -> void:
 	if not is_inside_tree():
 		return
 	_apply_meter_text_style()
+
+
+func _apply_back_button_style() -> void:
+	var back_button := get_node_or_null("BackButton") as Button
+	if back_button == null:
+		return
+	# GUI input follows sibling order as well as drawing order. Keep this overlay
+	# after the full-screen RootMargin so it receives clicks before the margin.
+	if back_button.get_parent() == self:
+		move_child(back_button, get_child_count() - 1)
+	back_button.custom_minimum_size = Vector2(back_button_width, back_button_height)
+	back_button.add_theme_font_size_override("font_size", back_button_font_size)
+	back_button.anchor_left = 1.0
+	back_button.anchor_top = 0.0
+	back_button.anchor_right = 1.0
+	back_button.anchor_bottom = 0.0
+	back_button.offset_left = -back_button_right_margin - back_button_width
+	back_button.offset_top = back_button_top_margin
+	back_button.offset_right = -back_button_right_margin
+	back_button.offset_bottom = back_button_top_margin + back_button_height
 
 
 func _apply_meter_text_style() -> void:

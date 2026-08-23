@@ -3,6 +3,7 @@ extends SceneTree
 const CargoLoadingScreenScene := preload("res://scenes/ui/CargoLoadingScreen.tscn")
 
 var did_emit_launch := false
+var did_emit_cancel := false
 
 
 func _init() -> void:
@@ -13,6 +14,29 @@ func _run() -> void:
 	var screen = CargoLoadingScreenScene.instantiate()
 	root.add_child(screen)
 	await process_frame
+	var back_button := screen.get_node("BackButton") as Button
+	if screen.get_child(screen.get_child_count() - 1) != back_button:
+		_fail("Cargo Back button overlay did not have top GUI input priority.")
+		return
+	screen.assignment_cancelled.connect(func() -> void: did_emit_cancel = true)
+	back_button.pressed.emit()
+	if not did_emit_cancel:
+		_fail("Cargo Back button did not emit assignment cancellation.")
+		return
+	var assignment_panel := screen.get_node("RootMargin/Layout/AssignmentPanel") as HBoxContainer
+	var assignment_y_before_resize: float = assignment_panel.position.y
+	screen.back_button_width = 196.0
+	screen.back_button_height = 52.0
+	screen.back_button_font_size = 25
+	await process_frame
+	if back_button.size != Vector2(196.0, 52.0) or back_button.get_theme_font_size("font_size") != 25:
+		_fail("Cargo Back button Inspector controls did not update the runtime button.")
+		return
+	screen.back_button_height = 80.0
+	await process_frame
+	if not is_equal_approx(assignment_panel.position.y, assignment_y_before_resize):
+		_fail("Resizing the independent Cargo Back button moved the assignment panel.")
+		return
 	if screen.capacity_label.get_theme_font_size("font_size") != 18:
 		_fail("Cargo meter labels did not use the readability font size.")
 		return
