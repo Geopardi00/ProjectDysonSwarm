@@ -16,6 +16,13 @@ const BUTTON_HOVER_SOUND := preload("res://audio/sfx/button_hover.wav")
 const DEFAULT_SETTINGS_PATH := "user://settings.cfg"
 const SETTINGS_SAVE_DELAY := 0.25
 const UI_SOUND_CONNECTED_META := &"dyson_ui_sound_connected"
+const UI_TWEEN_CONNECTED_META := &"dyson_ui_tween_connected"
+const UI_TWEEN_SKIP_META := &"skip_global_button_tween"
+const UI_TWEEN_BASE_SCALE_META := &"dyson_ui_tween_base_scale"
+const UI_TWEEN_BASE_COLOR_META := &"dyson_ui_tween_base_color"
+const UI_TWEEN_ACTIVE_META := &"dyson_ui_active_tween"
+const UI_TWEEN_HOVERED_META := &"dyson_ui_tween_hovered"
+const UI_TWEEN_DOWN_META := &"dyson_ui_tween_down"
 const MUSIC_BUS_NAME := &"Music"
 const SFX_BUS_NAME := &"SFX"
 
@@ -103,6 +110,15 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 	set(value):
 		background_music_volume_percent = value
 		_apply_background_music_volume()
+
+@export_category("Button Tween")
+@export_range(1.0, 1.2, 0.01) var button_hover_scale := 1.04
+@export_range(0.8, 1.0, 0.01) var button_press_scale := 0.96
+@export_range(0.0, 0.5, 0.01, "suffix:s") var button_hover_duration := 0.10
+@export_range(0.0, 0.5, 0.01, "suffix:s") var button_press_duration := 0.05
+@export_range(0.0, 0.5, 0.01, "suffix:s") var button_release_duration := 0.09
+@export_range(1.0, 1.5, 0.01) var button_hover_brightness := 1.08
+@export_range(0.5, 1.0, 0.01) var button_press_brightness := 0.88
 
 @onready var root_margin: MarginContainer = $RootMargin
 @onready var cargo_loading_screen: Control = %CargoLoadingScreen
@@ -203,11 +219,126 @@ func _on_tree_node_added_for_ui_sounds(node: Node) -> void:
 
 
 func _register_button_ui_sounds(button: Button) -> void:
-	if button.has_meta(UI_SOUND_CONNECTED_META):
+	if not button.has_meta(UI_SOUND_CONNECTED_META):
+		button.set_meta(UI_SOUND_CONNECTED_META, true)
+		button.mouse_entered.connect(_on_ui_button_hovered.bind(button))
+		button.button_down.connect(_play_button_click_sound)
+	_register_button_tween(button)
+
+
+func _register_button_tween(button: Button) -> void:
+	if button.has_meta(UI_TWEEN_CONNECTED_META) or button.has_meta(UI_TWEEN_SKIP_META):
 		return
-	button.set_meta(UI_SOUND_CONNECTED_META, true)
-	button.mouse_entered.connect(_on_ui_button_hovered.bind(button))
-	button.button_down.connect(_play_button_click_sound)
+	button.set_meta(UI_TWEEN_CONNECTED_META, true)
+	button.set_meta(UI_TWEEN_BASE_SCALE_META, button.scale)
+	button.set_meta(UI_TWEEN_BASE_COLOR_META, button.self_modulate)
+	button.set_meta(UI_TWEEN_HOVERED_META, false)
+	button.set_meta(UI_TWEEN_DOWN_META, false)
+	button.resized.connect(_update_ui_button_pivot.bind(button))
+	button.mouse_entered.connect(_on_ui_button_tween_mouse_entered.bind(button))
+	button.mouse_exited.connect(_on_ui_button_tween_mouse_exited.bind(button))
+	button.button_down.connect(_on_ui_button_tween_down.bind(button))
+	button.button_up.connect(_on_ui_button_tween_up.bind(button))
+	button.visibility_changed.connect(_on_ui_button_tween_visibility_changed.bind(button))
+	_update_ui_button_pivot(button)
+
+
+func _update_ui_button_pivot(button: Button) -> void:
+	if not is_instance_valid(button):
+		return
+	var centered_pivot := button.size * 0.5
+	var pivot_delta := centered_pivot - button.pivot_offset
+	var base_scale := button.get_meta(UI_TWEEN_BASE_SCALE_META, button.scale) as Vector2
+	# Some authored controls already have a non-unit scale. Compensate their
+	# layout position so changing the pivot does not move them at rest.
+	button.position -= Vector2(
+		(1.0 - base_scale.x) * pivot_delta.x,
+		(1.0 - base_scale.y) * pivot_delta.y
+	)
+	button.pivot_offset = centered_pivot
+
+
+func _on_ui_button_tween_mouse_entered(button: Button) -> void:
+	button.set_meta(UI_TWEEN_HOVERED_META, true)
+	if not bool(button.get_meta(UI_TWEEN_DOWN_META, false)):
+		_animate_ui_button(button, button_hover_scale, button_hover_brightness, button_hover_duration)
+
+
+func _on_ui_button_tween_mouse_exited(button: Button) -> void:
+	button.set_meta(UI_TWEEN_HOVERED_META, false)
+	if not bool(button.get_meta(UI_TWEEN_DOWN_META, false)):
+		_animate_ui_button(button, 1.0, 1.0, button_hover_duration)
+
+
+func _on_ui_button_tween_down(button: Button) -> void:
+	button.set_meta(UI_TWEEN_DOWN_META, true)
+	_animate_ui_button(button, button_press_scale, button_press_brightness, button_press_duration)
+
+
+func _on_ui_button_tween_up(button: Button) -> void:
+	button.set_meta(UI_TWEEN_DOWN_META, false)
+	var is_hovered := bool(button.get_meta(UI_TWEEN_HOVERED_META, false)) or button.is_hovered()
+	_animate_ui_button(
+		button,
+		button_hover_scale if is_hovered else 1.0,
+		button_hover_brightness if is_hovered else 1.0,
+		button_release_duration
+	)
+
+
+func _on_ui_button_tween_visibility_changed(button: Button) -> void:
+	if not button.is_visible_in_tree():
+		_reset_ui_button_tween(button)
+
+
+func _animate_ui_button(button: Button, scale_multiplier: float, brightness: float, duration: float) -> void:
+	if not _can_animate_ui_button(button):
+		_reset_ui_button_tween(button)
+		return
+	_kill_ui_button_tween(button)
+	var base_scale := button.get_meta(UI_TWEEN_BASE_SCALE_META, Vector2.ONE) as Vector2
+	var base_color := button.get_meta(UI_TWEEN_BASE_COLOR_META, Color.WHITE) as Color
+	var target_color := Color(
+		base_color.r * brightness,
+		base_color.g * brightness,
+		base_color.b * brightness,
+		base_color.a
+	)
+	var tween := button.create_tween()
+	tween.set_parallel(true)
+	tween.set_trans(Tween.TRANS_QUAD)
+	tween.set_ease(Tween.EASE_OUT)
+	tween.tween_property(button, "scale", base_scale * scale_multiplier, duration)
+	tween.tween_property(button, "self_modulate", target_color, duration)
+	button.set_meta(UI_TWEEN_ACTIVE_META, tween)
+
+
+func _can_animate_ui_button(button: Button) -> bool:
+	return (
+		is_instance_valid(button)
+		and not button.disabled
+		and button.is_visible_in_tree()
+		and not button.has_meta(UI_TWEEN_SKIP_META)
+	)
+
+
+func _reset_ui_button_tween(button: Button) -> void:
+	if not is_instance_valid(button) or not button.has_meta(UI_TWEEN_CONNECTED_META):
+		return
+	_kill_ui_button_tween(button)
+	button.scale = button.get_meta(UI_TWEEN_BASE_SCALE_META, Vector2.ONE) as Vector2
+	button.self_modulate = button.get_meta(UI_TWEEN_BASE_COLOR_META, Color.WHITE) as Color
+	button.set_meta(UI_TWEEN_HOVERED_META, false)
+	button.set_meta(UI_TWEEN_DOWN_META, false)
+
+
+func _kill_ui_button_tween(button: Button) -> void:
+	if not button.has_meta(UI_TWEEN_ACTIVE_META):
+		return
+	var active_tween = button.get_meta(UI_TWEEN_ACTIVE_META)
+	if active_tween is Tween and active_tween.is_valid():
+		active_tween.kill()
+	button.remove_meta(UI_TWEEN_ACTIVE_META)
 
 
 func _on_ui_button_hovered(button: Button) -> void:
@@ -529,10 +660,18 @@ func _show_opening_screen() -> void:
 
 
 func _show_options_screen() -> void:
+	_open_options_screen(_show_opening_screen)
+
+
+func _show_faction_options_screen() -> void:
+	_open_options_screen(_show_faction_select)
+
+
+func _open_options_screen(back_callback: Callable) -> void:
 	cargo_loading_screen.visible = false
 	_set_corner_logo_visible(false)
 	var options_screen := OptionsScreenScene.instantiate() as OptionsScreen
-	options_screen.back_requested.connect(_show_opening_screen)
+	options_screen.back_requested.connect(back_callback)
 	options_screen.master_volume_changed.connect(_on_master_volume_changed)
 	options_screen.music_volume_changed.connect(_on_music_volume_changed)
 	options_screen.sfx_volume_changed.connect(_on_sfx_volume_changed)
@@ -736,6 +875,7 @@ func _quit_to_opening_menu() -> void:
 
 func _build_faction_select_screen() -> Control:
 	var layout := Control.new()
+	layout.name = "FactionSelectScreen"
 	layout.set_anchors_preset(Control.PRESET_FULL_RECT)
 
 	var prompt := Label.new()
@@ -765,25 +905,46 @@ func _build_faction_select_screen() -> Control:
 		var button := _build_faction_logo_button(faction_id)
 		faction_row.add_child(button)
 
+	var menu_stack := VBoxContainer.new()
+	menu_stack.name = "FactionMenuButtons"
+	menu_stack.anchor_left = 0.5
+	menu_stack.anchor_right = 0.5
+	menu_stack.anchor_top = 0.5
+	menu_stack.anchor_bottom = 0.5
+	menu_stack.offset_left = -120.0
+	menu_stack.offset_top = 164.0
+	menu_stack.offset_right = 120.0
+	menu_stack.offset_bottom = 312.0
+	menu_stack.add_theme_constant_override("separation", 8)
+	layout.add_child(menu_stack)
+
 	var start_button := Button.new()
+	start_button.name = "StartButton"
 	start_button.text = "START"
-	start_button.anchor_left = 0.5
-	start_button.anchor_right = 0.5
-	start_button.anchor_top = 0.5
-	start_button.anchor_bottom = 0.5
-	start_button.offset_left = -120.0
-	start_button.offset_top = 164.0
-	start_button.offset_right = 120.0
-	start_button.offset_bottom = 208.0
 	start_button.custom_minimum_size = Vector2(240, 44)
 	start_button.disabled = selected_faction == ""
 	start_button.modulate = Color(1.18, 1.03, 0.74, 1.0) if selected_faction != "" else Color(0.62, 0.62, 0.62, 1.0)
 	start_button.pressed.connect(_on_start_match_pressed)
-	layout.add_child(start_button)
+	menu_stack.add_child(start_button)
+
+	var options_button := Button.new()
+	options_button.name = "OptionsButton"
+	options_button.text = "OPTIONS"
+	options_button.custom_minimum_size = Vector2(240, 44)
+	options_button.pressed.connect(_show_faction_options_screen)
+	menu_stack.add_child(options_button)
+
+	var exit_button := Button.new()
+	exit_button.name = "ExitButton"
+	exit_button.text = "EXIT GAME"
+	exit_button.custom_minimum_size = Vector2(240, 44)
+	exit_button.pressed.connect(_exit_game)
+	menu_stack.add_child(exit_button)
 
 	UiAssetsScript.apply_text_outline(layout)
 	UiAssetsScript.apply_semibold_font(prompt)
-	UiAssetsScript.apply_semibold_font(start_button)
+	for button: Node in menu_stack.get_children():
+		UiAssetsScript.apply_semibold_font(button as Control)
 	return layout
 
 

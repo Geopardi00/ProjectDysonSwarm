@@ -12,6 +12,7 @@ const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 const MATERIAL_ICON_SIZE := Vector2i(24, 24)
 const PACKING_PIECE_SLOT_SIZE := Vector2(320, 180)
 const ASSIGNMENT_PREVIEW_TINT_ALPHA := 0.68
+const UI_TWEEN_SKIP_META := &"skip_global_button_tween"
 const METER_LABEL_PATHS: Array[String] = [
 	"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters/CapacityLabel",
 	"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters/FuelLabel",
@@ -307,10 +308,12 @@ func _build_material_buttons() -> void:
 		if button == null:
 			button = Button.new()
 			button.name = _get_material_button_name(material)
+			button.set_meta(UI_TWEEN_SKIP_META, true)
 			button.position = Vector2(float(index % 2) * 115.0, float(index / 2) * 32.0)
 			button.size = Vector2(110, 30)
 			material_buttons.add_child(button)
 		button.text = _format_material_name(material)
+		button.set_meta(UI_TWEEN_SKIP_META, true)
 		button.icon = _get_fixed_size_material_icon(material)
 		button.expand_icon = false
 		button.add_theme_constant_override("icon_max_width", 30)

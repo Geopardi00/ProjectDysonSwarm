@@ -108,6 +108,27 @@ func _run() -> void:
 	if main.corner_logo == null or not main.corner_logo.visible:
 		_fail("Faction selection did not restore the corner logo.")
 		return
+	var faction_menu := main.active_screen.get_node_or_null("FactionMenuButtons") as VBoxContainer
+	var expected_faction_buttons := ["StartButton", "OptionsButton", "ExitButton"]
+	if faction_menu == null or faction_menu.get_child_count() != expected_faction_buttons.size():
+		_fail("Faction selection did not provide Start, Options, and Exit buttons.")
+		return
+	for index: int in range(expected_faction_buttons.size()):
+		if faction_menu.get_child(index).name != expected_faction_buttons[index]:
+			_fail("Faction menu buttons were not ordered Start, Options, Exit.")
+			return
+	main._on_faction_button_pressed("China")
+	main._show_faction_options_screen()
+	await process_frame
+	if not main.active_screen is OptionsScreen:
+		_fail("Faction Options button did not open OptionsScreen.")
+		return
+	(main.active_screen as OptionsScreen).back_requested.emit()
+	await process_frame
+	var returned_start := main.active_screen.get_node_or_null("FactionMenuButtons/StartButton") as Button
+	if main.active_screen.name != "FactionSelectScreen" or main.selected_faction != "China" or returned_start == null or returned_start.disabled:
+		_fail("Options Back did not restore the selected faction screen.")
+		return
 
 	main.settings_loaded = false
 	_remove_test_settings()
