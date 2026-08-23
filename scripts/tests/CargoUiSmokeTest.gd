@@ -24,6 +24,48 @@ func _run() -> void:
 		_fail("Cargo Back button did not emit assignment cancellation.")
 		return
 	var assignment_panel := screen.get_node("RootMargin/Layout/AssignmentPanel") as HBoxContainer
+	var assignment_info_margin := screen.get_node("RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin") as MarginContainer
+	var packing_info_margin := screen.get_node("RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin") as MarginContainer
+	if (
+		not packing_info_margin.scale.is_equal_approx(assignment_info_margin.scale)
+		or not packing_info_margin.position.is_equal_approx(assignment_info_margin.position)
+	):
+		_fail("Packing information typography did not match the assignment information transform.")
+		return
+	var assignment_fuel_button := screen.get_node(
+		"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons/FuelButton"
+	) as Button
+	var packing_fuel_button := screen.get_node(
+		"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingManifestFuelButton"
+	) as Button
+	var packing_fuel_status := screen.get_node(
+		"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingFuelStatusLabel"
+	) as Label
+	var assignment_capacity := screen.get_node(
+		"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters/CapacityLabel"
+	) as Label
+	var packing_capacity := screen.get_node(
+		"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters/CapacityLabel"
+	) as Label
+	if packing_fuel_button.scale != Vector2.ONE or packing_fuel_button.size != assignment_fuel_button.size:
+		_fail("Packing manifest buttons did not match assignment button sizing (%s versus %s, scale %s)." % [
+			packing_fuel_button.size,
+			assignment_fuel_button.size,
+			packing_fuel_button.scale,
+		])
+		return
+	if packing_fuel_button.position != assignment_fuel_button.get_parent().position + assignment_fuel_button.position:
+		_fail("Packing manifest button placement did not match the assignment material block.")
+		return
+	if packing_fuel_button.icon == null:
+		_fail("Packing manifest icon was not integrated into its button.")
+		return
+	if packing_capacity.position != assignment_capacity.position or packing_capacity.size != assignment_capacity.size:
+		_fail("Packing meter geometry did not match the assignment meter geometry.")
+		return
+	if packing_fuel_status.get_theme_font_size("font_size") != screen.meter_text_font_size:
+		_fail("Packing fuel warning did not match the assignment meter text style.")
+		return
 	var assignment_y_before_resize: float = assignment_panel.position.y
 	screen.back_button_width = 196.0
 	screen.back_button_height = 52.0

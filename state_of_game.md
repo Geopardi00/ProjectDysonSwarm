@@ -9,8 +9,8 @@ Milestones 1-5 are implemented and Milestone 7 has an editor-driven art/UI pass 
 Working loop:
 
 - Opening screen shows the title logo over the space background with Start, Options, and Exit Game buttons.
-- Options provides persistent live master-volume and brightness controls plus a scrollable How To Play page.
-- Faction select screen lets the player choose USA, China, or EU before starting.
+- Options provides persistent live master, music, SFX, and brightness controls plus a scrollable How To Play page.
+- Faction select screen lets the player choose USA, China, or EU before starting and also provides Options and Exit Game controls.
 - Strategy screen shows day, player faction, readiness, moonbase needs, CPU progress, news, and vehicle selection.
 - Vehicle selection supports Big Rocket, Space Shuttle, and SpinLaunch.
 - Cargo loading has two locked phases:
@@ -84,6 +84,10 @@ Currently wired:
 - Empty panel textures for vehicle info / available cargo style panels.
 - Vehicle-specific cargo hold panel textures for Big Rocket, Space Shuttle, and SpinLaunch.
 - Options and How To Play share the centered `panel_options.png` artwork at 85% opacity over the normal space background.
+- Background music and sound effects use separate Music and SFX audio buses with independently persisted Options sliders.
+- Buttons play shared hover/click sounds and use global hover/press tweens; cargo material-assignment buttons intentionally keep sounds without tweens.
+- The opening glitch effect has a synchronized glitch sound.
+- Gameplay screens provide an `Esc` pause overlay with Resume, Options, Quit to Menu, and Exit Game controls.
 - Strategy screen, cargo loading screen, cargo grid view, and cargo hold panel are now scene-backed for easier 2D editor placement.
 - Strategy vehicle cards have an editor-tuned layout pass with manually placed titles, icons, stat labels, and buttons.
 - Launch result and game-over screens now lower their text content below the upper-left logo overlay.
@@ -102,19 +106,27 @@ Opening / options:
 
 - Opening buttons are stacked Start, Options, and Exit Game beneath the title logo.
 - The opening title, button dimensions, and gaps have Inspector controls with matching editor/runtime placement.
-- Options changes Master-bus volume and fullscreen brightness live and saves them to `user://settings.cfg`.
+- Options changes master, music, and SFX volume plus fullscreen brightness live and saves them to `user://settings.cfg`.
 - How To Play opens inside the same options panel and documents the faction-neutral goal, cargo flow, controls, and launch outcomes.
 - Back and `Esc` return from instructions to Options and from Options to the opening menu.
 
 Faction select:
 
 - Reached after the opening screen start button.
-- Shows the upper-left title logo, centered faction logos, a small "Select faction" prompt, and a start button below.
+- Shows the upper-left title logo, centered faction logos, a small "Select faction" prompt, and a Start/Options/Exit Game stack below.
 - No faction is selected by default.
 - Start is disabled/greyed out until the player selects a faction.
 - Hovering a faction logo slightly enlarges, brightens, and halos it.
 - The selected faction keeps the same highlight treatment.
+- Options returns to faction selection without losing the current faction choice.
 - Faction choice is flavor only for now.
+
+Global button feedback:
+
+- All standard buttons receive center-pivoted hover/press scale and brightness tweens, including buttons created dynamically at runtime.
+- Tween scale, brightness, and timing values are exposed on the Main scene under the Button Tween Inspector category.
+- Existing authored button scales are preserved without shifting their resting positions.
+- Assignment material buttons (Fuel, Carbon Metals, Silicon, Copper, Electronics, Rare Metals, and Propellant) are excluded from tweens so their dense layout remains stable.
 
 Strategy / vehicle selection:
 
@@ -144,7 +156,8 @@ Packing:
 
 - Left panel: selected piece preview, payload/fuel meters, and a lower placed-manifest section.
 - Selected packing piece preview tints to the selected piece's assigned material color at 68% opacity and shows material/unit text below it.
-- Packing placed manifest uses separate icon, material-name, and placed-unit nodes per material.
+- Packing meter labels, bars, warning text, material buttons, icons, unit labels, and row spacing mirror the assignment panel geometry for consistent typography and alignment.
+- Packing material icons are integrated into their buttons so icon/text alignment matches assignment; the scene's former overlay icon nodes remain hidden.
 - Center: manually placeable cargo hold panel with functional clickable packing overlay.
 - Right panel: assigned pieces to place render as centered, tinted block previews with no visible text.
 - Cargo hold grid display is horizontally mirrored to match the side-panel piece orientation while keeping the underlying grid data unchanged.
@@ -177,6 +190,9 @@ Run from the project root:
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/StrategyScreenSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/OpeningCutsceneSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/OptionsMenuSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/PauseMenuSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/UiSoundSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/ButtonTweenSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --quit-after 1 res://scenes/main/Main.tscn
 ```
 
@@ -187,12 +203,18 @@ Latest checks passed before this checkpoint:
 - Strategy screen smoke test passed.
 - Opening cutscene smoke test passed.
 - Options menu smoke test passed.
+- Pause menu smoke test passed.
+- UI sound smoke test passed.
+- Button tween smoke test passed.
 - Main scene loaded headless during this visual pass.
 - 2026-05-22 checkpoint: Cargo UI smoke test passed after cargo grid display mirroring.
 - 2026-05-22 checkpoint: Main scene loaded headless after launch-result and game-over layout tuning.
 - 2026-08-23 checkpoint: Added the persistent Options/How To Play flow, Start/Options/Exit opening stack, fullscreen brightness control, and opening-layout parity.
 - 2026-08-23 checkpoint: Split strategy status and news into left/right panels, constrained scrolling and readiness content, and added editor-previewable positioning/font controls.
 - 2026-08-23 checkpoint: Improved cargo text/icon readability and separated the Back button from the cargo content layout; its Inspector controls now apply in editor and runtime without shifting assignment content.
+- 2026-08-23 checkpoint: Added Music/SFX routing and Options sliders, global UI hover/click sounds, the opening glitch sound, and an `Esc` gameplay pause/options flow.
+- 2026-08-23 checkpoint: Added Options/Exit Game to faction selection and global hover/press button tweens with stable handling for pre-scaled controls.
+- 2026-08-23 checkpoint: Matched packing meter, warning, manifest-button, icon, unit-label, and row geometry to the assignment panel.
 
 ## Suggested Next Steps
 

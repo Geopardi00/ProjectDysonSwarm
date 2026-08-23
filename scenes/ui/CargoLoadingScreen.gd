@@ -20,6 +20,16 @@ const METER_LABEL_PATHS: Array[String] = [
 	"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters/CapacityLabel",
 	"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters/FuelLabel",
 	"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters/WarningLabel",
+	"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingFuelStatusLabel",
+]
+const MANIFEST_NODE_NAMES: Array[String] = [
+	"Fuel",
+	"CarbonMetals",
+	"Silicon",
+	"Copper",
+	"Electronics",
+	"RareMetals",
+	"Propellant",
 ]
 const MATERIAL_TINTS := {
 	"fuel": Color("#E8452E"),
@@ -115,6 +125,8 @@ var meter_sets: Array[Dictionary] = []
 func _ready() -> void:
 	_apply_back_button_style()
 	_apply_meter_text_style()
+	_apply_packing_manifest_style()
+	_apply_packing_manifest_style.call_deferred()
 	if Engine.is_editor_hint():
 		return
 	_bind_scene_nodes()
@@ -162,6 +174,55 @@ func _apply_meter_text_style() -> void:
 		spaced_font.spacing_glyph = meter_character_spacing
 		label.add_theme_font_override("font", spaced_font)
 	queue_redraw()
+
+
+func _apply_packing_manifest_style() -> void:
+	var assignment_materials := get_node_or_null(
+		"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons"
+	) as Control
+	var packing_content := get_node_or_null(
+		"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent"
+	) as Control
+	if assignment_materials == null or packing_content == null:
+		return
+	var assignment_meters := get_node_or_null(
+		"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters"
+	) as Control
+	var packing_meters := get_node_or_null(
+		"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingMeters"
+	) as Control
+	if assignment_meters != null and packing_meters != null:
+		packing_meters.position = assignment_meters.position
+		packing_meters.size = assignment_meters.size
+		for meter_node_name: String in ["CapacityLabel", "PayloadBar", "FuelLabel", "FuelBar"]:
+			var source_meter_control := assignment_meters.get_node_or_null(meter_node_name) as Control
+			var target_meter_control := packing_meters.get_node_or_null(meter_node_name) as Control
+			if source_meter_control != null and target_meter_control != null:
+				target_meter_control.position = source_meter_control.position
+				target_meter_control.size = source_meter_control.size
+		var source_warning := assignment_meters.get_node_or_null("WarningLabel") as Label
+		var target_warning := packing_content.get_node_or_null("PackingFuelStatusLabel") as Label
+		if source_warning != null and target_warning != null:
+			target_warning.position = assignment_meters.position + source_warning.position
+			target_warning.size = source_warning.size
+	for node_name: String in MANIFEST_NODE_NAMES:
+		var source_button := assignment_materials.get_node_or_null("%sButton" % node_name) as Button
+		var source_amount := assignment_materials.get_node_or_null("%sAmountLabel" % node_name) as Label
+		var target_button := packing_content.get_node_or_null("PackingManifest%sButton" % node_name) as Button
+		var target_icon := packing_content.get_node_or_null("PackingManifest%sIcon" % node_name) as TextureRect
+		var target_amount := packing_content.get_node_or_null("PackingManifest%sLabel" % node_name) as Label
+		if source_button == null or source_amount == null or target_button == null or target_amount == null:
+			continue
+		target_button.scale = Vector2.ONE
+		target_button.position = assignment_materials.position + source_button.position
+		target_button.size = source_button.size
+		target_amount.position = assignment_materials.position + source_amount.position
+		target_amount.size = source_amount.size
+		if target_icon != null:
+			target_button.icon = target_icon.texture
+			target_button.expand_icon = false
+			target_button.add_theme_constant_override("icon_max_width", 30)
+			target_icon.visible = false
 
 
 func start_assignment(vehicle_id: String, remaining_requirements: Dictionary = {}) -> void:
@@ -283,13 +344,15 @@ func _bind_packing_info_labels() -> void:
 	}
 	for material: String in GameDataScript.MATERIALS:
 		var button := packing_manifest_buttons.get(material, null) as Button
-		if button != null:
-			button.icon = null
-			button.expand_icon = false
-			button.focus_mode = Control.FOCUS_NONE
 		var icon_rect := packing_manifest_icons.get(material, null) as TextureRect
+		if button != null:
+			button.icon = _get_fixed_size_material_icon(material)
+			button.expand_icon = false
+			button.add_theme_constant_override("icon_max_width", 30)
+			button.focus_mode = Control.FOCUS_NONE
 		if icon_rect != null:
 			icon_rect.texture = _get_fixed_size_material_icon(material)
+			icon_rect.visible = false
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
