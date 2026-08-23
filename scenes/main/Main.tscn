@@ -134,8 +134,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 45.0
-offset_bottom = 45.0
+offset_top = 77.0
+offset_bottom = 77.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 0
@@ -150,7 +150,12 @@ texture = ExtResource("4_title_logo")
 expand_mode = 2
 stretch_mode = 5
 
-[node name="StartButton" type="Button" parent="EditorOpeningPreview/Layout" unique_id=384786634]
+[node name="ButtonStack" type="VBoxContainer" parent="EditorOpeningPreview/Layout"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/separation = 8
+
+[node name="StartButton" type="Button" parent="EditorOpeningPreview/Layout/ButtonStack"]
 custom_minimum_size = Vector2(141, 24)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -160,6 +165,28 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = SubResource("FontVariation_1rhdn")
 text = "START"
+
+[node name="OptionsButton" type="Button" parent="EditorOpeningPreview/Layout/ButtonStack"]
+custom_minimum_size = Vector2(141, 24)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = SubResource("FontVariation_1rhdn")
+text = "OPTIONS"
+
+[node name="ExitButton" type="Button" parent="EditorOpeningPreview/Layout/ButtonStack"]
+custom_minimum_size = Vector2(141, 24)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = SubResource("FontVariation_1rhdn")
+text = "EXIT GAME"
 
 [connection signal="pressed" from="RootMargin/Layout/Buttons/BigRocketButton" to="." method="_on_big_rocket_button_pressed"]
 [connection signal="pressed" from="RootMargin/Layout/Buttons/ShuttleButton" to="." method="_on_shuttle_button_pressed"]

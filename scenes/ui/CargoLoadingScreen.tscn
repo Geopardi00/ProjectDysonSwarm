@@ -72,7 +72,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/margin_left = 24
-theme_override_constants/margin_top = 24
+theme_override_constants/margin_top = 0
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 24
 
@@ -94,7 +94,9 @@ label_settings = SubResource("LabelSettings_outline")
 
 [node name="BackButton" type="Button" parent="RootMargin/Layout/Header" unique_id=985904312]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 48)
 layout_mode = 2
+theme_override_font_sizes/font_size = 21
 text = "Back"
 
 [node name="AssignmentPanel" type="HBoxContainer" parent="RootMargin/Layout" unique_id=2051998405]

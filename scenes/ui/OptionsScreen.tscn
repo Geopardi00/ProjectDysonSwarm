@@ -1,0 +1,196 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/OptionsScreen.gd" id="1_options"]
+[ext_resource type="Texture2D" path="res://assets/ui/backgrounds/ui_bg_space_loading_1920x1080.png" id="2_background"]
+[ext_resource type="Texture2D" path="res://assets/ui/panels/panel_options.png" id="3_panel"]
+[ext_resource type="FontFile" path="res://assets/ui/fonts/zekton/Zekton-Regular.otf" id="4_font"]
+
+[node name="OptionsScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_options")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="PanelCenter" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Control" parent="PanelCenter"]
+custom_minimum_size = Vector2(814, 781)
+layout_mode = 2
+
+[node name="PanelArt" type="TextureRect" parent="PanelCenter/Panel"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ContentMargin" type="MarginContainer" parent="PanelCenter/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 54.0
+offset_top = 102.0
+offset_right = -54.0
+offset_bottom = -48.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="OptionsPage" type="VBoxContainer" parent="PanelCenter/Panel/ContentMargin"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="OptionsTitle" type="Label" parent="PanelCenter/Panel/ContentMargin/OptionsPage"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 32
+text = "OPTIONS"
+horizontal_alignment = 1
+
+[node name="TopSpacer" type="Control" parent="PanelCenter/Panel/ContentMargin/OptionsPage"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+
+[node name="VolumeRow" type="HBoxContainer" parent="PanelCenter/Panel/ContentMargin/OptionsPage"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="VolumeLabel" type="Label" parent="PanelCenter/Panel/ContentMargin/OptionsPage/VolumeRow"]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "VOLUME"
+vertical_alignment = 1
+
+[node name="VolumeSlider" type="HSlider" parent="PanelCenter/Panel/ContentMargin/OptionsPage/VolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(400, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 100.0
+step = 1.0
+value = 100.0
+
+[node name="VolumeValueLabel" type="Label" parent="PanelCenter/Panel/ContentMargin/OptionsPage/VolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "100%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="BrightnessRow" type="HBoxContainer" parent="PanelCenter/Panel/ContentMargin/OptionsPage"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="BrightnessLabel" type="Label" parent="PanelCenter/Panel/ContentMargin/OptionsPage/BrightnessRow"]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "BRIGHTNESS"
+vertical_alignment = 1
+
+[node name="BrightnessSlider" type="HSlider" parent="PanelCenter/Panel/ContentMargin/OptionsPage/BrightnessRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(400, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 50.0
+max_value = 150.0
+step = 1.0
+value = 100.0
+
+[node name="BrightnessValueLabel" type="Label" parent="PanelCenter/Panel/ContentMargin/OptionsPage/BrightnessRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "100%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ButtonSpacer" type="Control" parent="PanelCenter/Panel/ContentMargin/OptionsPage"]
+custom_minimum_size = Vector2(0, 70)
+layout_mode = 2
+
+[node name="HowToPlayButton" type="Button" parent="PanelCenter/Panel/ContentMargin/OptionsPage"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "HOW TO PLAY"
+
+[node name="OptionsBackButton" type="Button" parent="PanelCenter/Panel/ContentMargin/OptionsPage"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 44)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "BACK"
+
+[node name="InstructionsPage" type="VBoxContainer" parent="PanelCenter/Panel/ContentMargin"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="InstructionsTitle" type="Label" parent="PanelCenter/Panel/ContentMargin/InstructionsPage"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 30
+text = "HOW TO PLAY"
+horizontal_alignment = 1
+
+[node name="InstructionsScroll" type="ScrollContainer" parent="PanelCenter/Panel/ContentMargin/InstructionsPage"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="InstructionsLabel" type="Label" parent="PanelCenter/Panel/ContentMargin/InstructionsPage/InstructionsScroll"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(670, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "GOAL\nReach 100% moonbase readiness before competing factions.\n\nSTRATEGY\nSelect a launch vehicle based on payload capacity, fuel requirement, launch duration, and cargo-grid size.\n\nASSIGN CARGO\nChoose cargo-piece copies and assign fuel or construction materials to them. Include enough fuel for the selected vehicle, then confirm the assignment.\n\nPACK THE VEHICLE\nSelect an assigned piece and fit it into the cargo grid. Empty grid spaces are allowed.\n\nCONTROLS\n• Left-click an empty grid cell to place the selected piece.\n• Left-click a placed piece to pick it up and move it.\n• Right-click a placed piece to remove it from the grid.\n• Press R or use the Rotate button to rotate the selected piece.\n\nLAUNCH RESULTS\nSuccessful launches deliver placed non-fuel materials to the moonbase. Fuel does not increase readiness. Too little placed fuel causes a crash: the cargo is lost and time still advances."
+autowrap_mode = 3
+
+[node name="InstructionsBackButton" type="Button" parent="PanelCenter/Panel/ContentMargin/InstructionsPage"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 44)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "BACK"

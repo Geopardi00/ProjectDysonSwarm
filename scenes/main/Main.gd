@@ -5,8 +5,12 @@ const GameDataScript := preload("res://scripts/data/GameData.gd")
 const LaunchManagerScript := preload("res://scripts/launch/LaunchManager.gd")
 const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 const StrategyScreenScene := preload("res://scenes/ui/StrategyScreen.tscn")
+const OptionsScreenScene := preload("res://scenes/ui/OptionsScreen.tscn")
+const OPENING_GLITCH_SHADER := preload("res://assets/shaders/opening_glitch.gdshader")
 const OPENING_CUTSCENE_PATH := "res://assets/cutscene/0001-0360.ogv"
 const CUTSCENE_EXPLOSION_SOUND_PATH := "res://audio/sfx/explosion.wav"
+const DEFAULT_SETTINGS_PATH := "user://settings.cfg"
+const SETTINGS_SAVE_DELAY := 0.25
 
 const SHOW_DEBUG_ACTIONS := true
 const CORNER_LOGO_SIZE := Vector2(272, 62.5)
@@ -51,8 +55,13 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 	set(value):
 		opening_button_height = value
 		_update_editor_opening_preview()
+@export_range(0.0, 80.0, 1.0, "suffix:px") var opening_menu_button_spacing := 8.0:
+	set(value):
+		opening_menu_button_spacing = value
+		_update_editor_opening_preview()
 
 @export_category("Opening Cutscene")
+@export_range(0.0, 2.0, 0.05, "suffix:s") var opening_glitch_duration := 0.4
 @export_range(0.0, 15.0, 0.05, "suffix:s") var cutscene_explosion_time := 2.0
 
 @onready var root_margin: MarginContainer = $RootMargin
@@ -67,10 +76,18 @@ var last_launch_result: Dictionary = {}
 var music_player: AudioStreamPlayer
 var background_music_streams: Array[AudioStream] = []
 var current_music_index := 0
+var opening_glitch_layer: ColorRect
 var opening_cutscene_layer: Control
 var opening_cutscene_player: VideoStreamPlayer
 var cutscene_explosion_player: AudioStreamPlayer
 var cutscene_explosion_played := false
+var settings_file_path := DEFAULT_SETTINGS_PATH
+var master_volume_percent := 100.0
+var brightness_percent := 100.0
+var settings_save_timer: Timer
+var brightness_layer: CanvasLayer
+var brightness_filter: ColorRect
+var settings_loaded := false
 
 
 func _ready() -> void:
@@ -80,7 +97,12 @@ func _ready() -> void:
 	var editor_preview := get_node_or_null("EditorOpeningPreview") as Control
 	if editor_preview != null:
 		editor_preview.visible = false
+	_create_settings_save_timer()
+	_load_settings()
+	_apply_master_volume()
 	_add_scene_background()
+	_add_brightness_filter()
+	_apply_brightness()
 	_add_corner_logo()
 	_start_background_music()
 	game_state = GameState.new()
@@ -94,6 +116,81 @@ func _ready() -> void:
 
 	_clear_root_margin()
 	_show_opening_screen()
+
+
+func _exit_tree() -> void:
+	if not Engine.is_editor_hint() and settings_loaded:
+		_save_settings()
+
+
+func _create_settings_save_timer() -> void:
+	settings_save_timer = Timer.new()
+	settings_save_timer.name = "SettingsSaveTimer"
+	settings_save_timer.one_shot = true
+	settings_save_timer.wait_time = SETTINGS_SAVE_DELAY
+	settings_save_timer.timeout.connect(_save_settings)
+	add_child(settings_save_timer)
+
+
+func _load_settings() -> void:
+	var config := ConfigFile.new()
+	var error := config.load(settings_file_path)
+	if error != OK and error != ERR_FILE_NOT_FOUND:
+		push_warning("Could not load settings from %s (error %d)." % [settings_file_path, error])
+	master_volume_percent = clampf(float(config.get_value("audio", "master_volume_percent", 100.0)), 0.0, 100.0)
+	brightness_percent = clampf(float(config.get_value("display", "brightness_percent", 100.0)), 50.0, 150.0)
+	settings_loaded = true
+
+
+func _queue_settings_save() -> void:
+	if settings_save_timer != null:
+		settings_save_timer.start()
+
+
+func _save_settings() -> void:
+	var config := ConfigFile.new()
+	config.set_value("audio", "master_volume_percent", master_volume_percent)
+	config.set_value("display", "brightness_percent", brightness_percent)
+	var error := config.save(settings_file_path)
+	if error != OK:
+		push_warning("Could not save settings to %s (error %d)." % [settings_file_path, error])
+
+
+func _apply_master_volume() -> void:
+	var master_bus := AudioServer.get_bus_index("Master")
+	if master_bus < 0:
+		return
+	if master_volume_percent <= 0.0:
+		AudioServer.set_bus_mute(master_bus, true)
+		AudioServer.set_bus_volume_db(master_bus, -80.0)
+	else:
+		AudioServer.set_bus_mute(master_bus, false)
+		AudioServer.set_bus_volume_db(master_bus, linear_to_db(master_volume_percent / 100.0))
+
+
+func _add_brightness_filter() -> void:
+	brightness_layer = CanvasLayer.new()
+	brightness_layer.name = "BrightnessLayer"
+	brightness_layer.layer = 100
+	add_child(brightness_layer)
+	brightness_filter = ColorRect.new()
+	brightness_filter.name = "BrightnessFilter"
+	brightness_filter.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	brightness_layer.add_child(brightness_filter)
+	brightness_filter.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+
+func _apply_brightness() -> void:
+	if brightness_filter == null:
+		return
+	if brightness_percent < 100.0:
+		var darkness := (100.0 - brightness_percent) / 50.0
+		brightness_filter.color = Color(0.0, 0.0, 0.0, darkness * 0.4)
+	elif brightness_percent > 100.0:
+		var lightness := (brightness_percent - 100.0) / 50.0
+		brightness_filter.color = Color(1.0, 1.0, 1.0, lightness * 0.2)
+	else:
+		brightness_filter.color = Color.TRANSPARENT
 
 
 func _start_background_music() -> void:
@@ -162,8 +259,31 @@ func _show_faction_select() -> void:
 
 
 func _show_opening_cutscene() -> void:
-	if opening_cutscene_layer != null:
+	if opening_glitch_layer != null or opening_cutscene_layer != null:
 		return
+	if opening_glitch_duration <= 0.0:
+		_begin_opening_cutscene()
+		return
+
+	opening_glitch_layer = ColorRect.new()
+	opening_glitch_layer.name = "OpeningGlitch"
+	opening_glitch_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
+	opening_glitch_layer.color = Color.WHITE
+	opening_glitch_layer.mouse_filter = Control.MOUSE_FILTER_STOP
+	var glitch_material := ShaderMaterial.new()
+	glitch_material.shader = OPENING_GLITCH_SHADER
+	opening_glitch_layer.material = glitch_material
+	add_child(opening_glitch_layer)
+
+	var glitch_tween := opening_glitch_layer.create_tween()
+	glitch_tween.tween_interval(opening_glitch_duration)
+	glitch_tween.tween_callback(_begin_opening_cutscene)
+
+
+func _begin_opening_cutscene() -> void:
+	if opening_glitch_layer != null:
+		opening_glitch_layer.queue_free()
+		opening_glitch_layer = null
 	var cutscene_stream := load(OPENING_CUTSCENE_PATH) as VideoStream
 	if cutscene_stream == null:
 		push_warning("Could not load opening cutscene: %s" % OPENING_CUTSCENE_PATH)
@@ -249,6 +369,34 @@ func _show_opening_screen() -> void:
 	_set_active_screen(_build_opening_screen())
 
 
+func _show_options_screen() -> void:
+	cargo_loading_screen.visible = false
+	_set_corner_logo_visible(false)
+	var options_screen := OptionsScreenScene.instantiate() as OptionsScreen
+	options_screen.back_requested.connect(_show_opening_screen)
+	options_screen.master_volume_changed.connect(_on_master_volume_changed)
+	options_screen.brightness_changed.connect(_on_brightness_changed)
+	_set_active_screen(options_screen)
+	options_screen.setup(master_volume_percent, brightness_percent)
+
+
+func _on_master_volume_changed(value: float) -> void:
+	master_volume_percent = clampf(value, 0.0, 100.0)
+	_apply_master_volume()
+	_queue_settings_save()
+
+
+func _on_brightness_changed(value: float) -> void:
+	brightness_percent = clampf(value, 50.0, 150.0)
+	_apply_brightness()
+	_queue_settings_save()
+
+
+func _exit_game() -> void:
+	_save_settings()
+	get_tree().quit()
+
+
 func _build_opening_screen() -> Control:
 	var screen := Control.new()
 	screen.name = "OpeningScreen"
@@ -256,8 +404,9 @@ func _build_opening_screen() -> Control:
 	var layout := VBoxContainer.new()
 	layout.name = "Layout"
 	layout.set_anchors_preset(Control.PRESET_FULL_RECT)
-	layout.offset_top = opening_vertical_offset
-	layout.offset_bottom = opening_vertical_offset
+	var opening_stack_compensation := opening_button_height + opening_menu_button_spacing
+	layout.offset_top = opening_vertical_offset + opening_stack_compensation
+	layout.offset_bottom = opening_vertical_offset + opening_stack_compensation
 	layout.alignment = BoxContainer.ALIGNMENT_CENTER
 	layout.add_theme_constant_override("separation", int(opening_title_button_spacing))
 
@@ -271,18 +420,32 @@ func _build_opening_screen() -> Control:
 	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layout.add_child(logo)
 
-	var start_button := Button.new()
-	start_button.name = "StartButton"
-	start_button.text = "START"
-	start_button.custom_minimum_size = Vector2(opening_button_width, opening_button_height)
-	start_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	start_button.pressed.connect(_show_opening_cutscene)
-	layout.add_child(start_button)
+	var button_stack := VBoxContainer.new()
+	button_stack.name = "ButtonStack"
+	button_stack.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	button_stack.add_theme_constant_override("separation", int(opening_menu_button_spacing))
+	layout.add_child(button_stack)
+
+	var start_button := _build_opening_menu_button("StartButton", "START", _show_opening_cutscene)
+	button_stack.add_child(start_button)
+	button_stack.add_child(_build_opening_menu_button("OptionsButton", "OPTIONS", _show_options_screen))
+	button_stack.add_child(_build_opening_menu_button("ExitButton", "EXIT GAME", _exit_game))
 
 	UiAssetsScript.apply_text_outline(layout)
-	UiAssetsScript.apply_semibold_font(start_button)
+	for button: Node in button_stack.get_children():
+		UiAssetsScript.apply_semibold_font(button as Control)
 	screen.add_child(layout)
 	return screen
+
+
+func _build_opening_menu_button(button_name: String, button_text: String, callback: Callable) -> Button:
+	var button := Button.new()
+	button.name = button_name
+	button.text = button_text
+	button.custom_minimum_size = Vector2(opening_button_width, opening_button_height)
+	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	button.pressed.connect(callback)
+	return button
 
 
 func _update_editor_opening_preview() -> void:
@@ -294,16 +457,20 @@ func _update_editor_opening_preview() -> void:
 	preview.visible = true
 	var layout := preview.get_node_or_null("Layout") as VBoxContainer
 	var logo := preview.get_node_or_null("Layout/TitleLogo") as TextureRect
-	var start_button := preview.get_node_or_null("Layout/StartButton") as Button
-	if layout == null or logo == null or start_button == null:
+	var button_stack := preview.get_node_or_null("Layout/ButtonStack") as VBoxContainer
+	if layout == null or logo == null or button_stack == null:
 		return
-	layout.offset_top = opening_vertical_offset
-	layout.offset_bottom = opening_vertical_offset
+	var opening_stack_compensation := opening_button_height + opening_menu_button_spacing
+	layout.offset_top = opening_vertical_offset + opening_stack_compensation
+	layout.offset_bottom = opening_vertical_offset + opening_stack_compensation
 	layout.add_theme_constant_override("separation", int(opening_title_button_spacing))
 	logo.custom_minimum_size = Vector2(opening_title_width, opening_title_height)
-	start_button.custom_minimum_size = Vector2(opening_button_width, opening_button_height)
+	button_stack.add_theme_constant_override("separation", int(opening_menu_button_spacing))
+	for button: Node in button_stack.get_children():
+		(button as Button).custom_minimum_size = Vector2(opening_button_width, opening_button_height)
 	UiAssetsScript.apply_text_outline(layout)
-	UiAssetsScript.apply_semibold_font(start_button)
+	for button: Node in button_stack.get_children():
+		UiAssetsScript.apply_semibold_font(button as Control)
 
 
 func _unhandled_input(event: InputEvent) -> void:

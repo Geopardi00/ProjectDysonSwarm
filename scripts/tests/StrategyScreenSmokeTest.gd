@@ -1,6 +1,7 @@
 extends SceneTree
 
 const MainScene := preload("res://scenes/main/Main.tscn")
+const TEST_SETTINGS_PATH := "user://strategy_screen_smoke_settings.cfg"
 
 
 func _init() -> void:
@@ -9,6 +10,7 @@ func _init() -> void:
 
 func _run() -> void:
 	var main := MainScene.instantiate()
+	main.settings_file_path = TEST_SETTINGS_PATH
 	root.add_child(main)
 	await process_frame
 
@@ -104,10 +106,18 @@ func _run() -> void:
 		_fail("Strategy screen news scroll area extends beyond its configured safe bounds.")
 		return
 
+	main.settings_loaded = false
+	_remove_test_settings()
 	print("Strategy screen smoke test passed.")
 	quit(0)
 
 
 func _fail(message: String) -> void:
+	_remove_test_settings()
 	push_error(message)
 	quit(1)
+
+
+func _remove_test_settings() -> void:
+	if FileAccess.file_exists(TEST_SETTINGS_PATH):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(TEST_SETTINGS_PATH))
