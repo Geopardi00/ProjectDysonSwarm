@@ -16,6 +16,13 @@ func _run() -> void:
 	main.size = Vector2(1920, 1080)
 	await process_frame
 	await process_frame
+	main.corner_logo_x = 18.0
+	main.corner_logo_y = 14.0
+	main.corner_logo_width = 300.0
+	main.corner_logo_height = 70.0
+	if main.corner_logo.position != Vector2(18.0, 14.0) or main.corner_logo.size != Vector2(300.0, 70.0):
+		_fail("Corner Logo Layout Inspector controls did not update the runtime logo.")
+		return
 	main.get_node("EditorOpeningPreview").visible = true
 	await process_frame
 

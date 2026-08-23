@@ -13,7 +13,6 @@ const DEFAULT_SETTINGS_PATH := "user://settings.cfg"
 const SETTINGS_SAVE_DELAY := 0.25
 
 const SHOW_DEBUG_ACTIONS := true
-const CORNER_LOGO_SIZE := Vector2(272, 62.5)
 const LAUNCH_RESULT_MARGIN_TOP := 112
 const LAUNCH_RESULT_BUTTON_WIDTH := 220
 const LAUNCH_RESULT_BUTTON_HEIGHT := 44
@@ -63,6 +62,24 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 @export_category("Opening Cutscene")
 @export_range(0.0, 2.0, 0.05, "suffix:s") var opening_glitch_duration := 0.4
 @export_range(0.0, 15.0, 0.05, "suffix:s") var cutscene_explosion_time := 2.0
+
+@export_category("Corner Logo Layout")
+@export_range(-500.0, 1920.0, 1.0, "suffix:px") var corner_logo_x := 10.0:
+	set(value):
+		corner_logo_x = value
+		_update_corner_logo_layout()
+@export_range(-500.0, 1080.0, 1.0, "suffix:px") var corner_logo_y := 7.0:
+	set(value):
+		corner_logo_y = value
+		_update_corner_logo_layout()
+@export_range(20.0, 1000.0, 1.0, "suffix:px") var corner_logo_width := 272.0:
+	set(value):
+		corner_logo_width = value
+		_update_corner_logo_layout()
+@export_range(10.0, 500.0, 0.5, "suffix:px") var corner_logo_height := 62.5:
+	set(value):
+		corner_logo_height = value
+		_update_corner_logo_layout()
 
 @onready var root_margin: MarginContainer = $RootMargin
 @onready var cargo_loading_screen: Control = %CargoLoadingScreen
@@ -823,17 +840,23 @@ func _add_corner_logo() -> void:
 		return
 	corner_logo = TextureRect.new()
 	corner_logo.name = "CornerLogo"
-	corner_logo.custom_minimum_size = CORNER_LOGO_SIZE
-	corner_logo.offset_left = 10.0
-	corner_logo.offset_top = 7.0
-	corner_logo.offset_right = corner_logo.offset_left + CORNER_LOGO_SIZE.x
-	corner_logo.offset_bottom = corner_logo.offset_top + CORNER_LOGO_SIZE.y
 	corner_logo.texture = texture
 	corner_logo.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	corner_logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	corner_logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	corner_logo.visible = false
 	add_child(corner_logo)
+	_update_corner_logo_layout()
+
+
+func _update_corner_logo_layout() -> void:
+	if corner_logo == null or not is_instance_valid(corner_logo):
+		return
+	corner_logo.custom_minimum_size = Vector2(corner_logo_width, corner_logo_height)
+	corner_logo.offset_left = corner_logo_x
+	corner_logo.offset_top = corner_logo_y
+	corner_logo.offset_right = corner_logo_x + corner_logo_width
+	corner_logo.offset_bottom = corner_logo_y + corner_logo_height
 
 
 func _set_corner_logo_visible(is_visible: bool) -> void:

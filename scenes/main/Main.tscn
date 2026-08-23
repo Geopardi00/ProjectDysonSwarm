@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://cdrrtf0a71lrp" path="res://assets/ui/title/title_logo.png" id="4_title_logo"]
 [ext_resource type="FontFile" uid="uid://i1vysh7sha26" path="res://assets/ui/fonts/zekton/Zekton-Regular.otf" id="5_dc040"]
 
-[sub_resource type="FontVariation" id="FontVariation_1rhdn"]
+[sub_resource type="FontVariation" id="FontVariation_dc040"]
 base_font = ExtResource("5_dc040")
 variation_embolden = 0.8
 
@@ -18,12 +18,16 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_main")
-opening_vertical_offset = 45.0
+opening_vertical_offset = 51.0
 opening_title_button_spacing = 0.0
 opening_title_width = 1800.0
 opening_title_height = 473.0
 opening_button_width = 141.0
 opening_button_height = 24.0
+corner_logo_x = -20.0
+corner_logo_y = -15.0
+corner_logo_width = 408.0
+corner_logo_height = 94.0
 
 [node name="RootMargin" type="MarginContainer" parent="." unique_id=755015488]
 layout_mode = 1
@@ -134,8 +138,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 77.0
-offset_bottom = 77.0
+offset_top = 83.0
+offset_bottom = 83.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 0
@@ -150,12 +154,12 @@ texture = ExtResource("4_title_logo")
 expand_mode = 2
 stretch_mode = 5
 
-[node name="ButtonStack" type="VBoxContainer" parent="EditorOpeningPreview/Layout"]
+[node name="ButtonStack" type="VBoxContainer" parent="EditorOpeningPreview/Layout" unique_id=510383493]
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_constants/separation = 8
 
-[node name="StartButton" type="Button" parent="EditorOpeningPreview/Layout/ButtonStack"]
+[node name="StartButton" type="Button" parent="EditorOpeningPreview/Layout/ButtonStack" unique_id=1505724276]
 custom_minimum_size = Vector2(141, 24)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -163,10 +167,10 @@ mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_1rhdn")
+theme_override_fonts/font = SubResource("FontVariation_dc040")
 text = "START"
 
-[node name="OptionsButton" type="Button" parent="EditorOpeningPreview/Layout/ButtonStack"]
+[node name="OptionsButton" type="Button" parent="EditorOpeningPreview/Layout/ButtonStack" unique_id=1886465872]
 custom_minimum_size = Vector2(141, 24)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -174,10 +178,10 @@ mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_1rhdn")
+theme_override_fonts/font = SubResource("FontVariation_dc040")
 text = "OPTIONS"
 
-[node name="ExitButton" type="Button" parent="EditorOpeningPreview/Layout/ButtonStack"]
+[node name="ExitButton" type="Button" parent="EditorOpeningPreview/Layout/ButtonStack" unique_id=2124917468]
 custom_minimum_size = Vector2(141, 24)
 layout_mode = 2
 size_flags_horizontal = 4
@@ -185,7 +189,7 @@ mouse_filter = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_1rhdn")
+theme_override_fonts/font = SubResource("FontVariation_dc040")
 text = "EXIT GAME"
 
 [connection signal="pressed" from="RootMargin/Layout/Buttons/BigRocketButton" to="." method="_on_big_rocket_button_pressed"]
