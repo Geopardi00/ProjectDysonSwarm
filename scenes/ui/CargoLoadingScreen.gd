@@ -13,6 +13,8 @@ const MATERIAL_ICON_SIZE := Vector2i(24, 24)
 const PACKING_PIECE_SLOT_SIZE := Vector2(320, 180)
 const ASSIGNMENT_PREVIEW_TINT_ALPHA := 0.68
 const UI_TWEEN_SKIP_META := &"skip_global_button_tween"
+const PACKING_LIST_CONTENT_PATH := \
+	"RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions/ContentRegion"
 const METER_LABEL_PATHS: Array[String] = [
 	"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters/CapacityLabel",
 	"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters/FuelLabel",
@@ -56,6 +58,24 @@ const MATERIAL_TINTS := {
 	set(value):
 		packing_selected_label_font_size = value
 		_apply_packing_selected_label_style()
+@export_range(-100.0, 500.0, 1.0, "suffix:px") var packing_selected_label_x := 94.0:
+	set(value):
+		packing_selected_label_x = value
+		_apply_packing_selected_label_style()
+@export_range(-100.0, 800.0, 1.0, "suffix:px") var packing_selected_label_y := 286.0:
+	set(value):
+		packing_selected_label_y = value
+		_apply_packing_selected_label_style()
+
+@export_category("Packing List Bounds")
+@export_range(0.0, 0.3, 0.001) var packing_list_top_anchor := 0.11:
+	set(value):
+		packing_list_top_anchor = value
+		_apply_packing_list_bounds()
+@export_range(0.7, 1.0, 0.001) var packing_list_bottom_anchor := 0.94:
+	set(value):
+		packing_list_bottom_anchor = value
+		_apply_packing_list_bounds()
 
 @export_category("Back Button")
 @export_range(60.0, 400.0, 1.0, "suffix:px") var back_button_width := 140.0:
@@ -134,6 +154,7 @@ func _ready() -> void:
 	_apply_back_button_style()
 	_apply_meter_text_style()
 	_apply_packing_selected_label_style()
+	_apply_packing_list_bounds()
 	_apply_packing_manifest_style()
 	_apply_packing_manifest_style.call_deferred()
 	if Engine.is_editor_hint():
@@ -194,7 +215,18 @@ func _apply_packing_selected_label_style() -> void:
 	label.label_settings = null
 	UiAssetsScript.apply_text_outline(label)
 	label.add_theme_font_size_override("font_size", packing_selected_label_font_size)
+	label.position = Vector2(packing_selected_label_x, packing_selected_label_y)
 	queue_redraw()
+
+
+func _apply_packing_list_bounds() -> void:
+	var content_region := get_node_or_null(PACKING_LIST_CONTENT_PATH) as Control
+	if content_region == null:
+		return
+	content_region.anchor_top = packing_list_top_anchor
+	content_region.anchor_bottom = maxf(packing_list_bottom_anchor, packing_list_top_anchor)
+	content_region.offset_top = 0.0
+	content_region.offset_bottom = 0.0
 
 
 func _apply_packing_manifest_style() -> void:

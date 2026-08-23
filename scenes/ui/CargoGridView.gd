@@ -3,15 +3,17 @@ class_name CargoGridView
 
 signal grid_cell_clicked(cell: Vector2i, mouse_button: int)
 
-const MATERIAL_COLORS := {
-	"fuel": Color(0.95, 0.32, 0.12),
-	"carbon_metals": Color(0.35, 0.37, 0.39),
-	"silicon": Color(0.20, 0.55, 0.95),
-	"copper": Color(0.82, 0.43, 0.18),
-	"electronics": Color(0.20, 0.68, 0.35),
-	"rare_metals": Color(0.60, 0.36, 0.86),
-	"propellant": Color(0.10, 0.70, 0.72),
+const MATERIAL_TINTS := {
+	"fuel": Color("#E8452E"),
+	"carbon_metals": Color("#4F5B66"),
+	"silicon": Color("#2F7FE8"),
+	"copper": Color("#C8752B"),
+	"electronics": Color("#31B85C"),
+	"rare_metals": Color("#8F55D9"),
+	"propellant": Color("#19B7B2"),
 }
+const CARGO_PIECE_BASE_COLOR := Color(0.638, 0.606, 0.568)
+const CARGO_PIECE_TINT_ALPHA := 0.68
 
 var packing_state
 var selected_piece: CargoPiece
@@ -119,10 +121,20 @@ func _draw_debug_grid() -> void:
 func _draw_placed_pieces() -> void:
 	for placed_piece: Dictionary in packing_state.get_placed_pieces():
 		var material := String(placed_piece.get("material", ""))
-		var color: Color = MATERIAL_COLORS.get(material, Color(0.50, 0.55, 0.60))
+		var color := _get_placed_piece_color(material)
 		var occupied_cells: Array = placed_piece.get("occupied_cells", [])
 		for cell: Vector2i in occupied_cells:
 			_draw_cell(cell, color, true)
+
+
+func _get_placed_piece_color(material: String) -> Color:
+	var tint: Color = MATERIAL_TINTS.get(material, Color.WHITE)
+	return Color(
+		tint.r * CARGO_PIECE_BASE_COLOR.r,
+		tint.g * CARGO_PIECE_BASE_COLOR.g,
+		tint.b * CARGO_PIECE_BASE_COLOR.b,
+		CARGO_PIECE_TINT_ALPHA
+	)
 
 
 func _draw_selected_piece_preview() -> void:
