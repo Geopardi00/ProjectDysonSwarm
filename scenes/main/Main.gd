@@ -6,11 +6,18 @@ const LaunchManagerScript := preload("res://scripts/launch/LaunchManager.gd")
 const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 const StrategyScreenScene := preload("res://scenes/ui/StrategyScreen.tscn")
 const OptionsScreenScene := preload("res://scenes/ui/OptionsScreen.tscn")
+const PauseMenuScreenScene := preload("res://scenes/ui/PauseMenuScreen.tscn")
 const OPENING_GLITCH_SHADER := preload("res://assets/shaders/opening_glitch.gdshader")
+const OPENING_GLITCH_SOUND := preload("res://audio/sfx/glitch.wav")
 const OPENING_CUTSCENE_PATH := "res://assets/cutscene/0001-0360.ogv"
 const CUTSCENE_EXPLOSION_SOUND_PATH := "res://audio/sfx/explosion.wav"
+const BUTTON_CLICK_SOUND := preload("res://audio/sfx/button_click.wav")
+const BUTTON_HOVER_SOUND := preload("res://audio/sfx/button_hover.wav")
 const DEFAULT_SETTINGS_PATH := "user://settings.cfg"
 const SETTINGS_SAVE_DELAY := 0.25
+const UI_SOUND_CONNECTED_META := &"dyson_ui_sound_connected"
+const MUSIC_BUS_NAME := &"Music"
+const SFX_BUS_NAME := &"SFX"
 
 const SHOW_DEBUG_ACTIONS := true
 const LAUNCH_RESULT_MARGIN_TOP := 112
@@ -81,6 +88,22 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 		corner_logo_height = value
 		_update_corner_logo_layout()
 
+@export_category("UI Sounds")
+@export_range(0.0, 100.0, 1.0, "suffix:%") var button_hover_volume_percent := 100.0:
+	set(value):
+		button_hover_volume_percent = value
+		_apply_ui_sound_volumes()
+@export_range(0.0, 100.0, 1.0, "suffix:%") var button_click_volume_percent := 100.0:
+	set(value):
+		button_click_volume_percent = value
+		_apply_ui_sound_volumes()
+
+@export_category("Background Music")
+@export_range(0.0, 100.0, 1.0, "suffix:%") var background_music_volume_percent := 100.0:
+	set(value):
+		background_music_volume_percent = value
+		_apply_background_music_volume()
+
 @onready var root_margin: MarginContainer = $RootMargin
 @onready var cargo_loading_screen: Control = %CargoLoadingScreen
 
@@ -94,17 +117,24 @@ var music_player: AudioStreamPlayer
 var background_music_streams: Array[AudioStream] = []
 var current_music_index := 0
 var opening_glitch_layer: ColorRect
+var opening_glitch_player: AudioStreamPlayer
 var opening_cutscene_layer: Control
 var opening_cutscene_player: VideoStreamPlayer
 var cutscene_explosion_player: AudioStreamPlayer
 var cutscene_explosion_played := false
+var button_click_player: AudioStreamPlayer
+var button_hover_player: AudioStreamPlayer
 var settings_file_path := DEFAULT_SETTINGS_PATH
 var master_volume_percent := 100.0
+var music_bus_volume_percent := 100.0
+var sfx_bus_volume_percent := 100.0
 var brightness_percent := 100.0
 var settings_save_timer: Timer
 var brightness_layer: CanvasLayer
 var brightness_filter: ColorRect
 var settings_loaded := false
+var pause_overlay: PauseMenuScreen
+var pause_options_screen: OptionsScreen
 
 
 func _ready() -> void:
@@ -115,8 +145,12 @@ func _ready() -> void:
 	if editor_preview != null:
 		editor_preview.visible = false
 	_create_settings_save_timer()
+	_ensure_audio_buses()
 	_load_settings()
 	_apply_master_volume()
+	_apply_music_bus_volume()
+	_apply_sfx_bus_volume()
+	_setup_ui_sounds()
 	_add_scene_background()
 	_add_brightness_filter()
 	_apply_brightness()
@@ -136,8 +170,68 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
+	if not Engine.is_editor_hint() and get_tree() != null and get_tree().node_added.is_connected(_on_tree_node_added_for_ui_sounds):
+		get_tree().node_added.disconnect(_on_tree_node_added_for_ui_sounds)
 	if not Engine.is_editor_hint() and settings_loaded:
 		_save_settings()
+
+
+func _setup_ui_sounds() -> void:
+	button_hover_player = AudioStreamPlayer.new()
+	button_hover_player.name = "ButtonHoverPlayer"
+	button_hover_player.stream = BUTTON_HOVER_SOUND
+	button_hover_player.bus = SFX_BUS_NAME
+	button_hover_player.max_polyphony = 4
+	add_child(button_hover_player)
+
+	button_click_player = AudioStreamPlayer.new()
+	button_click_player.name = "ButtonClickPlayer"
+	button_click_player.stream = BUTTON_CLICK_SOUND
+	button_click_player.bus = SFX_BUS_NAME
+	button_click_player.max_polyphony = 4
+	add_child(button_click_player)
+	_apply_ui_sound_volumes()
+
+	get_tree().node_added.connect(_on_tree_node_added_for_ui_sounds)
+	for node: Node in find_children("*", "Button", true, false):
+		_register_button_ui_sounds(node as Button)
+
+
+func _on_tree_node_added_for_ui_sounds(node: Node) -> void:
+	if node is Button:
+		_register_button_ui_sounds(node as Button)
+
+
+func _register_button_ui_sounds(button: Button) -> void:
+	if button.has_meta(UI_SOUND_CONNECTED_META):
+		return
+	button.set_meta(UI_SOUND_CONNECTED_META, true)
+	button.mouse_entered.connect(_on_ui_button_hovered.bind(button))
+	button.button_down.connect(_play_button_click_sound)
+
+
+func _on_ui_button_hovered(button: Button) -> void:
+	if button.disabled or not button.is_visible_in_tree() or button_hover_player == null:
+		return
+	button_hover_player.play()
+
+
+func _play_button_click_sound() -> void:
+	if button_click_player != null:
+		button_click_player.play()
+
+
+func _apply_ui_sound_volumes() -> void:
+	if button_hover_player != null:
+		button_hover_player.volume_db = _percent_to_volume_db(button_hover_volume_percent)
+	if button_click_player != null:
+		button_click_player.volume_db = _percent_to_volume_db(button_click_volume_percent)
+
+
+func _percent_to_volume_db(percent: float) -> float:
+	if percent <= 0.0:
+		return -80.0
+	return linear_to_db(percent / 100.0)
 
 
 func _create_settings_save_timer() -> void:
@@ -149,12 +243,28 @@ func _create_settings_save_timer() -> void:
 	add_child(settings_save_timer)
 
 
+func _ensure_audio_buses() -> void:
+	_ensure_audio_bus(MUSIC_BUS_NAME)
+	_ensure_audio_bus(SFX_BUS_NAME)
+
+
+func _ensure_audio_bus(bus_name: StringName) -> void:
+	if AudioServer.get_bus_index(bus_name) >= 0:
+		return
+	AudioServer.add_bus()
+	var bus_index := AudioServer.bus_count - 1
+	AudioServer.set_bus_name(bus_index, bus_name)
+	AudioServer.set_bus_send(bus_index, &"Master")
+
+
 func _load_settings() -> void:
 	var config := ConfigFile.new()
 	var error := config.load(settings_file_path)
 	if error != OK and error != ERR_FILE_NOT_FOUND:
 		push_warning("Could not load settings from %s (error %d)." % [settings_file_path, error])
 	master_volume_percent = clampf(float(config.get_value("audio", "master_volume_percent", 100.0)), 0.0, 100.0)
+	music_bus_volume_percent = clampf(float(config.get_value("audio", "music_volume_percent", 100.0)), 0.0, 100.0)
+	sfx_bus_volume_percent = clampf(float(config.get_value("audio", "sfx_volume_percent", 100.0)), 0.0, 100.0)
 	brightness_percent = clampf(float(config.get_value("display", "brightness_percent", 100.0)), 50.0, 150.0)
 	settings_loaded = true
 
@@ -167,6 +277,8 @@ func _queue_settings_save() -> void:
 func _save_settings() -> void:
 	var config := ConfigFile.new()
 	config.set_value("audio", "master_volume_percent", master_volume_percent)
+	config.set_value("audio", "music_volume_percent", music_bus_volume_percent)
+	config.set_value("audio", "sfx_volume_percent", sfx_bus_volume_percent)
 	config.set_value("display", "brightness_percent", brightness_percent)
 	var error := config.save(settings_file_path)
 	if error != OK:
@@ -174,15 +286,23 @@ func _save_settings() -> void:
 
 
 func _apply_master_volume() -> void:
-	var master_bus := AudioServer.get_bus_index("Master")
-	if master_bus < 0:
+	_apply_audio_bus_volume(&"Master", master_volume_percent)
+
+
+func _apply_music_bus_volume() -> void:
+	_apply_audio_bus_volume(MUSIC_BUS_NAME, music_bus_volume_percent)
+
+
+func _apply_sfx_bus_volume() -> void:
+	_apply_audio_bus_volume(SFX_BUS_NAME, sfx_bus_volume_percent)
+
+
+func _apply_audio_bus_volume(bus_name: StringName, percent: float) -> void:
+	var bus_index := AudioServer.get_bus_index(bus_name)
+	if bus_index < 0:
 		return
-	if master_volume_percent <= 0.0:
-		AudioServer.set_bus_mute(master_bus, true)
-		AudioServer.set_bus_volume_db(master_bus, -80.0)
-	else:
-		AudioServer.set_bus_mute(master_bus, false)
-		AudioServer.set_bus_volume_db(master_bus, linear_to_db(master_volume_percent / 100.0))
+	AudioServer.set_bus_mute(bus_index, percent <= 0.0)
+	AudioServer.set_bus_volume_db(bus_index, _percent_to_volume_db(percent))
 
 
 func _add_brightness_filter() -> void:
@@ -221,9 +341,16 @@ func _start_background_music() -> void:
 		return
 	music_player = AudioStreamPlayer.new()
 	music_player.name = "BackgroundMusicPlayer"
+	music_player.bus = MUSIC_BUS_NAME
 	music_player.finished.connect(_play_next_background_music)
 	add_child(music_player)
+	_apply_background_music_volume()
 	_play_background_music(0)
+
+
+func _apply_background_music_volume() -> void:
+	if music_player != null:
+		music_player.volume_db = _percent_to_volume_db(background_music_volume_percent)
 
 
 func _load_background_music_stream(music_path: String) -> AudioStream:
@@ -291,6 +418,13 @@ func _show_opening_cutscene() -> void:
 	glitch_material.shader = OPENING_GLITCH_SHADER
 	opening_glitch_layer.material = glitch_material
 	add_child(opening_glitch_layer)
+	opening_glitch_player = AudioStreamPlayer.new()
+	opening_glitch_player.name = "OpeningGlitchPlayer"
+	opening_glitch_player.stream = OPENING_GLITCH_SOUND
+	opening_glitch_player.bus = SFX_BUS_NAME
+	opening_glitch_player.finished.connect(_on_opening_glitch_sound_finished)
+	add_child(opening_glitch_player)
+	opening_glitch_player.play()
 
 	var glitch_tween := opening_glitch_layer.create_tween()
 	glitch_tween.tween_interval(opening_glitch_duration)
@@ -322,6 +456,7 @@ func _begin_opening_cutscene() -> void:
 	opening_cutscene_player.name = "Video"
 	opening_cutscene_player.set_anchors_preset(Control.PRESET_FULL_RECT)
 	opening_cutscene_player.expand = true
+	opening_cutscene_player.bus = SFX_BUS_NAME
 	opening_cutscene_player.stream = cutscene_stream
 	opening_cutscene_player.finished.connect(_finish_opening_cutscene)
 	opening_cutscene_layer.add_child(opening_cutscene_player)
@@ -331,6 +466,7 @@ func _begin_opening_cutscene() -> void:
 		cutscene_explosion_player = AudioStreamPlayer.new()
 		cutscene_explosion_player.name = "ExplosionSound"
 		cutscene_explosion_player.stream = explosion_stream
+		cutscene_explosion_player.bus = SFX_BUS_NAME
 		opening_cutscene_layer.add_child(cutscene_explosion_player)
 	else:
 		push_warning("Could not load cutscene explosion sound: %s" % CUTSCENE_EXPLOSION_SOUND_PATH)
@@ -354,6 +490,12 @@ func _begin_opening_cutscene() -> void:
 
 	add_child(opening_cutscene_layer)
 	opening_cutscene_player.play()
+
+
+func _on_opening_glitch_sound_finished() -> void:
+	if opening_glitch_player != null:
+		opening_glitch_player.queue_free()
+		opening_glitch_player = null
 
 
 func _finish_opening_cutscene() -> void:
@@ -392,14 +534,28 @@ func _show_options_screen() -> void:
 	var options_screen := OptionsScreenScene.instantiate() as OptionsScreen
 	options_screen.back_requested.connect(_show_opening_screen)
 	options_screen.master_volume_changed.connect(_on_master_volume_changed)
+	options_screen.music_volume_changed.connect(_on_music_volume_changed)
+	options_screen.sfx_volume_changed.connect(_on_sfx_volume_changed)
 	options_screen.brightness_changed.connect(_on_brightness_changed)
 	_set_active_screen(options_screen)
-	options_screen.setup(master_volume_percent, brightness_percent)
+	options_screen.setup(master_volume_percent, music_bus_volume_percent, sfx_bus_volume_percent, brightness_percent)
 
 
 func _on_master_volume_changed(value: float) -> void:
 	master_volume_percent = clampf(value, 0.0, 100.0)
 	_apply_master_volume()
+	_queue_settings_save()
+
+
+func _on_music_volume_changed(value: float) -> void:
+	music_bus_volume_percent = clampf(value, 0.0, 100.0)
+	_apply_music_bus_volume()
+	_queue_settings_save()
+
+
+func _on_sfx_volume_changed(value: float) -> void:
+	sfx_bus_volume_percent = clampf(value, 0.0, 100.0)
+	_apply_sfx_bus_volume()
 	_queue_settings_save()
 
 
@@ -494,6 +650,88 @@ func _unhandled_input(event: InputEvent) -> void:
 	if opening_cutscene_layer != null and event.is_action_pressed("ui_cancel"):
 		get_viewport().set_input_as_handled()
 		_finish_opening_cutscene()
+		return
+	if not event.is_action_pressed("ui_cancel"):
+		return
+	if pause_overlay != null:
+		get_viewport().set_input_as_handled()
+		_close_pause_menu()
+		return
+	if _can_open_pause_menu():
+		get_viewport().set_input_as_handled()
+		_open_pause_menu()
+
+
+func _can_open_pause_menu() -> bool:
+	return cargo_loading_screen.visible or active_screen is StrategyScreen
+
+
+func _open_pause_menu() -> void:
+	if pause_overlay != null or not _can_open_pause_menu():
+		return
+	pause_overlay = PauseMenuScreenScene.instantiate() as PauseMenuScreen
+	pause_overlay.resume_requested.connect(_close_pause_menu)
+	pause_overlay.options_requested.connect(_show_pause_options)
+	pause_overlay.instructions_requested.connect(_show_pause_instructions)
+	pause_overlay.quit_to_main_requested.connect(_quit_to_opening_menu)
+	pause_overlay.exit_game_requested.connect(_exit_game)
+	add_child(pause_overlay)
+
+
+func _close_pause_menu() -> void:
+	if pause_options_screen != null and is_instance_valid(pause_options_screen):
+		pause_options_screen.queue_free()
+	pause_options_screen = null
+	if pause_overlay != null and is_instance_valid(pause_overlay):
+		pause_overlay.queue_free()
+	pause_overlay = null
+
+
+func _show_pause_options() -> void:
+	_show_pause_options_page(false)
+
+
+func _show_pause_instructions() -> void:
+	_show_pause_options_page(true)
+
+
+func _show_pause_options_page(show_instructions: bool) -> void:
+	if pause_overlay == null:
+		return
+	pause_overlay.set_menu_visible(false)
+	if pause_options_screen != null and is_instance_valid(pause_options_screen):
+		pause_options_screen.queue_free()
+	pause_options_screen = OptionsScreenScene.instantiate() as OptionsScreen
+	pause_options_screen.back_requested.connect(_return_to_pause_menu)
+	pause_options_screen.master_volume_changed.connect(_on_master_volume_changed)
+	pause_options_screen.music_volume_changed.connect(_on_music_volume_changed)
+	pause_options_screen.sfx_volume_changed.connect(_on_sfx_volume_changed)
+	pause_options_screen.brightness_changed.connect(_on_brightness_changed)
+	pause_overlay.add_child(pause_options_screen)
+	pause_options_screen.setup(
+		master_volume_percent,
+		music_bus_volume_percent,
+		sfx_bus_volume_percent,
+		brightness_percent,
+		false
+	)
+	if show_instructions:
+		pause_options_screen.show_instructions_page()
+
+
+func _return_to_pause_menu() -> void:
+	if pause_options_screen != null and is_instance_valid(pause_options_screen):
+		pause_options_screen.queue_free()
+	pause_options_screen = null
+	if pause_overlay != null:
+		pause_overlay.set_menu_visible(true)
+
+
+func _quit_to_opening_menu() -> void:
+	_close_pause_menu()
+	selected_faction = ""
+	cargo_loading_screen.visible = false
+	_show_opening_screen()
 
 
 func _build_faction_select_screen() -> Control:

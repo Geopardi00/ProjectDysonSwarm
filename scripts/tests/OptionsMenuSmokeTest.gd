@@ -5,8 +5,14 @@ const TEST_SETTINGS_PATH := "user://options_menu_smoke_test.cfg"
 
 var main_instance
 var master_bus := -1
+var music_bus := -1
+var sfx_bus := -1
 var original_master_db := 0.0
 var original_master_muted := false
+var original_music_db := 0.0
+var original_music_muted := false
+var original_sfx_db := 0.0
+var original_sfx_muted := false
 
 
 func _init() -> void:
@@ -19,6 +25,14 @@ func _run() -> void:
 	if master_bus >= 0:
 		original_master_db = AudioServer.get_bus_volume_db(master_bus)
 		original_master_muted = AudioServer.is_bus_mute(master_bus)
+	music_bus = AudioServer.get_bus_index("Music")
+	sfx_bus = AudioServer.get_bus_index("SFX")
+	if music_bus >= 0:
+		original_music_db = AudioServer.get_bus_volume_db(music_bus)
+		original_music_muted = AudioServer.is_bus_mute(music_bus)
+	if sfx_bus >= 0:
+		original_sfx_db = AudioServer.get_bus_volume_db(sfx_bus)
+		original_sfx_muted = AudioServer.is_bus_mute(sfx_bus)
 
 	main_instance = MainScene.instantiate()
 	main_instance.settings_file_path = TEST_SETTINGS_PATH
@@ -52,6 +66,8 @@ func _run() -> void:
 		return
 
 	options.volume_slider.value = 35.0
+	options.music_volume_slider.value = 45.0
+	options.sfx_volume_slider.value = 55.0
 	options.brightness_slider.value = 125.0
 	await process_frame
 	if not is_equal_approx(main_instance.master_volume_percent, 35.0):
@@ -59,6 +75,16 @@ func _run() -> void:
 		return
 	if master_bus >= 0 and (AudioServer.is_bus_mute(master_bus) or not is_equal_approx(AudioServer.get_bus_volume_db(master_bus), linear_to_db(0.35))):
 		_fail("Master volume slider did not update the Master audio bus.")
+		return
+	if (
+		music_bus < 0
+		or sfx_bus < 0
+		or not is_equal_approx(main_instance.music_bus_volume_percent, 45.0)
+		or not is_equal_approx(main_instance.sfx_bus_volume_percent, 55.0)
+		or not is_equal_approx(AudioServer.get_bus_volume_db(music_bus), linear_to_db(0.45))
+		or not is_equal_approx(AudioServer.get_bus_volume_db(sfx_bus), linear_to_db(0.55))
+	):
+		_fail("Music or SFX volume slider did not update its audio bus.")
 		return
 	var brightness_color: Color = main_instance.brightness_filter.color
 	if (
@@ -79,13 +105,26 @@ func _run() -> void:
 	if not is_equal_approx(float(saved_config.get_value("audio", "master_volume_percent", -1.0)), 35.0):
 		_fail("Saved Master volume value was incorrect.")
 		return
+	if not is_equal_approx(float(saved_config.get_value("audio", "music_volume_percent", -1.0)), 45.0):
+		_fail("Saved Music volume value was incorrect.")
+		return
+	if not is_equal_approx(float(saved_config.get_value("audio", "sfx_volume_percent", -1.0)), 55.0):
+		_fail("Saved SFX volume value was incorrect.")
+		return
 	if not is_equal_approx(float(saved_config.get_value("display", "brightness_percent", -1.0)), 125.0):
 		_fail("Saved brightness value was incorrect.")
 		return
 	main_instance.master_volume_percent = 100.0
+	main_instance.music_bus_volume_percent = 100.0
+	main_instance.sfx_bus_volume_percent = 100.0
 	main_instance.brightness_percent = 100.0
 	main_instance._load_settings()
-	if not is_equal_approx(main_instance.master_volume_percent, 35.0) or not is_equal_approx(main_instance.brightness_percent, 125.0):
+	if (
+		not is_equal_approx(main_instance.master_volume_percent, 35.0)
+		or not is_equal_approx(main_instance.music_bus_volume_percent, 45.0)
+		or not is_equal_approx(main_instance.sfx_bus_volume_percent, 55.0)
+		or not is_equal_approx(main_instance.brightness_percent, 125.0)
+	):
 		_fail("Options settings were not restored from disk.")
 		return
 
@@ -112,6 +151,12 @@ func _cleanup() -> void:
 	if master_bus >= 0:
 		AudioServer.set_bus_volume_db(master_bus, original_master_db)
 		AudioServer.set_bus_mute(master_bus, original_master_muted)
+	if music_bus >= 0:
+		AudioServer.set_bus_volume_db(music_bus, original_music_db)
+		AudioServer.set_bus_mute(music_bus, original_music_muted)
+	if sfx_bus >= 0:
+		AudioServer.set_bus_volume_db(sfx_bus, original_sfx_db)
+		AudioServer.set_bus_mute(sfx_bus, original_sfx_muted)
 	if main_instance != null and is_instance_valid(main_instance):
 		main_instance.settings_loaded = false
 		main_instance.queue_free()

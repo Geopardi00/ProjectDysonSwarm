@@ -63,6 +63,14 @@ func _run() -> void:
 	if main.opening_glitch_layer == null:
 		_fail("Opening glitch effect did not start before the cutscene.")
 		return
+	if (
+		main.opening_glitch_player == null
+		or not main.opening_glitch_player.playing
+		or main.opening_glitch_player.bus != &"SFX"
+		or main.opening_glitch_player.stream.resource_path != "res://audio/sfx/glitch.wav"
+	):
+		_fail("Opening glitch effect did not play glitch.wav.")
+		return
 	if main.opening_cutscene_layer != null:
 		_fail("Opening cutscene started before the glitch effect finished.")
 		return
@@ -75,8 +83,14 @@ func _run() -> void:
 	if main.opening_cutscene_player == null or not main.opening_cutscene_player.is_playing():
 		_fail("Opening cutscene video did not start playing.")
 		return
+	if main.opening_cutscene_player.bus != &"SFX":
+		_fail("Opening cutscene audio was not routed to the SFX bus.")
+		return
 	if main.cutscene_explosion_player == null or not main.cutscene_explosion_player.is_playing():
 		_fail("Cutscene explosion sound did not play at its configured time.")
+		return
+	if main.cutscene_explosion_player.bus != &"SFX":
+		_fail("Cutscene explosion sound was not routed to the SFX bus.")
 		return
 	if main.music_player != null and main.music_player.stream_paused:
 		_fail("Background music was paused during the cutscene.")

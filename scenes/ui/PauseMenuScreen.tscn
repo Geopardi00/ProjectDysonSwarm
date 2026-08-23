@@ -1,0 +1,115 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/PauseMenuScreen.gd" id="1_pause"]
+[ext_resource type="Texture2D" path="res://assets/ui/panels/panel_options.png" id="2_panel"]
+[ext_resource type="FontFile" path="res://assets/ui/fonts/zekton/Zekton-Regular.otf" id="3_font"]
+
+[node name="PauseMenuScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+z_index = 200
+script = ExtResource("1_pause")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.62)
+
+[node name="PanelCenter" type="CenterContainer" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Control" parent="PanelCenter"]
+custom_minimum_size = Vector2(620, 596)
+layout_mode = 2
+
+[node name="PanelArt" type="TextureRect" parent="PanelCenter/Panel"]
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ContentMargin" type="MarginContainer" parent="PanelCenter/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 92.0
+offset_top = 92.0
+offset_right = -92.0
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Buttons" type="VBoxContainer" parent="PanelCenter/Panel/ContentMargin"]
+layout_mode = 2
+theme_override_constants/separation = 20
+alignment = 1
+
+[node name="PauseTitle" type="Label" parent="PanelCenter/Panel/ContentMargin/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 34
+text = "PAUSED"
+horizontal_alignment = 1
+
+[node name="TitleSpacer" type="Control" parent="PanelCenter/Panel/ContentMargin/Buttons"]
+custom_minimum_size = Vector2(0, 18)
+layout_mode = 2
+
+[node name="ResumeButton" type="Button" parent="PanelCenter/Panel/ContentMargin/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "RESUME"
+
+[node name="OptionsButton" type="Button" parent="PanelCenter/Panel/ContentMargin/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "OPTIONS"
+
+[node name="HowToPlayButton" type="Button" parent="PanelCenter/Panel/ContentMargin/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "HOW TO PLAY"
+
+[node name="QuitToMainButton" type="Button" parent="PanelCenter/Panel/ContentMargin/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "QUIT TO MAIN MENU"
+
+[node name="ExitGameButton" type="Button" parent="PanelCenter/Panel/ContentMargin/Buttons"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(300, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "EXIT GAME"

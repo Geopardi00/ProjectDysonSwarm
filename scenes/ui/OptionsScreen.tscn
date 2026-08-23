@@ -90,7 +90,7 @@ theme_override_constants/separation = 18
 custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
-text = "VOLUME"
+text = "MASTER"
 vertical_alignment = 1
 
 [node name="VolumeSlider" type="HSlider" parent="PanelCenter/Panel/ContentMargin/OptionsPage/VolumeRow"]
@@ -103,6 +103,64 @@ step = 1.0
 value = 100.0
 
 [node name="VolumeValueLabel" type="Label" parent="PanelCenter/Panel/ContentMargin/OptionsPage/VolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "100%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="MusicVolumeRow" type="HBoxContainer" parent="PanelCenter/Panel/ContentMargin/OptionsPage"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="MusicVolumeLabel" type="Label" parent="PanelCenter/Panel/ContentMargin/OptionsPage/MusicVolumeRow"]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "MUSIC"
+vertical_alignment = 1
+
+[node name="MusicVolumeSlider" type="HSlider" parent="PanelCenter/Panel/ContentMargin/OptionsPage/MusicVolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(400, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 100.0
+step = 1.0
+value = 100.0
+
+[node name="MusicVolumeValueLabel" type="Label" parent="PanelCenter/Panel/ContentMargin/OptionsPage/MusicVolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(76, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "100%"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="SfxVolumeRow" type="HBoxContainer" parent="PanelCenter/Panel/ContentMargin/OptionsPage"]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="SfxVolumeLabel" type="Label" parent="PanelCenter/Panel/ContentMargin/OptionsPage/SfxVolumeRow"]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "SFX"
+vertical_alignment = 1
+
+[node name="SfxVolumeSlider" type="HSlider" parent="PanelCenter/Panel/ContentMargin/OptionsPage/SfxVolumeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(400, 36)
+layout_mode = 2
+size_flags_horizontal = 3
+max_value = 100.0
+step = 1.0
+value = 100.0
+
+[node name="SfxVolumeValueLabel" type="Label" parent="PanelCenter/Panel/ContentMargin/OptionsPage/SfxVolumeRow"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(76, 0)
 layout_mode = 2
