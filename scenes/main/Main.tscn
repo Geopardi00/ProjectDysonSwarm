@@ -1,9 +1,16 @@
-[gd_scene load_steps=3 format=3 uid="uid://project_dyson_swarm_main"]
+[gd_scene format=3 uid="uid://bewujagdnwswd"]
 
-[ext_resource type="Script" path="res://scenes/main/Main.gd" id="1_main"]
-[ext_resource type="PackedScene" path="res://scenes/ui/CargoLoadingScreen.tscn" id="2_cargo"]
+[ext_resource type="Script" uid="uid://cpji1rpre3d1s" path="res://scenes/main/Main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://b8tgph63inluv" path="res://scenes/ui/CargoLoadingScreen.tscn" id="2_cargo"]
+[ext_resource type="Texture2D" uid="uid://jdd6xt5nsnso" path="res://assets/ui/backgrounds/ui_bg_space_loading_1920x1080.png" id="3_background"]
+[ext_resource type="Texture2D" uid="uid://cdrrtf0a71lrp" path="res://assets/ui/title/title_logo.png" id="4_title_logo"]
+[ext_resource type="FontFile" uid="uid://i1vysh7sha26" path="res://assets/ui/fonts/zekton/Zekton-Regular.otf" id="5_dc040"]
 
-[node name="Main" type="Control"]
+[sub_resource type="FontVariation" id="FontVariation_1rhdn"]
+base_font = ExtResource("5_dc040")
+variation_embolden = 0.8
+
+[node name="Main" type="Control" unique_id=1824463018]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -11,8 +18,14 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_main")
+opening_vertical_offset = 48.0
+opening_title_button_spacing = 0.0
+opening_title_width = 1800.0
+opening_title_height = 473.0
+opening_button_width = 141.0
+opening_button_height = 24.0
 
-[node name="RootMargin" type="MarginContainer" parent="."]
+[node name="RootMargin" type="MarginContainer" parent="." unique_id=755015488]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,75 +37,129 @@ theme_override_constants/margin_top = 24
 theme_override_constants/margin_right = 24
 theme_override_constants/margin_bottom = 24
 
-[node name="Layout" type="VBoxContainer" parent="RootMargin"]
+[node name="Layout" type="VBoxContainer" parent="RootMargin" unique_id=631813794]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="Title" type="Label" parent="RootMargin/Layout"]
+[node name="Title" type="Label" parent="RootMargin/Layout" unique_id=1934240542]
 layout_mode = 2
-text = "Project Dyson Swarm"
 theme_override_font_sizes/font_size = 24
+text = "Project Dyson Swarm"
 
-[node name="Buttons" type="HBoxContainer" parent="RootMargin/Layout"]
+[node name="Buttons" type="HBoxContainer" parent="RootMargin/Layout" unique_id=1007029573]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="BigRocketButton" type="Button" parent="RootMargin/Layout/Buttons"]
+[node name="BigRocketButton" type="Button" parent="RootMargin/Layout/Buttons" unique_id=1973579647]
 layout_mode = 2
 text = "Load Big Rocket"
 
-[node name="ShuttleButton" type="Button" parent="RootMargin/Layout/Buttons"]
+[node name="ShuttleButton" type="Button" parent="RootMargin/Layout/Buttons" unique_id=748196803]
 layout_mode = 2
 text = "Load Space Shuttle"
 
-[node name="FailedRocketButton" type="Button" parent="RootMargin/Layout/Buttons"]
+[node name="FailedRocketButton" type="Button" parent="RootMargin/Layout/Buttons" unique_id=1172067171]
 layout_mode = 2
 text = "Test Failed Rocket"
 
-[node name="SpinLaunchButton" type="Button" parent="RootMargin/Layout/Buttons"]
+[node name="SpinLaunchButton" type="Button" parent="RootMargin/Layout/Buttons" unique_id=1177906616]
 layout_mode = 2
 text = "Load SpinLaunch"
 
-[node name="ResetButton" type="Button" parent="RootMargin/Layout/Buttons"]
+[node name="ResetButton" type="Button" parent="RootMargin/Layout/Buttons" unique_id=1380159176]
 layout_mode = 2
 text = "Reset Match"
 
-[node name="Panels" type="HBoxContainer" parent="RootMargin/Layout"]
+[node name="Panels" type="HBoxContainer" parent="RootMargin/Layout" unique_id=167989973]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_constants/separation = 16
 
-[node name="LeftPanel" type="VBoxContainer" parent="RootMargin/Layout/Panels"]
+[node name="LeftPanel" type="VBoxContainer" parent="RootMargin/Layout/Panels" unique_id=624893476]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 12
 
-[node name="StatusLabel" type="Label" parent="RootMargin/Layout/Panels/LeftPanel"]
+[node name="StatusLabel" type="Label" parent="RootMargin/Layout/Panels/LeftPanel" unique_id=221574137]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Status"
 
-[node name="NeedsLabel" type="Label" parent="RootMargin/Layout/Panels/LeftPanel"]
+[node name="NeedsLabel" type="Label" parent="RootMargin/Layout/Panels/LeftPanel" unique_id=513013344]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Needs"
 
-[node name="CompetitorsLabel" type="Label" parent="RootMargin/Layout/Panels/LeftPanel"]
+[node name="CompetitorsLabel" type="Label" parent="RootMargin/Layout/Panels/LeftPanel" unique_id=2026680489]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Competitors"
 
-[node name="NewsLabel" type="Label" parent="RootMargin/Layout/Panels"]
+[node name="NewsLabel" type="Label" parent="RootMargin/Layout/Panels" unique_id=966719872]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-autowrap_mode = 3
 text = "News"
+autowrap_mode = 3
 
-[node name="CargoLoadingScreen" parent="." instance=ExtResource("2_cargo")]
+[node name="CargoLoadingScreen" parent="." unique_id=107664910 instance=ExtResource("2_cargo")]
 unique_name_in_owner = true
 visible = false
+layout_mode = 1
+
+[node name="EditorOpeningPreview" type="Control" parent="." unique_id=784489763]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Background" type="TextureRect" parent="EditorOpeningPreview" unique_id=739265710]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Layout" type="VBoxContainer" parent="EditorOpeningPreview" unique_id=775194093]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 48.0
+offset_bottom = 48.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="TitleLogo" type="TextureRect" parent="EditorOpeningPreview/Layout" unique_id=764883722]
+custom_minimum_size = Vector2(1800, 473)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+texture = ExtResource("4_title_logo")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="StartButton" type="Button" parent="EditorOpeningPreview/Layout" unique_id=384786634]
+custom_minimum_size = Vector2(141, 24)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = SubResource("FontVariation_1rhdn")
+text = "START"
 
 [connection signal="pressed" from="RootMargin/Layout/Buttons/BigRocketButton" to="." method="_on_big_rocket_button_pressed"]
 [connection signal="pressed" from="RootMargin/Layout/Buttons/ShuttleButton" to="." method="_on_shuttle_button_pressed"]

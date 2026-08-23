@@ -1,3 +1,4 @@
+@tool
 extends Control
 
 const GameDataScript := preload("res://scripts/data/GameData.gd")
@@ -23,6 +24,32 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 	"res://audio/music/bg_music3.mp3",
 ]
 
+@export_category("Opening Screen Layout")
+@export_range(-300.0, 300.0, 1.0, "suffix:px") var opening_vertical_offset := 90.0:
+	set(value):
+		opening_vertical_offset = value
+		_update_editor_opening_preview()
+@export_range(0.0, 200.0, 1.0, "suffix:px") var opening_title_button_spacing := 28.0:
+	set(value):
+		opening_title_button_spacing = value
+		_update_editor_opening_preview()
+@export_range(200.0, 1800.0, 1.0, "suffix:px") var opening_title_width := 1448.0:
+	set(value):
+		opening_title_width = value
+		_update_editor_opening_preview()
+@export_range(50.0, 600.0, 1.0, "suffix:px") var opening_title_height := 333.0:
+	set(value):
+		opening_title_height = value
+		_update_editor_opening_preview()
+@export_range(100.0, 600.0, 1.0, "suffix:px") var opening_button_width := 220.0:
+	set(value):
+		opening_button_width = value
+		_update_editor_opening_preview()
+@export_range(24.0, 160.0, 1.0, "suffix:px") var opening_button_height := 44.0:
+	set(value):
+		opening_button_height = value
+		_update_editor_opening_preview()
+
 @onready var root_margin: MarginContainer = $RootMargin
 @onready var cargo_loading_screen: Control = %CargoLoadingScreen
 
@@ -38,6 +65,12 @@ var current_music_index := 0
 
 
 func _ready() -> void:
+	if Engine.is_editor_hint():
+		call_deferred("_update_editor_opening_preview")
+		return
+	var editor_preview := get_node_or_null("EditorOpeningPreview") as Control
+	if editor_preview != null:
+		editor_preview.visible = false
 	_add_scene_background()
 	_add_corner_logo()
 	_start_background_music()
@@ -128,11 +161,14 @@ func _show_opening_screen() -> void:
 func _build_opening_screen() -> Control:
 	var layout := VBoxContainer.new()
 	layout.set_anchors_preset(Control.PRESET_FULL_RECT)
+	layout.offset_top = opening_vertical_offset
+	layout.offset_bottom = opening_vertical_offset
 	layout.alignment = BoxContainer.ALIGNMENT_CENTER
-	layout.add_theme_constant_override("separation", 28)
+	layout.add_theme_constant_override("separation", int(opening_title_button_spacing))
 
 	var logo := TextureRect.new()
-	logo.custom_minimum_size = Vector2(1448, 333)
+	logo.custom_minimum_size = Vector2(opening_title_width, opening_title_height)
+	logo.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	logo.texture = UiAssetsScript.get_title_logo()
 	logo.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -141,13 +177,35 @@ func _build_opening_screen() -> Control:
 
 	var start_button := Button.new()
 	start_button.text = "START"
-	start_button.custom_minimum_size = Vector2(220, 44)
+	start_button.custom_minimum_size = Vector2(opening_button_width, opening_button_height)
+	start_button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	start_button.pressed.connect(_show_faction_select)
 	layout.add_child(start_button)
 
 	UiAssetsScript.apply_text_outline(layout)
 	UiAssetsScript.apply_semibold_font(start_button)
 	return layout
+
+
+func _update_editor_opening_preview() -> void:
+	if not Engine.is_editor_hint() or not is_inside_tree():
+		return
+	var preview := get_node_or_null("EditorOpeningPreview") as Control
+	if preview == null:
+		return
+	preview.visible = true
+	var layout := preview.get_node_or_null("Layout") as VBoxContainer
+	var logo := preview.get_node_or_null("Layout/TitleLogo") as TextureRect
+	var start_button := preview.get_node_or_null("Layout/StartButton") as Button
+	if layout == null or logo == null or start_button == null:
+		return
+	layout.offset_top = opening_vertical_offset
+	layout.offset_bottom = opening_vertical_offset
+	layout.add_theme_constant_override("separation", int(opening_title_button_spacing))
+	logo.custom_minimum_size = Vector2(opening_title_width, opening_title_height)
+	start_button.custom_minimum_size = Vector2(opening_button_width, opening_button_height)
+	UiAssetsScript.apply_text_outline(layout)
+	UiAssetsScript.apply_semibold_font(start_button)
 
 
 func _build_faction_select_screen() -> Control:
