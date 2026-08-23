@@ -57,8 +57,9 @@ script = ExtResource("1_cargo_loading")
 meter_character_spacing = 2
 packing_selected_label_font_size = 20
 packing_selected_label_y = 400.0
-packing_list_top_anchor = 0.12
-packing_list_bottom_anchor = 0.93
+packing_list_bottom_anchor = 0.945
+piece_scrollbar_width_reduction = 2.5
+piece_scrollbar_x_offset = -2.5
 back_button_height = 42.0
 back_button_font_size = 20
 
@@ -1186,11 +1187,11 @@ vertical_alignment = 1
 [node name="ContentRegion" type="Control" parent="RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions" unique_id=1984144237]
 clip_contents = true
 layout_mode = 1
-anchor_top = 0.12
+anchor_top = 0.11
 anchor_right = 1.0
-anchor_bottom = 0.93
+anchor_bottom = 0.945
 offset_left = 40.0
-offset_right = -40.0
+offset_right = -14.0
 grow_horizontal = 2
 
 [node name="PieceScroll" type="ScrollContainer" parent="RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions/ContentRegion" unique_id=1169264651]

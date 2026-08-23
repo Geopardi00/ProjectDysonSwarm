@@ -15,6 +15,10 @@ const ASSIGNMENT_PREVIEW_TINT_ALPHA := 0.68
 const UI_TWEEN_SKIP_META := &"skip_global_button_tween"
 const PACKING_LIST_CONTENT_PATH := \
 	"RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions/ContentRegion"
+const PIECE_SCROLL_PATHS: Array[String] = [
+	"RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll",
+	"RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions/ContentRegion/PieceScroll",
+]
 const METER_LABEL_PATHS: Array[String] = [
 	"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters/CapacityLabel",
 	"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/AssignmentMeters/FuelLabel",
@@ -76,6 +80,16 @@ const MATERIAL_TINTS := {
 	set(value):
 		packing_list_bottom_anchor = value
 		_apply_packing_list_bounds()
+
+@export_category("Piece Scrollbars")
+@export_range(0.5, 8.0, 0.5, "suffix:px") var piece_scrollbar_width_reduction := 2.0:
+	set(value):
+		piece_scrollbar_width_reduction = value
+		_update_piece_scrollbars_from_inspector()
+@export_range(-20.0, 20.0, 0.5, "suffix:px") var piece_scrollbar_x_offset := -2.0:
+	set(value):
+		piece_scrollbar_x_offset = value
+		_update_piece_scrollbars_from_inspector()
 
 @export_category("Back Button")
 @export_range(60.0, 400.0, 1.0, "suffix:px") var back_button_width := 140.0:
@@ -155,6 +169,7 @@ func _ready() -> void:
 	_apply_meter_text_style()
 	_apply_packing_selected_label_style()
 	_apply_packing_list_bounds()
+	_apply_piece_scrollbar_width.call_deferred()
 	_apply_packing_manifest_style()
 	_apply_packing_manifest_style.call_deferred()
 	if Engine.is_editor_hint():
@@ -227,6 +242,34 @@ func _apply_packing_list_bounds() -> void:
 	content_region.anchor_bottom = maxf(packing_list_bottom_anchor, packing_list_top_anchor)
 	content_region.offset_top = 0.0
 	content_region.offset_bottom = 0.0
+
+
+func _update_piece_scrollbars_from_inspector() -> void:
+	if not is_inside_tree():
+		return
+	_apply_piece_scrollbar_width.call_deferred()
+
+
+func _apply_piece_scrollbar_width() -> void:
+	for scroll_path: String in PIECE_SCROLL_PATHS:
+		var scroll := get_node_or_null(scroll_path) as ScrollContainer
+		if scroll == null:
+			continue
+		var scroll_bar := scroll.get_v_scroll_bar()
+		var original_width := scroll_bar.size.x
+		if original_width <= 0.0:
+			continue
+		var adjusted_width := maxf(original_width - piece_scrollbar_width_reduction, 1.0)
+		var actual_width_reduction := original_width - adjusted_width
+		var width_scale := adjusted_width / original_width
+		var scale_delta := 1.0 - width_scale
+		if is_zero_approx(scale_delta):
+			continue
+		# Containers overwrite their children's layout position. Moving the scale
+		# pivot applies the requested visual X offset without fighting that layout.
+		var visual_x_translation := actual_width_reduction + piece_scrollbar_x_offset
+		scroll_bar.pivot_offset.x = visual_x_translation / scale_delta
+		scroll_bar.scale.x = width_scale
 
 
 func _apply_packing_manifest_style() -> void:
