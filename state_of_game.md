@@ -1,6 +1,6 @@
 # Project Dyson Swarm - State of Game
 
-Last updated: 2026-08-23
+Last updated: 2026-08-25
 
 ## Current Prototype Status
 
@@ -83,9 +83,11 @@ Currently wired:
 - Cargo piece images on editor-placeable assignment slots and packing lists.
 - Empty panel textures for vehicle info / available cargo style panels.
 - Vehicle-specific cargo hold panel textures for Big Rocket, Space Shuttle, and SpinLaunch.
+- Assignment now presents the live moonbase material requirements inside `empty_panel02.png` above the cargo hold; panel and text X/Y positions are independently Inspector-tunable.
+- Failed launches use the centered native-size `launch_failure_panel.png`, with failure details inside the artwork and Continue beneath it; panel and text X/Y positions are Inspector-tunable.
 - Options and How To Play share the centered `panel_options.png` artwork at 85% opacity over the normal space background.
 - Background music and sound effects use separate Music and SFX audio buses with independently persisted Options sliders.
-- Buttons play shared hover/click sounds and use global hover/press tweens; cargo material-assignment buttons intentionally keep sounds without tweens.
+- Buttons play shared hover/click sounds and use global hover/press tweens; hover playback has a small Inspector-tunable random pitch variation, while cargo material-assignment buttons intentionally keep sounds without tweens.
 - The opening glitch effect has a synchronized glitch sound.
 - Gameplay screens provide an `Esc` pause overlay with Resume, Options, Quit to Menu, and Exit Game controls.
 - Strategy screen, cargo loading screen, cargo grid view, and cargo hold panel are now scene-backed for easier 2D editor placement.
@@ -138,6 +140,7 @@ Strategy / vehicle selection:
 - Status, news, and vehicle-card text sizes and positions have Inspector controls with live editor preview.
 - `StrategyVehicleIconPlacementPreview.tscn` exists as a small tuning scene for vehicle-card placement.
 - Current vehicle-card pass uses fixed/manual placement to keep icon, stat, and button positions stable.
+- The visible debug row includes test launch-failure and launch-success buttons in addition to news and forced-win controls.
 
 Assignment:
 
@@ -146,7 +149,8 @@ Assignment:
 - Payload, fuel, and warning text have Inspector-controlled font size and character spacing for readability.
 - Selected assignment piece preview tints to the selected copy's assigned material color at 68% opacity.
 - Material buttons and their assigned-unit labels are hand-placeable in the 2D editor.
-- Center: moonbase needs and manually placeable cargo hold panel.
+- Center: moonbase needs inside a dedicated 85%-opacity panel above the manually placeable cargo hold panel.
+- Moonbase panel and text X/Y positions are independently exposed under the Cargo Loading Screen Inspector settings.
 - Right panel: available cargo groups use fixed, editor-placeable icon slots with no runtime text.
 - Assignment cargo group icons are centered inside their slot rectangles; slot rectangles can be hand-placed and the list scrolls from their positions.
 - ASCII piece previews have been removed from the visible list.
@@ -161,6 +165,7 @@ Packing:
 - Center: manually placeable cargo hold panel with functional clickable packing overlay.
 - Right panel: assigned pieces to place render as centered, tinted block previews with no visible text.
 - Cargo hold grid display is horizontally mirrored to match the side-panel piece orientation while keeping the underlying grid data unchanged.
+- A moving-piece preview colors each free cell gray and each overlapping occupied cell red, so partial collisions are readable cell by cell.
 - Rotate is keyboard-only with `R`.
 - Clear placements and launch buttons live under the center cargo hold panel.
 - Assignment and packing cargo hold panel positions are independently hand-tunable but currently matched.
@@ -168,8 +173,11 @@ Packing:
 Launch result / game over:
 
 - The upper-left logo remains a separate overlay.
-- Launch result and win/loss text start lower on the screen to avoid overlapping the logo.
-- The launch result Continue button is narrower, centered, and placed lower under the result text.
+- Successful launch-result text starts lower on the screen to avoid overlapping the logo.
+- Failed launches use a centered 812x781 panel at native resolution and 85% opacity, with the title/details in the upper readable area.
+- The failed-launch Continue button sits below the panel and follows panel X/Y adjustments.
+- Failed-launch panel and text X/Y positions are independently exposed on the Main scene under `Launch Failure Layout`.
+- Win/loss text starts lower on the screen to avoid overlapping the logo.
 
 ## Known Rough Edges
 
@@ -179,6 +187,7 @@ Launch result / game over:
 - Material needs panel is text-first; it can later become icon/progress-bar based.
 - Panel textures may still need exact padding and scale adjustments.
 - Debug buttons are currently visible on the strategy screen.
+- `esc_gear.png` and `button_hover2.wav` are present in the asset tree but are not currently wired into runtime UI/audio.
 
 ## Useful Validation Commands
 
@@ -188,6 +197,7 @@ Run from the project root:
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/CargoSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/CargoUiSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/StrategyScreenSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/LaunchFailurePanelSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/OpeningCutsceneSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/OptionsMenuSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/PauseMenuSmokeTest.gd
@@ -201,6 +211,7 @@ Latest checks passed before this checkpoint:
 - Cargo smoke test passed.
 - Cargo UI smoke test passed.
 - Strategy screen smoke test passed.
+- Launch failure panel smoke test passed.
 - Opening cutscene smoke test passed.
 - Options menu smoke test passed.
 - Pause menu smoke test passed.
@@ -215,6 +226,9 @@ Latest checks passed before this checkpoint:
 - 2026-08-23 checkpoint: Added Music/SFX routing and Options sliders, global UI hover/click sounds, the opening glitch sound, and an `Esc` gameplay pause/options flow.
 - 2026-08-23 checkpoint: Added Options/Exit Game to faction selection and global hover/press button tweens with stable handling for pre-scaled controls.
 - 2026-08-23 checkpoint: Matched packing meter, warning, manifest-button, icon, unit-label, and row geometry to the assignment panel.
+- 2026-08-25 checkpoint: Added the assignment moonbase-needs panel with independent panel/text positioning, refreshed cargo-hold artwork, and made partial packing overlaps readable per cell.
+- 2026-08-25 checkpoint: Added the illustrated failed-launch panel with independent panel/text positioning, placed Continue beneath it, and added strategy debug buttons for failed and successful launch results.
+- 2026-08-25 checkpoint: Added subtle Inspector-tunable random pitch variation to repeated button-hover playback.
 
 ## Suggested Next Steps
 

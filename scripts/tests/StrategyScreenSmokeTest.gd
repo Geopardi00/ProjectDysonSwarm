@@ -34,6 +34,12 @@ func _run() -> void:
 	if not strategy_screen.has_node("Layout/Panels/NewsPanel"):
 		_fail("Strategy screen is missing the right-side news panel.")
 		return
+	if (
+		not strategy_screen.has_node("Layout/DebugRow/DebugLaunchFailureButton")
+		or not strategy_screen.has_node("Layout/DebugRow/DebugLaunchSuccessButton")
+	):
+		_fail("Strategy screen is missing the launch-result debug buttons.")
+		return
 	if strategy_screen.news_label.get_parent().get_parent().get_parent().get_parent().name != "NewsPanel":
 		_fail("Strategy screen news feed is not inside the right-side news panel.")
 		return

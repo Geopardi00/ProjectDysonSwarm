@@ -13,14 +13,11 @@
 [ext_resource type="Texture2D" uid="uid://c0giugw2yagei" path="res://assets/ui/materials/electronics_icon.png" id="10_electronics_icon"]
 [ext_resource type="Texture2D" uid="uid://bu80cuu63ho7" path="res://assets/ui/materials/rare_materials_icon.png" id="11_rare_icon"]
 [ext_resource type="Texture2D" uid="uid://bjrxdj3h0b11a" path="res://assets/ui/materials/propellant_icon.png" id="12_propellant_icon"]
+[ext_resource type="Texture2D" uid="uid://ci17eak0r3yey" path="res://assets/ui/panels/empty_panel02.png" id="13_moonbase_panel"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_outline"]
 outline_size = 4
 outline_color = Color(0, 0, 0, 1)
-
-[sub_resource type="FontVariation" id="FontVariation_yev54"]
-base_font = ExtResource("4_yev54")
-spacing_glyph = 2
 
 [sub_resource type="FontVariation" id="FontVariation_x3rdk"]
 base_font = ExtResource("4_yev54")
@@ -46,6 +43,10 @@ spacing_glyph = 2
 base_font = ExtResource("4_yev54")
 spacing_glyph = 2
 
+[sub_resource type="FontVariation" id="FontVariation_3huh5"]
+base_font = ExtResource("4_yev54")
+spacing_glyph = 2
+
 [node name="CargoLoadingScreen" type="Control" unique_id=715382821]
 layout_mode = 3
 anchors_preset = 15
@@ -54,12 +55,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_cargo_loading")
+moonbase_text_y = 105.0
 meter_character_spacing = 2
 packing_selected_label_font_size = 20
 packing_selected_label_y = 400.0
 packing_list_bottom_anchor = 0.945
 piece_scrollbar_width_reduction = 2.5
 piece_scrollbar_x_offset = -2.5
+packing_pieces_title_x = 11.0
+packing_pieces_title_y = 4.0
 back_button_height = 42.0
 back_button_font_size = 20
 
@@ -202,7 +206,7 @@ offset_bottom = 175.71199
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_yev54")
+theme_override_fonts/font = SubResource("FontVariation_x3rdk")
 theme_override_font_sizes/font_size = 18
 text = "Assigned payload: 50 / 500"
 
@@ -223,7 +227,7 @@ offset_bottom = 248.81271
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_x3rdk")
+theme_override_fonts/font = SubResource("FontVariation_5f7s1")
 theme_override_font_sizes/font_size = 18
 text = "Assigned fuel: 50 / 200"
 
@@ -244,7 +248,7 @@ offset_bottom = 341.62442
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_5f7s1")
+theme_override_fonts/font = SubResource("FontVariation_arohg")
 theme_override_font_sizes/font_size = 18
 text = "Fuel assigned is below required minimum."
 autowrap_mode = 3
@@ -402,11 +406,24 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
+[node name="MoonbaseMaterialPanel" type="TextureRect" parent="RootMargin/Layout/AssignmentPanel/AssignmentCenter" unique_id=105388190]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 0
+offset_left = 1.0
+offset_right = 779.0
+offset_bottom = 385.0
+mouse_filter = 2
+texture = ExtResource("13_moonbase_panel")
+expand_mode = 1
+
 [node name="MoonbaseNeedsLabel" type="Label" parent="RootMargin/Layout/AssignmentPanel/AssignmentCenter" unique_id=1966856836]
 unique_name_in_owner = true
 layout_mode = 0
-offset_right = 760.0
-offset_bottom = 160.0
+offset_left = 64.0
+offset_top = 105.0
+offset_right = 748.0
+offset_bottom = 442.0
 text = "Moonbase material needs"
 label_settings = SubResource("LabelSettings_outline")
 autowrap_mode = 3
@@ -994,7 +1011,7 @@ offset_bottom = 670.6244
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_arohg")
+theme_override_fonts/font = SubResource("FontVariation_4vco7")
 theme_override_font_sizes/font_size = 18
 text = "Not enough fuel placed. Launch will crash."
 autowrap_mode = 3
@@ -1042,7 +1059,7 @@ offset_bottom = 175.71199
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_4vco7")
+theme_override_fonts/font = SubResource("FontVariation_b1t20")
 theme_override_font_sizes/font_size = 18
 text = "Placed payload: 50 / 500"
 
@@ -1063,7 +1080,7 @@ offset_bottom = 248.81271
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_b1t20")
+theme_override_fonts/font = SubResource("FontVariation_keh4i")
 theme_override_font_sizes/font_size = 18
 text = "Placed fuel: 50 / 200"
 
@@ -1085,7 +1102,7 @@ offset_bottom = -324.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_keh4i")
+theme_override_fonts/font = SubResource("FontVariation_3huh5")
 theme_override_font_sizes/font_size = 18
 text = "Fuel assigned is below required minimum."
 autowrap_mode = 3
@@ -1177,11 +1194,14 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 11.0
+offset_top = 4.0
+offset_right = 11.0
+offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 20
 text = "Cargo pieces"
-label_settings = SubResource("LabelSettings_outline")
 vertical_alignment = 1
 
 [node name="ContentRegion" type="Control" parent="RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions" unique_id=1984144237]

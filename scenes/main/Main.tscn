@@ -28,8 +28,8 @@ corner_logo_x = -20.0
 corner_logo_y = -15.0
 corner_logo_width = 408.0
 corner_logo_height = 94.0
+launch_failure_text_y = 106.0
 background_music_volume_percent = 56.0
-button_navigation_delay = null
 
 [node name="RootMargin" type="MarginContainer" parent="." unique_id=755015488]
 layout_mode = 1

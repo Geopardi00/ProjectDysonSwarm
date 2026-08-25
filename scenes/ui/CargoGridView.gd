@@ -14,6 +14,8 @@ const MATERIAL_TINTS := {
 }
 const CARGO_PIECE_BASE_COLOR := Color(0.638, 0.606, 0.568)
 const CARGO_PIECE_TINT_ALPHA := 0.68
+const PREVIEW_AVAILABLE_COLOR := Color(0.88, 0.92, 0.95, 0.42)
+const PREVIEW_BLOCKED_COLOR := Color(1.0, 0.18, 0.12, 0.38)
 
 var packing_state
 var selected_piece: CargoPiece
@@ -144,12 +146,19 @@ func _draw_selected_piece_preview() -> void:
 	if not _is_cell_in_grid(mouse_cell):
 		return
 
-	var can_place: bool = packing_state.grid.can_place_piece(selected_piece, mouse_cell, selected_rotation)
-	var color := Color(0.88, 0.92, 0.95, 0.42) if can_place else Color(1.0, 0.18, 0.12, 0.38)
 	var occupied_cells: Array[Vector2i] = packing_state.grid.get_occupied_cells(selected_piece.cells, mouse_cell, selected_rotation)
 	for cell: Vector2i in occupied_cells:
 		if _is_cell_in_grid(cell):
-			_draw_cell(cell, color, true)
+			_draw_cell(cell, _get_selected_preview_cell_color(cell), true)
+
+
+func _get_selected_preview_cell_color(cell: Vector2i) -> Color:
+	var placed_piece: Dictionary = packing_state.get_placed_piece_at_cell(cell)
+	if placed_piece.is_empty():
+		return PREVIEW_AVAILABLE_COLOR
+	if selected_piece != null and String(placed_piece.get("instance_id", "")) == selected_piece.instance_id:
+		return PREVIEW_AVAILABLE_COLOR
+	return PREVIEW_BLOCKED_COLOR
 
 
 func _draw_cell(cell: Vector2i, color: Color, filled: bool) -> void:

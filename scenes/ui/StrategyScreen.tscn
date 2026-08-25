@@ -759,6 +759,24 @@ theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Add Test News"
 
+[node name="DebugLaunchFailureButton" type="Button" parent="Layout/DebugRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
+text = "Test Launch Failure"
+
+[node name="DebugLaunchSuccessButton" type="Button" parent="Layout/DebugRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("2_0kx2o")
+text = "Test Launch Success"
+
 [node name="DebugForcePlayerWinButton" type="Button" parent="Layout/DebugRow" unique_id=138862066]
 unique_name_in_owner = true
 layout_mode = 2

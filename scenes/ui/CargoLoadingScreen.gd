@@ -15,6 +15,12 @@ const ASSIGNMENT_PREVIEW_TINT_ALPHA := 0.68
 const UI_TWEEN_SKIP_META := &"skip_global_button_tween"
 const PACKING_LIST_CONTENT_PATH := \
 	"RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions/ContentRegion"
+const PACKING_PIECES_TITLE_PATH := \
+	"RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions/HeaderRegion/PiecesTitle"
+const MOONBASE_PANEL_PATH := \
+	"RootMargin/Layout/AssignmentPanel/AssignmentCenter/MoonbaseMaterialPanel"
+const MOONBASE_TEXT_PATH := \
+	"RootMargin/Layout/AssignmentPanel/AssignmentCenter/MoonbaseNeedsLabel"
 const PIECE_SCROLL_PATHS: Array[String] = [
 	"RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll",
 	"RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions/ContentRegion/PieceScroll",
@@ -46,6 +52,24 @@ const MATERIAL_TINTS := {
 	"rare_metals": Color("#8F55D9"),
 	"propellant": Color("#19B7B2"),
 }
+
+@export_category("Moonbase Material Panel")
+@export_range(-400.0, 400.0, 1.0, "suffix:px") var moonbase_panel_x := 1.0:
+	set(value):
+		moonbase_panel_x = value
+		_apply_moonbase_panel_layout()
+@export_range(-400.0, 600.0, 1.0, "suffix:px") var moonbase_panel_y := 0.0:
+	set(value):
+		moonbase_panel_y = value
+		_apply_moonbase_panel_layout()
+@export_range(-400.0, 800.0, 1.0, "suffix:px") var moonbase_text_x := 64.0:
+	set(value):
+		moonbase_text_x = value
+		_apply_moonbase_panel_layout()
+@export_range(-400.0, 600.0, 1.0, "suffix:px") var moonbase_text_y := 40.0:
+	set(value):
+		moonbase_text_y = value
+		_apply_moonbase_panel_layout()
 
 @export_category("Meter Text Readability")
 @export_range(10, 32, 1, "suffix:px") var meter_text_font_size := 18:
@@ -90,6 +114,16 @@ const MATERIAL_TINTS := {
 	set(value):
 		piece_scrollbar_x_offset = value
 		_update_piece_scrollbars_from_inspector()
+
+@export_category("Packing Pieces Title")
+@export_range(-200.0, 200.0, 1.0, "suffix:px") var packing_pieces_title_x := 0.0:
+	set(value):
+		packing_pieces_title_x = value
+		_apply_packing_pieces_title_position()
+@export_range(-100.0, 100.0, 1.0, "suffix:px") var packing_pieces_title_y := 0.0:
+	set(value):
+		packing_pieces_title_y = value
+		_apply_packing_pieces_title_position()
 
 @export_category("Back Button")
 @export_range(60.0, 400.0, 1.0, "suffix:px") var back_button_width := 140.0:
@@ -165,10 +199,12 @@ var meter_sets: Array[Dictionary] = []
 
 
 func _ready() -> void:
+	_apply_moonbase_panel_layout()
 	_apply_back_button_style()
 	_apply_meter_text_style()
 	_apply_packing_selected_label_style()
 	_apply_packing_list_bounds()
+	_apply_packing_pieces_title_position()
 	_apply_piece_scrollbar_width.call_deferred()
 	_apply_packing_manifest_style()
 	_apply_packing_manifest_style.call_deferred()
@@ -178,6 +214,15 @@ func _ready() -> void:
 	_build_material_buttons()
 	UiAssetsScript.apply_text_outline(self)
 	visible = false
+
+
+func _apply_moonbase_panel_layout() -> void:
+	var panel := get_node_or_null(MOONBASE_PANEL_PATH) as Control
+	if panel != null:
+		panel.position = Vector2(moonbase_panel_x, moonbase_panel_y)
+	var label := get_node_or_null(MOONBASE_TEXT_PATH) as Control
+	if label != null:
+		label.position = Vector2(moonbase_text_x, moonbase_text_y)
 
 
 func _update_editor_meter_text() -> void:
@@ -242,6 +287,16 @@ func _apply_packing_list_bounds() -> void:
 	content_region.anchor_bottom = maxf(packing_list_bottom_anchor, packing_list_top_anchor)
 	content_region.offset_top = 0.0
 	content_region.offset_bottom = 0.0
+
+
+func _apply_packing_pieces_title_position() -> void:
+	var title := get_node_or_null(PACKING_PIECES_TITLE_PATH) as Label
+	if title == null:
+		return
+	title.offset_left = packing_pieces_title_x
+	title.offset_top = packing_pieces_title_y
+	title.offset_right = packing_pieces_title_x
+	title.offset_bottom = packing_pieces_title_y
 
 
 func _update_piece_scrollbars_from_inspector() -> void:
@@ -871,7 +926,9 @@ func _get_material_tint(material: String) -> Color:
 
 
 func _format_moonbase_needs() -> String:
-	var lines: Array[String] = ["Moonbase material needs"]
+	# Keep the title in the panel's header strip and start the material rows
+	# below it in the dark content region.
+	var lines: Array[String] = ["Moonbase material needs", ""]
 	for material: String in GameDataScript.CONSTRUCTION_MATERIALS:
 		var remaining := int(moonbase_remaining_requirements.get(material, GameDataScript.MOONBASE_REQUIREMENTS.get(material, 0)))
 		var total := int(GameDataScript.MOONBASE_REQUIREMENTS.get(material, 0))

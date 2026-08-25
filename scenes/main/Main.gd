@@ -13,6 +13,7 @@ const OPENING_CUTSCENE_PATH := "res://assets/cutscene/0001-0360.ogv"
 const CUTSCENE_EXPLOSION_SOUND_PATH := "res://audio/sfx/explosion.wav"
 const BUTTON_CLICK_SOUND := preload("res://audio/sfx/button_click.wav")
 const BUTTON_HOVER_SOUND := preload("res://audio/sfx/button_hover.wav")
+const LAUNCH_FAILURE_PANEL := preload("res://assets/ui/panels/launch_failure_panel.png")
 const DEFAULT_SETTINGS_PATH := "user://settings.cfg"
 const SETTINGS_SAVE_DELAY := 0.25
 const UI_SOUND_CONNECTED_META := &"dyson_ui_sound_connected"
@@ -30,6 +31,8 @@ const SHOW_DEBUG_ACTIONS := true
 const LAUNCH_RESULT_MARGIN_TOP := 112
 const LAUNCH_RESULT_BUTTON_WIDTH := 220
 const LAUNCH_RESULT_BUTTON_HEIGHT := 44
+const LAUNCH_FAILURE_PANEL_SIZE := Vector2(812.0, 781.0)
+const LAUNCH_FAILURE_TEXT_SIZE := Vector2(684.0, 230.0)
 const GAME_OVER_MARGIN_TOP := 112
 const FACTION_SELECT_LOGO_SIZE := Vector2(256, 256)
 const FACTION_LOGO_HIGHLIGHT_SCALE := Vector2(1.08, 1.08)
@@ -104,6 +107,25 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 	set(value):
 		button_click_volume_percent = value
 		_apply_ui_sound_volumes()
+@export_range(0.0, 10.0, 0.1, "suffix:%") var button_hover_pitch_variation_percent := 3.0
+
+@export_category("Launch Failure Layout")
+@export_range(-800.0, 800.0, 1.0, "suffix:px") var launch_failure_panel_x := 0.0:
+	set(value):
+		launch_failure_panel_x = value
+		_apply_launch_failure_layout()
+@export_range(-500.0, 500.0, 1.0, "suffix:px") var launch_failure_panel_y := 0.0:
+	set(value):
+		launch_failure_panel_y = value
+		_apply_launch_failure_layout()
+@export_range(-400.0, 800.0, 1.0, "suffix:px") var launch_failure_text_x := 64.0:
+	set(value):
+		launch_failure_text_x = value
+		_apply_launch_failure_layout()
+@export_range(-400.0, 700.0, 1.0, "suffix:px") var launch_failure_text_y := 34.0:
+	set(value):
+		launch_failure_text_y = value
+		_apply_launch_failure_layout()
 
 @export_category("Background Music")
 @export_range(0.0, 100.0, 1.0, "suffix:%") var background_music_volume_percent := 100.0:
@@ -141,6 +163,9 @@ var cutscene_explosion_player: AudioStreamPlayer
 var cutscene_explosion_played := false
 var button_click_player: AudioStreamPlayer
 var button_hover_player: AudioStreamPlayer
+var launch_failure_panel: TextureRect
+var launch_failure_text: Control
+var launch_failure_continue_button: Button
 var settings_file_path := DEFAULT_SETTINGS_PATH
 var master_volume_percent := 100.0
 var music_bus_volume_percent := 100.0
@@ -358,6 +383,8 @@ func _queue_button_navigation(action: Callable) -> void:
 func _on_ui_button_hovered(button: Button) -> void:
 	if button.disabled or not button.is_visible_in_tree() or button_hover_player == null:
 		return
+	var pitch_variation := button_hover_pitch_variation_percent / 100.0
+	button_hover_player.pitch_scale = randf_range(1.0 - pitch_variation, 1.0 + pitch_variation)
 	button_hover_player.play()
 
 
@@ -1027,6 +1054,8 @@ func _show_strategy_screen() -> void:
 	strategy_screen.debug_add_news_requested.connect(_on_debug_add_news_pressed)
 	strategy_screen.debug_force_player_win_requested.connect(_queue_button_navigation.bind(_on_debug_force_player_win_pressed))
 	strategy_screen.debug_force_cpu_win_requested.connect(_queue_button_navigation.bind(_on_debug_force_cpu_win_pressed))
+	strategy_screen.debug_launch_failure_requested.connect(_queue_button_navigation.bind(_on_debug_launch_failure_pressed))
+	strategy_screen.debug_launch_success_requested.connect(_queue_button_navigation.bind(_on_debug_launch_success_pressed))
 	_set_active_screen(strategy_screen)
 	strategy_screen.setup(game_state.get_summary(), SHOW_DEBUG_ACTIONS)
 
@@ -1036,9 +1065,20 @@ func _show_launch_result(result: Dictionary) -> void:
 	cargo_loading_screen.visible = false
 	_set_corner_logo_visible(true)
 	_set_active_screen(_build_launch_result_screen(result))
+	if not bool(result.get("success", false)):
+		launch_failure_panel = active_screen.get_node("LaunchFailurePanel") as TextureRect
+		launch_failure_text = launch_failure_panel.get_node("FailureText") as Control
+		launch_failure_continue_button = active_screen.get_node("ContinueButton") as Button
+		_apply_launch_failure_layout()
 
 
 func _build_launch_result_screen(result: Dictionary) -> Control:
+	launch_failure_panel = null
+	launch_failure_text = null
+	launch_failure_continue_button = null
+	if not bool(result.get("success", false)):
+		return _build_launch_failure_screen(result)
+
 	var screen := Control.new()
 	screen.set_anchors_preset(Control.PRESET_FULL_RECT)
 
@@ -1076,6 +1116,84 @@ func _build_launch_result_screen(result: Dictionary) -> Control:
 
 	UiAssetsScript.apply_text_outline(screen)
 	return screen
+
+
+func _build_launch_failure_screen(result: Dictionary) -> Control:
+	var screen := Control.new()
+	screen.set_anchors_preset(Control.PRESET_FULL_RECT)
+
+	var panel := TextureRect.new()
+	panel.name = "LaunchFailurePanel"
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.offset_left = -LAUNCH_FAILURE_PANEL_SIZE.x * 0.5 + launch_failure_panel_x
+	panel.offset_top = -LAUNCH_FAILURE_PANEL_SIZE.y * 0.5 + launch_failure_panel_y
+	panel.offset_right = LAUNCH_FAILURE_PANEL_SIZE.x * 0.5 + launch_failure_panel_x
+	panel.offset_bottom = LAUNCH_FAILURE_PANEL_SIZE.y * 0.5 + launch_failure_panel_y
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.texture = LAUNCH_FAILURE_PANEL
+	panel.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	panel.modulate.a = 0.85
+	screen.add_child(panel)
+
+	var text_group := VBoxContainer.new()
+	text_group.name = "FailureText"
+	text_group.position = Vector2(launch_failure_text_x, launch_failure_text_y)
+	text_group.size = LAUNCH_FAILURE_TEXT_SIZE
+	text_group.add_theme_constant_override("separation", 28)
+	panel.add_child(text_group)
+
+	var title := Label.new()
+	title.name = "Title"
+	title.text = "Launch Failure"
+	title.add_theme_font_size_override("font_size", 28)
+	text_group.add_child(title)
+
+	var details := Label.new()
+	details.name = "Details"
+	details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	details.text = _format_launch_result(result)
+	text_group.add_child(details)
+
+	var continue_button := Button.new()
+	continue_button.name = "ContinueButton"
+	continue_button.text = "Continue"
+	continue_button.set_anchors_preset(Control.PRESET_CENTER)
+	continue_button.offset_left = -LAUNCH_RESULT_BUTTON_WIDTH * 0.5 + launch_failure_panel_x
+	continue_button.offset_top = LAUNCH_FAILURE_PANEL_SIZE.y * 0.5 + 16.0 + launch_failure_panel_y
+	continue_button.offset_right = LAUNCH_RESULT_BUTTON_WIDTH * 0.5 + launch_failure_panel_x
+	continue_button.offset_bottom = (
+		LAUNCH_FAILURE_PANEL_SIZE.y * 0.5
+		+ 16.0
+		+ LAUNCH_RESULT_BUTTON_HEIGHT
+		+ launch_failure_panel_y
+	)
+	continue_button.pressed.connect(_queue_button_navigation.bind(_on_result_continue_pressed))
+	screen.add_child(continue_button)
+
+	UiAssetsScript.apply_text_outline(screen)
+	return screen
+
+
+func _apply_launch_failure_layout() -> void:
+	if is_instance_valid(launch_failure_panel):
+		launch_failure_panel.offset_left = -LAUNCH_FAILURE_PANEL_SIZE.x * 0.5 + launch_failure_panel_x
+		launch_failure_panel.offset_top = -LAUNCH_FAILURE_PANEL_SIZE.y * 0.5 + launch_failure_panel_y
+		launch_failure_panel.offset_right = LAUNCH_FAILURE_PANEL_SIZE.x * 0.5 + launch_failure_panel_x
+		launch_failure_panel.offset_bottom = LAUNCH_FAILURE_PANEL_SIZE.y * 0.5 + launch_failure_panel_y
+	if is_instance_valid(launch_failure_text):
+		launch_failure_text.position = Vector2(launch_failure_text_x, launch_failure_text_y)
+	if is_instance_valid(launch_failure_continue_button):
+		launch_failure_continue_button.offset_left = -LAUNCH_RESULT_BUTTON_WIDTH * 0.5 + launch_failure_panel_x
+		launch_failure_continue_button.offset_top = (
+			LAUNCH_FAILURE_PANEL_SIZE.y * 0.5 + 16.0 + launch_failure_panel_y
+		)
+		launch_failure_continue_button.offset_right = LAUNCH_RESULT_BUTTON_WIDTH * 0.5 + launch_failure_panel_x
+		launch_failure_continue_button.offset_bottom = (
+			LAUNCH_FAILURE_PANEL_SIZE.y * 0.5
+			+ 16.0
+			+ LAUNCH_RESULT_BUTTON_HEIGHT
+			+ launch_failure_panel_y
+		)
 
 
 func _show_game_over_screen() -> void:
@@ -1203,6 +1321,14 @@ func _on_main_menu_pressed() -> void:
 func _on_debug_add_news_pressed() -> void:
 	game_state.news.add_message("Debug bulletin: mission control confirms the news printer still works.")
 	_show_strategy_screen()
+
+
+func _on_debug_launch_failure_pressed() -> void:
+	test_failed_rocket()
+
+
+func _on_debug_launch_success_pressed() -> void:
+	test_big_rocket_success()
 
 
 func _on_debug_force_player_win_pressed() -> void:

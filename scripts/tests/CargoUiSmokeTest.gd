@@ -48,6 +48,33 @@ func _run() -> void:
 		return
 	screen.button_navigation_delay = 0.08
 	var assignment_panel := screen.get_node("RootMargin/Layout/AssignmentPanel") as HBoxContainer
+	var moonbase_panel := screen.get_node(
+		"RootMargin/Layout/AssignmentPanel/AssignmentCenter/MoonbaseMaterialPanel"
+	) as TextureRect
+	var moonbase_label := screen.get_node(
+		"RootMargin/Layout/AssignmentPanel/AssignmentCenter/MoonbaseNeedsLabel"
+	) as Label
+	if moonbase_panel.texture == null or not moonbase_panel.texture.resource_path.ends_with("empty_panel02.png"):
+		_fail("Cargo screen did not use empty_panel02.png for the moonbase material panel.")
+		return
+	if moonbase_panel.size != Vector2(778.0, 385.0) or moonbase_panel.texture.get_size() != Vector2(778.0, 385.0):
+		_fail("Moonbase material panel did not retain the PNG's native 778x385 size.")
+		return
+	if not is_equal_approx(moonbase_panel.modulate.a, 0.85):
+		_fail("Moonbase material panel opacity did not match the other cargo panels.")
+		return
+	var original_moonbase_panel_position := moonbase_panel.position
+	var original_moonbase_text_position := moonbase_label.position
+	screen.moonbase_panel_x += 7.0
+	screen.moonbase_panel_y += 9.0
+	screen.moonbase_text_x += 11.0
+	screen.moonbase_text_y += 13.0
+	if moonbase_panel.position != original_moonbase_panel_position + Vector2(7.0, 9.0):
+		_fail("Moonbase panel Inspector position controls did not update live.")
+		return
+	if moonbase_label.position != original_moonbase_text_position + Vector2(11.0, 13.0):
+		_fail("Moonbase text Inspector position controls did not update live.")
+		return
 	var assignment_info_margin := screen.get_node("RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin") as MarginContainer
 	var packing_info_margin := screen.get_node("RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin") as MarginContainer
 	if (
@@ -216,6 +243,35 @@ func _run() -> void:
 	if screen.packing_selected_material_preview.visible:
 		_fail("Packing material preview was visible before a piece was selected.")
 		return
+
+	if not screen.packing_state.place_piece(pieces[0].instance_id, Vector2i.ZERO, 0):
+		_fail("Could not prepare a placed piece for the partial-overlap preview test.")
+		return
+	var placed_test_piece: Dictionary = screen.packing_state.get_placed_pieces()[0]
+	var overlap_cell: Vector2i = placed_test_piece.get("occupied_cells", [Vector2i.ZERO])[0]
+	var clear_cell := Vector2i(-1, -1)
+	for x: int in range(screen.packing_state.grid.width):
+		for y: int in range(screen.packing_state.grid.height):
+			var candidate := Vector2i(x, y)
+			if screen.packing_state.get_placed_piece_at_cell(candidate).is_empty():
+				clear_cell = candidate
+				break
+		if clear_cell != Vector2i(-1, -1):
+			break
+	screen.packing_grid_view.set_selected_piece(pieces[1], 0)
+	var grid_overlay: CargoGridView = screen.packing_grid_view.grid_overlay
+	if grid_overlay._get_selected_preview_cell_color(overlap_cell) != Color(1.0, 0.18, 0.12, 0.38):
+		_fail("An overlapping movable-piece cell did not use the red blocked color.")
+		return
+	if (
+		clear_cell == Vector2i(-1, -1)
+		or grid_overlay._get_selected_preview_cell_color(clear_cell)
+		!= Color(0.88, 0.92, 0.95, 0.42)
+	):
+		_fail("A clear movable-piece cell did not remain gray.")
+		return
+	screen.packing_state.remove_piece(pieces[0].instance_id)
+	screen.packing_grid_view.set_selected_piece(null, 0)
 
 	for index: int in range(TEST_MATERIALS.size()):
 		var material := TEST_MATERIALS[index]

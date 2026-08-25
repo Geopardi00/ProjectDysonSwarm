@@ -7,6 +7,8 @@ signal reset_requested
 signal debug_add_news_requested
 signal debug_force_player_win_requested
 signal debug_force_cpu_win_requested
+signal debug_launch_failure_requested
+signal debug_launch_success_requested
 
 const GameDataScript := preload("res://scripts/data/GameData.gd")
 const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
@@ -258,6 +260,8 @@ func _ready() -> void:
 	%DebugAddNewsButton.pressed.connect(debug_add_news_requested.emit)
 	%DebugForcePlayerWinButton.pressed.connect(debug_force_player_win_requested.emit)
 	%DebugForceCpuWinButton.pressed.connect(debug_force_cpu_win_requested.emit)
+	%DebugLaunchFailureButton.pressed.connect(debug_launch_failure_requested.emit)
+	%DebugLaunchSuccessButton.pressed.connect(debug_launch_success_requested.emit)
 
 	for vehicle_id: String in vehicle_cards.keys():
 		var card: Dictionary = vehicle_cards[vehicle_id]

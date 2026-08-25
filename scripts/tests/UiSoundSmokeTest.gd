@@ -54,9 +54,18 @@ func _run() -> void:
 		return
 
 	main.button_hover_player.stop()
+	main.button_hover_pitch_variation_percent = 3.0
 	dynamic_button.mouse_entered.emit()
 	if not main.button_hover_player.playing:
 		_fail(main, "Button hover did not play the hover sound.")
+		return
+	if main.button_hover_player.pitch_scale < 0.97 or main.button_hover_player.pitch_scale > 1.03:
+		_fail(main, "Button hover pitch variation exceeded its configured range.")
+		return
+	main.button_hover_pitch_variation_percent = 0.0
+	dynamic_button.mouse_entered.emit()
+	if not is_equal_approx(main.button_hover_player.pitch_scale, 1.0):
+		_fail(main, "Disabling button hover pitch variation did not restore neutral pitch.")
 		return
 
 	main.button_click_player.stop()
