@@ -14,6 +14,9 @@ const CUTSCENE_EXPLOSION_SOUND_PATH := "res://audio/sfx/explosion.wav"
 const BUTTON_CLICK_SOUND := preload("res://audio/sfx/button_click.wav")
 const BUTTON_HOVER_SOUND := preload("res://audio/sfx/button_hover.wav")
 const LAUNCH_FAILURE_PANEL := preload("res://assets/ui/panels/launch_failure_panel.png")
+const LAUNCH_SUCCESSFUL_PANEL := preload("res://assets/ui/panels/launch_succesful_panel.png")
+const RACE_WON_PANEL := preload("res://assets/ui/panels/race_won_panel.png")
+const RACE_LOST_PANEL := preload("res://assets/ui/panels/race_lost_panel.png")
 const DEFAULT_SETTINGS_PATH := "user://settings.cfg"
 const SETTINGS_SAVE_DELAY := 0.25
 const UI_SOUND_CONNECTED_META := &"dyson_ui_sound_connected"
@@ -28,12 +31,14 @@ const MUSIC_BUS_NAME := &"Music"
 const SFX_BUS_NAME := &"SFX"
 
 const SHOW_DEBUG_ACTIONS := true
-const LAUNCH_RESULT_MARGIN_TOP := 112
 const LAUNCH_RESULT_BUTTON_WIDTH := 220
 const LAUNCH_RESULT_BUTTON_HEIGHT := 44
 const LAUNCH_FAILURE_PANEL_SIZE := Vector2(812.0, 781.0)
 const LAUNCH_FAILURE_TEXT_SIZE := Vector2(684.0, 230.0)
-const GAME_OVER_MARGIN_TOP := 112
+const GAME_OVER_PANEL_SIZE := Vector2(812.0, 781.0)
+const GAME_OVER_TEXT_SIZE := Vector2(684.0, 230.0)
+const GAME_OVER_BUTTON_ROW_SIZE := Vector2(292.0, 44.0)
+const GAME_OVER_BUTTON_SIZE := Vector2(140.0, 44.0)
 const FACTION_SELECT_LOGO_SIZE := Vector2(256, 256)
 const FACTION_LOGO_HIGHLIGHT_SCALE := Vector2(1.08, 1.08)
 const FACTION_LOGO_NORMAL_SCALE := Vector2.ONE
@@ -109,7 +114,7 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 		_apply_ui_sound_volumes()
 @export_range(0.0, 10.0, 0.1, "suffix:%") var button_hover_pitch_variation_percent := 3.0
 
-@export_category("Launch Failure Layout")
+@export_category("Launch Result Panel Layout")
 @export_range(-800.0, 800.0, 1.0, "suffix:px") var launch_failure_panel_x := 0.0:
 	set(value):
 		launch_failure_panel_x = value
@@ -126,6 +131,24 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 	set(value):
 		launch_failure_text_y = value
 		_apply_launch_failure_layout()
+
+@export_category("Game Over Panel Layout")
+@export_range(-800.0, 800.0, 1.0, "suffix:px") var game_over_panel_x := 0.0:
+	set(value):
+		game_over_panel_x = value
+		_apply_game_over_layout()
+@export_range(-500.0, 500.0, 1.0, "suffix:px") var game_over_panel_y := 0.0:
+	set(value):
+		game_over_panel_y = value
+		_apply_game_over_layout()
+@export_range(-400.0, 800.0, 1.0, "suffix:px") var game_over_text_x := 64.0:
+	set(value):
+		game_over_text_x = value
+		_apply_game_over_layout()
+@export_range(-400.0, 700.0, 1.0, "suffix:px") var game_over_text_y := 106.0:
+	set(value):
+		game_over_text_y = value
+		_apply_game_over_layout()
 
 @export_category("Background Music")
 @export_range(0.0, 100.0, 1.0, "suffix:%") var background_music_volume_percent := 100.0:
@@ -166,6 +189,9 @@ var button_hover_player: AudioStreamPlayer
 var launch_failure_panel: TextureRect
 var launch_failure_text: Control
 var launch_failure_continue_button: Button
+var game_over_panel: TextureRect
+var game_over_text: Control
+var game_over_button_row: Control
 var settings_file_path := DEFAULT_SETTINGS_PATH
 var master_volume_percent := 100.0
 var music_bus_volume_percent := 100.0
@@ -1065,78 +1091,65 @@ func _show_launch_result(result: Dictionary) -> void:
 	cargo_loading_screen.visible = false
 	_set_corner_logo_visible(true)
 	_set_active_screen(_build_launch_result_screen(result))
-	if not bool(result.get("success", false)):
-		launch_failure_panel = active_screen.get_node("LaunchFailurePanel") as TextureRect
-		launch_failure_text = launch_failure_panel.get_node("FailureText") as Control
-		launch_failure_continue_button = active_screen.get_node("ContinueButton") as Button
-		_apply_launch_failure_layout()
+	var successful := bool(result.get("success", false))
+	var panel_name := "LaunchSuccessfulPanel" if successful else "LaunchFailurePanel"
+	var text_name := "SuccessText" if successful else "FailureText"
+	launch_failure_panel = active_screen.get_node(panel_name) as TextureRect
+	launch_failure_text = launch_failure_panel.get_node(text_name) as Control
+	launch_failure_continue_button = active_screen.get_node("ContinueButton") as Button
+	_apply_launch_failure_layout()
 
 
 func _build_launch_result_screen(result: Dictionary) -> Control:
 	launch_failure_panel = null
 	launch_failure_text = null
 	launch_failure_continue_button = null
-	if not bool(result.get("success", false)):
-		return _build_launch_failure_screen(result)
-
-	var screen := Control.new()
-	screen.set_anchors_preset(Control.PRESET_FULL_RECT)
-
-	var text_margin := MarginContainer.new()
-	text_margin.set_anchors_preset(Control.PRESET_FULL_RECT)
-	text_margin.add_theme_constant_override("margin_left", 24)
-	text_margin.add_theme_constant_override("margin_top", LAUNCH_RESULT_MARGIN_TOP)
-	text_margin.add_theme_constant_override("margin_right", 24)
-	text_margin.add_theme_constant_override("margin_bottom", 24)
-	screen.add_child(text_margin)
-
-	var layout := VBoxContainer.new()
-	layout.add_theme_constant_override("separation", 12)
-	text_margin.add_child(layout)
-
-	var title := Label.new()
-	title.text = "Launch Result"
-	title.add_theme_font_size_override("font_size", 28)
-	layout.add_child(title)
-
-	var details := Label.new()
-	details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	details.text = _format_launch_result(result)
-	layout.add_child(details)
-
-	var continue_button := Button.new()
-	continue_button.text = "Continue"
-	continue_button.set_anchors_preset(Control.PRESET_CENTER)
-	continue_button.offset_left = -LAUNCH_RESULT_BUTTON_WIDTH * 0.5
-	continue_button.offset_top = -LAUNCH_RESULT_BUTTON_HEIGHT * 0.5
-	continue_button.offset_right = LAUNCH_RESULT_BUTTON_WIDTH * 0.5
-	continue_button.offset_bottom = LAUNCH_RESULT_BUTTON_HEIGHT * 0.5
-	continue_button.pressed.connect(_queue_button_navigation.bind(_on_result_continue_pressed))
-	screen.add_child(continue_button)
-
-	UiAssetsScript.apply_text_outline(screen)
-	return screen
+	if bool(result.get("success", false)):
+		return _build_illustrated_launch_result_screen(
+			result,
+			LAUNCH_SUCCESSFUL_PANEL,
+			"LaunchSuccessfulPanel",
+			"SuccessText",
+			"Launch Successful"
+		)
+	return _build_launch_failure_screen(result)
 
 
 func _build_launch_failure_screen(result: Dictionary) -> Control:
+	return _build_illustrated_launch_result_screen(
+		result,
+		LAUNCH_FAILURE_PANEL,
+		"LaunchFailurePanel",
+		"FailureText",
+		"Launch Failure"
+	)
+
+
+func _build_illustrated_launch_result_screen(
+	result: Dictionary,
+	panel_texture: Texture2D,
+	panel_name: String,
+	text_name: String,
+	title_text: String
+) -> Control:
 	var screen := Control.new()
 	screen.set_anchors_preset(Control.PRESET_FULL_RECT)
 
 	var panel := TextureRect.new()
-	panel.name = "LaunchFailurePanel"
+	panel.name = panel_name
 	panel.set_anchors_preset(Control.PRESET_CENTER)
 	panel.offset_left = -LAUNCH_FAILURE_PANEL_SIZE.x * 0.5 + launch_failure_panel_x
 	panel.offset_top = -LAUNCH_FAILURE_PANEL_SIZE.y * 0.5 + launch_failure_panel_y
 	panel.offset_right = LAUNCH_FAILURE_PANEL_SIZE.x * 0.5 + launch_failure_panel_x
 	panel.offset_bottom = LAUNCH_FAILURE_PANEL_SIZE.y * 0.5 + launch_failure_panel_y
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	panel.texture = LAUNCH_FAILURE_PANEL
+	panel.texture = panel_texture
 	panel.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	panel.modulate.a = 0.85
 	screen.add_child(panel)
 
 	var text_group := VBoxContainer.new()
-	text_group.name = "FailureText"
+	text_group.name = text_name
 	text_group.position = Vector2(launch_failure_text_x, launch_failure_text_y)
 	text_group.size = LAUNCH_FAILURE_TEXT_SIZE
 	text_group.add_theme_constant_override("separation", 28)
@@ -1144,7 +1157,7 @@ func _build_launch_failure_screen(result: Dictionary) -> Control:
 
 	var title := Label.new()
 	title.name = "Title"
-	title.text = "Launch Failure"
+	title.text = title_text
 	title.add_theme_font_size_override("font_size", 28)
 	text_group.add_child(title)
 
@@ -1200,42 +1213,101 @@ func _show_game_over_screen() -> void:
 	cargo_loading_screen.visible = false
 	_set_corner_logo_visible(true)
 	_set_active_screen(_build_game_over_screen())
+	game_over_panel = active_screen.get_node("GameOverPanel") as TextureRect
+	game_over_text = game_over_panel.get_node("GameOverText") as Control
+	game_over_button_row = active_screen.get_node("GameOverButtons") as Control
+	_apply_game_over_layout()
 
 
 func _build_game_over_screen() -> Control:
 	var summary := game_state.get_summary()
-	var layout := VBoxContainer.new()
-	layout.add_theme_constant_override("separation", 12)
+	var player_won := bool(summary["player_won"])
+	var screen := Control.new()
+	screen.set_anchors_preset(Control.PRESET_FULL_RECT)
+
+	var panel := TextureRect.new()
+	panel.name = "GameOverPanel"
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.offset_left = -GAME_OVER_PANEL_SIZE.x * 0.5 + game_over_panel_x
+	panel.offset_top = -GAME_OVER_PANEL_SIZE.y * 0.5 + game_over_panel_y
+	panel.offset_right = GAME_OVER_PANEL_SIZE.x * 0.5 + game_over_panel_x
+	panel.offset_bottom = GAME_OVER_PANEL_SIZE.y * 0.5 + game_over_panel_y
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.texture = RACE_WON_PANEL if player_won else RACE_LOST_PANEL
+	panel.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	panel.modulate.a = 0.85
+	screen.add_child(panel)
+
+	var text_group := VBoxContainer.new()
+	text_group.name = "GameOverText"
+	text_group.position = Vector2(game_over_text_x, game_over_text_y)
+	text_group.size = GAME_OVER_TEXT_SIZE
+	text_group.add_theme_constant_override("separation", 28)
+	panel.add_child(text_group)
 
 	var title := Label.new()
+	title.name = "Title"
 	title.add_theme_font_size_override("font_size", 32)
-	if bool(summary["player_won"]):
-		title.text = "Victory"
-	else:
-		title.text = "Race Lost"
-	layout.add_child(title)
+	title.text = "Victory" if player_won else "Race Lost"
+	text_group.add_child(title)
 
 	var details := Label.new()
+	details.name = "Details"
 	details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	details.text = _format_game_over(summary)
-	layout.add_child(details)
+	text_group.add_child(details)
 
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 8)
-	layout.add_child(row)
+	row.name = "GameOverButtons"
+	row.set_anchors_preset(Control.PRESET_CENTER)
+	row.offset_left = -GAME_OVER_BUTTON_ROW_SIZE.x * 0.5 + game_over_panel_x
+	row.offset_top = GAME_OVER_PANEL_SIZE.y * 0.5 + 16.0 + game_over_panel_y
+	row.offset_right = GAME_OVER_BUTTON_ROW_SIZE.x * 0.5 + game_over_panel_x
+	row.offset_bottom = (
+		GAME_OVER_PANEL_SIZE.y * 0.5
+		+ 16.0
+		+ GAME_OVER_BUTTON_ROW_SIZE.y
+		+ game_over_panel_y
+	)
+	row.add_theme_constant_override("separation", 12)
+	screen.add_child(row)
 
 	var again_button := Button.new()
-	again_button.text = "Play Again" if bool(summary["player_won"]) else "Try Again"
+	again_button.name = "AgainButton"
+	again_button.custom_minimum_size = GAME_OVER_BUTTON_SIZE
+	again_button.text = "Play Again" if player_won else "Try Again"
 	again_button.pressed.connect(_queue_button_navigation.bind(_on_play_again_pressed))
 	row.add_child(again_button)
 
 	var menu_button := Button.new()
+	menu_button.name = "MainMenuButton"
+	menu_button.custom_minimum_size = GAME_OVER_BUTTON_SIZE
 	menu_button.text = "Main Menu"
 	menu_button.pressed.connect(_queue_button_navigation.bind(_on_main_menu_pressed))
 	row.add_child(menu_button)
 
-	UiAssetsScript.apply_text_outline(layout)
-	return _with_margin(layout, GAME_OVER_MARGIN_TOP)
+	UiAssetsScript.apply_text_outline(screen)
+	return screen
+
+
+func _apply_game_over_layout() -> void:
+	if is_instance_valid(game_over_panel):
+		game_over_panel.offset_left = -GAME_OVER_PANEL_SIZE.x * 0.5 + game_over_panel_x
+		game_over_panel.offset_top = -GAME_OVER_PANEL_SIZE.y * 0.5 + game_over_panel_y
+		game_over_panel.offset_right = GAME_OVER_PANEL_SIZE.x * 0.5 + game_over_panel_x
+		game_over_panel.offset_bottom = GAME_OVER_PANEL_SIZE.y * 0.5 + game_over_panel_y
+	if is_instance_valid(game_over_text):
+		game_over_text.position = Vector2(game_over_text_x, game_over_text_y)
+	if is_instance_valid(game_over_button_row):
+		game_over_button_row.offset_left = -GAME_OVER_BUTTON_ROW_SIZE.x * 0.5 + game_over_panel_x
+		game_over_button_row.offset_top = GAME_OVER_PANEL_SIZE.y * 0.5 + 16.0 + game_over_panel_y
+		game_over_button_row.offset_right = GAME_OVER_BUTTON_ROW_SIZE.x * 0.5 + game_over_panel_x
+		game_over_button_row.offset_bottom = (
+			GAME_OVER_PANEL_SIZE.y * 0.5
+			+ 16.0
+			+ GAME_OVER_BUTTON_ROW_SIZE.y
+			+ game_over_panel_y
+		)
 
 
 func _build_debug_row() -> Control:

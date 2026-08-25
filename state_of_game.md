@@ -84,7 +84,8 @@ Currently wired:
 - Empty panel textures for vehicle info / available cargo style panels.
 - Vehicle-specific cargo hold panel textures for Big Rocket, Space Shuttle, and SpinLaunch.
 - Assignment now presents the live moonbase material requirements inside `empty_panel02.png` above the cargo hold; panel and text X/Y positions are independently Inspector-tunable.
-- Failed launches use the centered native-size `launch_failure_panel.png`, with failure details inside the artwork and Continue beneath it; panel and text X/Y positions are Inspector-tunable.
+- Successful and failed launches use centered native-size illustrated panels (`launch_succesful_panel.png` and `launch_failure_panel.png`), with result details inside and Continue beneath; both outcomes share the same Inspector-tunable panel/text X/Y positions.
+- Victory and defeat use centered native-size illustrated panels (`race_won_panel.png` and `race_lost_panel.png`), with game-over details inside and Play/Try Again plus Main Menu beneath; both outcomes share Inspector-tunable panel/text X/Y positions.
 - Options and How To Play share the centered `panel_options.png` artwork at 85% opacity over the normal space background.
 - Background music and sound effects use separate Music and SFX audio buses with independently persisted Options sliders.
 - Buttons play shared hover/click sounds and use global hover/press tweens; hover playback has a small Inspector-tunable random pitch variation, while cargo material-assignment buttons intentionally keep sounds without tweens.
@@ -173,11 +174,12 @@ Packing:
 Launch result / game over:
 
 - The upper-left logo remains a separate overlay.
-- Successful launch-result text starts lower on the screen to avoid overlapping the logo.
-- Failed launches use a centered 812x781 panel at native resolution and 85% opacity, with the title/details in the upper readable area.
-- The failed-launch Continue button sits below the panel and follows panel X/Y adjustments.
-- Failed-launch panel and text X/Y positions are independently exposed on the Main scene under `Launch Failure Layout`.
-- Win/loss text starts lower on the screen to avoid overlapping the logo.
+- Successful and failed launches each use their matching centered 812x781 panel at native resolution and 85% opacity.
+- Both launch outcomes share title/detail positioning in the upper readable area and the same controls under `Launch Result Panel Layout`.
+- The launch-result Continue button sits below the panel and follows panel X/Y adjustments.
+- Victory and defeat each use their matching centered 812x781 race panel at native resolution and 85% opacity.
+- Both game-over outcomes share title/detail positioning and the same controls under `Game Over Panel Layout`.
+- Play/Try Again and Main Menu sit in a centered row beneath the race panel and follow panel X/Y adjustments.
 
 ## Known Rough Edges
 
@@ -198,6 +200,7 @@ Run from the project root:
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/CargoUiSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/StrategyScreenSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/LaunchFailurePanelSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/GameOverPanelSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/OpeningCutsceneSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/OptionsMenuSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/PauseMenuSmokeTest.gd
@@ -211,7 +214,8 @@ Latest checks passed before this checkpoint:
 - Cargo smoke test passed.
 - Cargo UI smoke test passed.
 - Strategy screen smoke test passed.
-- Launch failure panel smoke test passed.
+- Launch result panel smoke test passed for successful and failed outcomes.
+- Game over panel smoke test passed for victory and defeat outcomes.
 - Opening cutscene smoke test passed.
 - Options menu smoke test passed.
 - Pause menu smoke test passed.
@@ -229,6 +233,7 @@ Latest checks passed before this checkpoint:
 - 2026-08-25 checkpoint: Added the assignment moonbase-needs panel with independent panel/text positioning, refreshed cargo-hold artwork, and made partial packing overlaps readable per cell.
 - 2026-08-25 checkpoint: Added the illustrated failed-launch panel with independent panel/text positioning, placed Continue beneath it, and added strategy debug buttons for failed and successful launch results.
 - 2026-08-25 checkpoint: Added subtle Inspector-tunable random pitch variation to repeated button-hover playback.
+- 2026-08-25 checkpoint: Added illustrated successful-launch, race-won, and race-lost panels; launch outcomes share one layout, game-over outcomes share another, and all action buttons sit beneath their panels.
 
 ## Suggested Next Steps
 

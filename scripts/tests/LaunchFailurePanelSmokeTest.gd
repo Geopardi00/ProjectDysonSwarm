@@ -60,9 +60,41 @@ func _run() -> void:
 	if continue_button.position != button_position + Vector2(8.0, 10.0):
 		_fail(main, "Launch failure Continue button did not follow the panel position.")
 		return
+	var shared_text_position := text_group.position
+
+	main._show_launch_result({
+		"success": true,
+		"vehicle_name": "Big Rocket",
+		"launch_days": 7,
+		"placed_fuel": 200,
+		"required_fuel": 200,
+		"readiness_before": 25.0,
+		"readiness_after": 30.0,
+		"delivery_result": {"used": {"copper": 10}, "wasted": {}},
+	})
+	await process_frame
+	var success_panel := main.active_screen.get_node("LaunchSuccessfulPanel") as TextureRect
+	var success_text := success_panel.get_node("SuccessText") as VBoxContainer
+	var success_details := success_text.get_node("Details") as Label
+	var success_continue := main.active_screen.get_node("ContinueButton") as Button
+	if success_panel.texture == null or not success_panel.texture.resource_path.ends_with("launch_succesful_panel.png"):
+		_fail(main, "Successful launch screen did not use launch_succesful_panel.png.")
+		return
+	if success_panel.size != Vector2(812.0, 781.0) or success_panel.texture.get_size() != Vector2(812.0, 781.0):
+		_fail(main, "Successful launch panel did not retain its native 812x781 size.")
+		return
+	if success_text.position != shared_text_position:
+		_fail(main, "Successful and failed launch text did not share the same position.")
+		return
+	if not success_details.text.contains("Launch successful."):
+		_fail(main, "Successful launch information was not placed inside the panel.")
+		return
+	if success_continue.position.y <= success_panel.position.y + success_panel.size.y:
+		_fail(main, "Successful launch Continue button was not below the panel.")
+		return
 
 	_cleanup(main)
-	print("Launch failure panel smoke test passed.")
+	print("Launch result panel smoke test passed.")
 	quit(0)
 
 
