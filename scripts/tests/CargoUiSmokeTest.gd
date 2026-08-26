@@ -145,6 +145,15 @@ func _run() -> void:
 		_fail("Packing selected-material font-size Inspector control did not update live.")
 		return
 	screen.packing_selected_label_font_size = configured_packing_label_size
+	var configured_preview_x: float = screen.packing_selected_preview_x
+	if not is_equal_approx(screen.packing_selected_material_preview.position.x, configured_preview_x):
+		_fail("Packing selected-material preview did not use its configured horizontal position.")
+		return
+	screen.packing_selected_preview_x = configured_preview_x + 8.0
+	if not is_equal_approx(screen.packing_selected_material_preview.position.x, configured_preview_x + 8.0):
+		_fail("Packing selected-material horizontal-position control did not update live.")
+		return
+	screen.packing_selected_preview_x = configured_preview_x
 	screen.meter_text_font_size = 20
 	screen.meter_character_spacing = 2
 	var meter_font := screen.capacity_label.get_theme_font("font") as FontVariation
@@ -243,6 +252,22 @@ func _run() -> void:
 	if screen.packing_selected_material_preview.visible:
 		_fail("Packing material preview was visible before a piece was selected.")
 		return
+	var assignment_piece_button := screen.piece_buttons.get(pieces[0].shape_id, null) as Button
+	var packing_piece_button := screen.packing_piece_buttons.get(pieces[0].instance_id, null) as Button
+	if assignment_piece_button == null or packing_piece_button == null:
+		_fail("Could not compare assignment and packing piece previews.")
+		return
+	var expected_packing_icon_size := Vector2(assignment_piece_button.icon.get_size()) * assignment_piece_button.scale
+	var packing_icon_size := Vector2(packing_piece_button.icon.get_size())
+	if (
+		absf(packing_icon_size.x - expected_packing_icon_size.x) > 1.0
+		or absf(packing_icon_size.y - expected_packing_icon_size.y) > 1.0
+	):
+		_fail("Packing piece preview size %s did not match assignment display size %s." % [
+			packing_icon_size,
+			expected_packing_icon_size,
+		])
+		return
 
 	if not screen.packing_state.place_piece(pieces[0].instance_id, Vector2i.ZERO, 0):
 		_fail("Could not prepare a placed piece for the partial-overlap preview test.")
@@ -260,11 +285,15 @@ func _run() -> void:
 			break
 	screen.packing_grid_view.set_selected_piece(pieces[1], 0)
 	var grid_overlay: CargoGridView = screen.packing_grid_view.grid_overlay
-	if grid_overlay._get_selected_preview_cell_color(overlap_cell) != Color(1.0, 0.18, 0.12, 0.38):
+	if (
+		not grid_overlay._is_selected_preview_cell_blocked(overlap_cell)
+		or grid_overlay._get_selected_preview_cell_color(overlap_cell) != Color(1.0, 0.18, 0.12, 0.38)
+	):
 		_fail("An overlapping movable-piece cell did not use the red blocked color.")
 		return
 	if (
 		clear_cell == Vector2i(-1, -1)
+		or grid_overlay._is_selected_preview_cell_blocked(clear_cell)
 		or grid_overlay._get_selected_preview_cell_color(clear_cell)
 		!= Color(0.88, 0.92, 0.95, 0.42)
 	):

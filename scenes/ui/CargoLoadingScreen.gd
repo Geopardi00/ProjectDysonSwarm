@@ -11,6 +11,7 @@ const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 
 const MATERIAL_ICON_SIZE := Vector2i(24, 24)
 const PACKING_PIECE_SLOT_SIZE := Vector2(320, 180)
+const PACKING_PIECE_PREVIEW_SCALE := 0.75
 const ASSIGNMENT_PREVIEW_TINT_ALPHA := 0.68
 const UI_TWEEN_SKIP_META := &"skip_global_button_tween"
 const PACKING_LIST_CONTENT_PATH := \
@@ -82,6 +83,10 @@ const MATERIAL_TINTS := {
 		_update_editor_meter_text()
 
 @export_category("Packing Selection Preview")
+@export_range(-100.0, 500.0, 1.0, "suffix:px") var packing_selected_preview_x := 136.0:
+	set(value):
+		packing_selected_preview_x = value
+		_apply_packing_selected_preview_position()
 @export_range(10, 40, 1, "suffix:px") var packing_selected_label_font_size := 18:
 	set(value):
 		packing_selected_label_font_size = value
@@ -162,6 +167,7 @@ var moonbase_remaining_requirements: Dictionary = {}
 var piece_buttons: Dictionary = {}
 var packing_piece_buttons: Dictionary = {}
 var half_size_piece_textures: Dictionary = {}
+var packing_piece_textures: Dictionary = {}
 var fixed_size_material_icons: Dictionary = {}
 
 var root: VBoxContainer
@@ -202,6 +208,7 @@ func _ready() -> void:
 	_apply_moonbase_panel_layout()
 	_apply_back_button_style()
 	_apply_meter_text_style()
+	_apply_packing_selected_preview_position()
 	_apply_packing_selected_label_style()
 	_apply_packing_list_bounds()
 	_apply_packing_pieces_title_position()
@@ -276,6 +283,16 @@ func _apply_packing_selected_label_style() -> void:
 	UiAssetsScript.apply_text_outline(label)
 	label.add_theme_font_size_override("font_size", packing_selected_label_font_size)
 	label.position = Vector2(packing_selected_label_x, packing_selected_label_y)
+	queue_redraw()
+
+
+func _apply_packing_selected_preview_position() -> void:
+	var preview := get_node_or_null(
+		"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingSelectedMaterialPreview"
+	) as TextureRect
+	if preview == null:
+		return
+	preview.position.x = packing_selected_preview_x
 	queue_redraw()
 
 
@@ -598,7 +615,7 @@ func _rebuild_packing_piece_buttons() -> void:
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.text = ""
 		button.tooltip_text = _format_packing_piece_button_text(piece)
-		button.icon = _get_half_size_piece_texture(piece.shape_id)
+		button.icon = _get_packing_piece_texture(piece.shape_id)
 		button.modulate = _get_material_tint(piece.material)
 		button.expand_icon = false
 		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -799,6 +816,23 @@ func _get_half_size_piece_texture(shape_id: String) -> Texture2D:
 	image.resize(width, height, Image.INTERPOLATE_LANCZOS)
 	var scaled_texture := ImageTexture.create_from_image(image)
 	half_size_piece_textures[shape_id] = scaled_texture
+	return scaled_texture
+
+
+func _get_packing_piece_texture(shape_id: String) -> Texture2D:
+	if packing_piece_textures.has(shape_id):
+		return packing_piece_textures[shape_id]
+	var texture := _get_half_size_piece_texture(shape_id)
+	if texture == null:
+		return null
+	var image := texture.get_image()
+	if image == null:
+		return texture
+	var width := maxi(1, int(roundi(image.get_width() * PACKING_PIECE_PREVIEW_SCALE)))
+	var height := maxi(1, int(roundi(image.get_height() * PACKING_PIECE_PREVIEW_SCALE)))
+	image.resize(width, height, Image.INTERPOLATE_LANCZOS)
+	var scaled_texture := ImageTexture.create_from_image(image)
+	packing_piece_textures[shape_id] = scaled_texture
 	return scaled_texture
 
 

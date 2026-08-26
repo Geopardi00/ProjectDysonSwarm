@@ -17,6 +17,10 @@ const CARGO_PIECE_BASE_COLOR := Color(0.638, 0.606, 0.568)
 const CARGO_PIECE_TINT_ALPHA := 0.68
 const PREVIEW_AVAILABLE_COLOR := Color(0.88, 0.92, 0.95, 0.42)
 const PREVIEW_BLOCKED_COLOR := Color(1.0, 0.18, 0.12, 0.38)
+const PREVIEW_BLOCKED_STRIPE_COLOR := Color(1.0, 0.24, 0.04, 0.95)
+const PREVIEW_BLOCKED_OUTER_GLOW_COLOR := Color(1.0, 0.08, 0.01, 0.24)
+const PREVIEW_BLOCKED_GLOW_COLOR := Color(1.0, 0.14, 0.02, 0.58)
+const PREVIEW_BLOCKED_OUTLINE_COLOR := Color(1.0, 0.25, 0.04, 1.0)
 
 var packing_state
 var selected_piece: CargoPiece
@@ -158,24 +162,76 @@ func _draw_selected_piece_preview() -> void:
 	var occupied_cells: Array[Vector2i] = packing_state.grid.get_occupied_cells(selected_piece.cells, mouse_cell, selected_rotation)
 	for cell: Vector2i in occupied_cells:
 		if _is_cell_in_grid(cell):
-			_draw_cell(cell, _get_selected_preview_cell_color(cell), true)
+			if _is_selected_preview_cell_blocked(cell):
+				_draw_blocked_preview_cell(cell)
+			else:
+				_draw_cell(cell, PREVIEW_AVAILABLE_COLOR, true)
+
+
+func _is_selected_preview_cell_blocked(cell: Vector2i) -> bool:
+	var placed_piece: Dictionary = packing_state.get_placed_piece_at_cell(cell)
+	if placed_piece.is_empty():
+		return false
+	return selected_piece == null or String(placed_piece.get("instance_id", "")) != selected_piece.instance_id
 
 
 func _get_selected_preview_cell_color(cell: Vector2i) -> Color:
-	var placed_piece: Dictionary = packing_state.get_placed_piece_at_cell(cell)
-	if placed_piece.is_empty():
-		return PREVIEW_AVAILABLE_COLOR
-	if selected_piece != null and String(placed_piece.get("instance_id", "")) == selected_piece.instance_id:
-		return PREVIEW_AVAILABLE_COLOR
-	return PREVIEW_BLOCKED_COLOR
+	return PREVIEW_BLOCKED_COLOR if _is_selected_preview_cell_blocked(cell) else PREVIEW_AVAILABLE_COLOR
+
+
+func _draw_blocked_preview_cell(cell: Vector2i) -> void:
+	var rect := _get_cell_rect(cell)
+	draw_rect(rect, PREVIEW_BLOCKED_COLOR, true)
+
+	var stripe_inset := maxf(2.0, cell_size * 0.045)
+	var stripe_rect := rect.grow(-stripe_inset)
+	var stripe_spacing := maxf(8.0, cell_size * 0.22)
+	var stripe_width := maxf(2.0, cell_size * 0.055)
+	var diagonal := stripe_spacing
+	while diagonal < stripe_rect.size.x + stripe_rect.size.y:
+		var start := Vector2.ZERO
+		var end := Vector2.ZERO
+		if diagonal <= stripe_rect.size.y:
+			start = Vector2(0.0, diagonal)
+		else:
+			start = Vector2(diagonal - stripe_rect.size.y, stripe_rect.size.y)
+		if diagonal <= stripe_rect.size.x:
+			end = Vector2(diagonal, 0.0)
+		else:
+			end = Vector2(stripe_rect.size.x, diagonal - stripe_rect.size.x)
+		draw_line(
+			stripe_rect.position + start,
+			stripe_rect.position + end,
+			PREVIEW_BLOCKED_STRIPE_COLOR,
+			stripe_width,
+			true
+		)
+		diagonal += stripe_spacing
+
+	var outer_glow_width := maxf(8.0, cell_size * 0.2)
+	var glow_width := maxf(5.0, cell_size * 0.13)
+	var outline_width := maxf(2.0, cell_size * 0.05)
+	draw_rect(
+		rect.grow(-outer_glow_width * 0.5),
+		PREVIEW_BLOCKED_OUTER_GLOW_COLOR,
+		false,
+		outer_glow_width,
+		true
+	)
+	draw_rect(rect.grow(-glow_width * 0.5), PREVIEW_BLOCKED_GLOW_COLOR, false, glow_width, true)
+	draw_rect(rect.grow(-outline_width * 0.5), PREVIEW_BLOCKED_OUTLINE_COLOR, false, outline_width, true)
 
 
 func _draw_cell(cell: Vector2i, color: Color, filled: bool) -> void:
-	var display_cell := _data_cell_to_display_cell(cell)
-	var origin := _get_drawn_grid_rect().position
-	var rect := Rect2(origin + Vector2(display_cell) * cell_size + Vector2.ONE, Vector2.ONE * (cell_size - 2.0))
+	var rect := _get_cell_rect(cell)
 	draw_rect(rect, color, filled)
 	draw_rect(rect, Color(0.03, 0.04, 0.05, 0.75), false, 1.0)
+
+
+func _get_cell_rect(cell: Vector2i) -> Rect2:
+	var display_cell := _data_cell_to_display_cell(cell)
+	var origin := _get_drawn_grid_rect().position
+	return Rect2(origin + Vector2(display_cell) * cell_size + Vector2.ONE, Vector2.ONE * (cell_size - 2.0))
 
 
 func _position_to_cell(position: Vector2) -> Vector2i:
