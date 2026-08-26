@@ -848,7 +848,7 @@ Controls:
 - click piece to select
 - mouse over grid shows ghost preview
 - left click grid places piece
-- R rotates selected piece
+- R or scrolling over the cargo grid rotates the selected piece
 - right click placed piece removes it
 - clear placements removes all placed pieces
 - launch resolves current placed cargo

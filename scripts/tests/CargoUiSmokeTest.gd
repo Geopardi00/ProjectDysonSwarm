@@ -294,6 +294,25 @@ func _run() -> void:
 	if screen.selected_rotation != 90:
 		_fail("Cargo screen did not rotate selected piece before placement.")
 		return
+	var wheel_down := InputEventMouseButton.new()
+	wheel_down.button_index = MOUSE_BUTTON_WHEEL_DOWN
+	wheel_down.pressed = true
+	screen.packing_grid_view.grid_overlay._gui_input(wheel_down)
+	if screen.selected_rotation != 0:
+		_fail("Mouse wheel did not rotate the selected piece counterclockwise.")
+		return
+	screen.packing_grid_view.grid_overlay._gui_input(wheel_down)
+	if screen.selected_rotation != 270:
+		_fail("Counterclockwise mouse-wheel rotation did not wrap to 270 degrees.")
+		return
+	var wheel_up := InputEventMouseButton.new()
+	wheel_up.button_index = MOUSE_BUTTON_WHEEL_UP
+	wheel_up.pressed = true
+	screen.packing_grid_view.grid_overlay._gui_input(wheel_up)
+	screen.packing_grid_view.grid_overlay._gui_input(wheel_up)
+	if screen.selected_rotation != 90:
+		_fail("Mouse wheel did not rotate the selected piece clockwise.")
+		return
 	if screen.packing_selected_material_preview.texture.resource_path != fuel_preview_path:
 		_fail("Rotating a piece changed its selected-material icon.")
 		return

@@ -433,6 +433,7 @@ func _bind_scene_nodes() -> void:
 	%ClearButton.pressed.connect(_on_clear_placements_pressed)
 	launch_button.pressed.connect(_queue_button_navigation.bind(_on_launch_pressed))
 	packing_grid_view.grid_cell_clicked.connect(_on_grid_cell_clicked)
+	packing_grid_view.piece_rotation_requested.connect(_rotate_selected_piece)
 
 	meter_sets.clear()
 	_register_meter_block(%AssignmentMeters)
@@ -1120,10 +1121,10 @@ func _on_packing_piece_pressed(instance_id: String) -> void:
 	_refresh()
 
 
-func _rotate_selected_piece() -> void:
+func _rotate_selected_piece(direction: int = 1) -> void:
 	if selected_piece_id == "":
 		return
-	selected_rotation = (selected_rotation + 90) % 360
+	selected_rotation = (selected_rotation + direction * 90 + 360) % 360
 	packing_status_text = "Rotation set to %d." % selected_rotation
 	_refresh()
 

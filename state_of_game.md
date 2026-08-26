@@ -167,7 +167,7 @@ Packing:
 - Right panel: assigned pieces to place render as centered, tinted block previews with no visible text.
 - Cargo hold grid display is horizontally mirrored to match the side-panel piece orientation while keeping the underlying grid data unchanged.
 - A moving-piece preview colors each free cell gray and each overlapping occupied cell red, so partial collisions are readable cell by cell.
-- Rotate is keyboard-only with `R`.
+- Selected pieces rotate with `R` or the mouse wheel while the pointer is over the cargo grid; wheel up rotates clockwise and wheel down rotates counterclockwise.
 - Clear placements and launch buttons live under the center cargo hold panel.
 - Assignment and packing cargo hold panel positions are independently hand-tunable but currently matched.
 
@@ -234,6 +234,7 @@ Latest checks passed before this checkpoint:
 - 2026-08-25 checkpoint: Added the illustrated failed-launch panel with independent panel/text positioning, placed Continue beneath it, and added strategy debug buttons for failed and successful launch results.
 - 2026-08-25 checkpoint: Added subtle Inspector-tunable random pitch variation to repeated button-hover playback.
 - 2026-08-25 checkpoint: Added illustrated successful-launch, race-won, and race-lost panels; launch outcomes share one layout, game-over outcomes share another, and all action buttons sit beneath their panels.
+- 2026-08-26 checkpoint: Added bidirectional mouse-wheel rotation for selected packing pieces while preserving `R` and isolating wheel input to the cargo grid so the piece list still scrolls normally.
 
 ## Suggested Next Steps
 

@@ -2,6 +2,7 @@ extends Control
 class_name CargoHoldPanel
 
 signal grid_cell_clicked(cell: Vector2i, mouse_button: int)
+signal piece_rotation_requested(direction: int)
 
 const BIG_ROCKET_PANEL := preload("res://assets/ui/panels/panel_cargo_hold.png")
 const SHUTTLE_PANEL := preload("res://assets/ui/panels/panel_cargo_hold_shuttle.png")
@@ -25,6 +26,7 @@ var vehicle_id := ""
 
 func _ready() -> void:
 	grid_overlay.grid_cell_clicked.connect(_on_grid_cell_clicked)
+	grid_overlay.piece_rotation_requested.connect(_on_piece_rotation_requested)
 	grid_overlay.debug_draw_grid = debug_draw_grid
 	grid_overlay.fixed_cell_size = ART_CELL_SIZE
 
@@ -54,6 +56,10 @@ func set_selected_piece(piece: CargoPiece, rotation: int) -> void:
 
 func _on_grid_cell_clicked(cell: Vector2i, mouse_button: int) -> void:
 	grid_cell_clicked.emit(cell, mouse_button)
+
+
+func _on_piece_rotation_requested(direction: int) -> void:
+	piece_rotation_requested.emit(direction)
 
 
 func _resolve_vehicle_id(next_vehicle_id: String) -> String:

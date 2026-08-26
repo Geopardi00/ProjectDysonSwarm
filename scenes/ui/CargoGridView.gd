@@ -2,6 +2,7 @@ extends Control
 class_name CargoGridView
 
 signal grid_cell_clicked(cell: Vector2i, mouse_button: int)
+signal piece_rotation_requested(direction: int)
 
 const MATERIAL_TINTS := {
 	"fuel": Color("#E8452E"),
@@ -80,6 +81,14 @@ func _gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		queue_redraw()
 	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			piece_rotation_requested.emit(1)
+			accept_event()
+			return
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			piece_rotation_requested.emit(-1)
+			accept_event()
+			return
 		var cell := _position_to_cell(event.position)
 		if _is_cell_in_grid(cell):
 			grid_cell_clicked.emit(cell, event.button_index)
