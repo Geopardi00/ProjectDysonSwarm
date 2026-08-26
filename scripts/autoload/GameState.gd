@@ -14,6 +14,7 @@ var failed_launches := 0
 var game_over := false
 var player_won := false
 var winner_name := ""
+var active_difficulty := GameDataScript.DEFAULT_DIFFICULTY
 
 var moonbase: Moonbase
 var competitors: Array[CPUCompetitor] = []
@@ -25,8 +26,12 @@ func _ready() -> void:
 	start_new_match(player_faction)
 
 
-func start_new_match(selected_faction: String = "USA") -> void:
+func start_new_match(
+	selected_faction: String = "USA",
+	selected_difficulty: String = GameDataScript.DEFAULT_DIFFICULTY
+) -> void:
 	player_faction = selected_faction
+	active_difficulty = GameDataScript.normalize_difficulty(selected_difficulty)
 	days_elapsed = 0
 	launches_attempted = 0
 	successful_launches = 0
@@ -75,6 +80,7 @@ func check_for_winner() -> Dictionary:
 func get_summary() -> Dictionary:
 	return {
 		"player_faction": player_faction,
+		"difficulty": active_difficulty,
 		"days_elapsed": days_elapsed,
 		"launches_attempted": launches_attempted,
 		"successful_launches": successful_launches,
@@ -95,7 +101,7 @@ func _setup_cpu_competitors() -> void:
 	competitors.clear()
 	for faction_id: String in GameDataScript.get_cpu_faction_ids(player_faction):
 		var competitor: CPUCompetitor = CPUCompetitorScript.new()
-		competitor.setup(faction_id, GameDataScript.FACTIONS[faction_id])
+		competitor.setup(faction_id, GameDataScript.FACTIONS[faction_id], active_difficulty)
 		competitors.append(competitor)
 
 

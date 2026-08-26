@@ -197,6 +197,7 @@ var master_volume_percent := 100.0
 var music_bus_volume_percent := 100.0
 var sfx_bus_volume_percent := 100.0
 var brightness_percent := 100.0
+var selected_difficulty := GameDataScript.DEFAULT_DIFFICULTY
 var settings_save_timer: Timer
 var brightness_layer: CanvasLayer
 var brightness_filter: ColorRect
@@ -464,6 +465,9 @@ func _load_settings() -> void:
 	music_bus_volume_percent = clampf(float(config.get_value("audio", "music_volume_percent", 100.0)), 0.0, 100.0)
 	sfx_bus_volume_percent = clampf(float(config.get_value("audio", "sfx_volume_percent", 100.0)), 0.0, 100.0)
 	brightness_percent = clampf(float(config.get_value("display", "brightness_percent", 100.0)), 50.0, 150.0)
+	selected_difficulty = GameDataScript.normalize_difficulty(
+		String(config.get_value("gameplay", "difficulty", GameDataScript.DEFAULT_DIFFICULTY))
+	)
 	settings_loaded = true
 
 
@@ -478,6 +482,7 @@ func _save_settings() -> void:
 	config.set_value("audio", "music_volume_percent", music_bus_volume_percent)
 	config.set_value("audio", "sfx_volume_percent", sfx_bus_volume_percent)
 	config.set_value("display", "brightness_percent", brightness_percent)
+	config.set_value("gameplay", "difficulty", selected_difficulty)
 	var error := config.save(settings_file_path)
 	if error != OK:
 		push_warning("Could not save settings to %s (error %d)." % [settings_file_path, error])
@@ -744,8 +749,16 @@ func _open_options_screen(back_callback: Callable) -> void:
 	options_screen.music_volume_changed.connect(_on_music_volume_changed)
 	options_screen.sfx_volume_changed.connect(_on_sfx_volume_changed)
 	options_screen.brightness_changed.connect(_on_brightness_changed)
+	options_screen.difficulty_changed.connect(_on_difficulty_changed)
 	_set_active_screen(options_screen)
-	options_screen.setup(master_volume_percent, music_bus_volume_percent, sfx_bus_volume_percent, brightness_percent)
+	options_screen.setup(
+		master_volume_percent,
+		music_bus_volume_percent,
+		sfx_bus_volume_percent,
+		brightness_percent,
+		true,
+		selected_difficulty
+	)
 
 
 func _on_master_volume_changed(value: float) -> void:
@@ -769,6 +782,11 @@ func _on_sfx_volume_changed(value: float) -> void:
 func _on_brightness_changed(value: float) -> void:
 	brightness_percent = clampf(value, 50.0, 150.0)
 	_apply_brightness()
+	_queue_settings_save()
+
+
+func _on_difficulty_changed(value: String) -> void:
+	selected_difficulty = GameDataScript.normalize_difficulty(value)
 	_queue_settings_save()
 
 
@@ -915,13 +933,15 @@ func _show_pause_options_page(show_instructions: bool) -> void:
 	pause_options_screen.music_volume_changed.connect(_on_music_volume_changed)
 	pause_options_screen.sfx_volume_changed.connect(_on_sfx_volume_changed)
 	pause_options_screen.brightness_changed.connect(_on_brightness_changed)
+	pause_options_screen.difficulty_changed.connect(_on_difficulty_changed)
 	pause_overlay.add_child(pause_options_screen)
 	pause_options_screen.setup(
 		master_volume_percent,
 		music_bus_volume_percent,
 		sfx_bus_volume_percent,
 		brightness_percent,
-		false
+		false,
+		selected_difficulty
 	)
 	if show_instructions:
 		pause_options_screen.show_instructions_page()
@@ -1371,22 +1391,22 @@ func _on_faction_button_pressed(faction_id: String) -> void:
 func _on_start_match_pressed() -> void:
 	if selected_faction == "":
 		return
-	game_state.start_new_match(selected_faction)
+	game_state.start_new_match(selected_faction, selected_difficulty)
 	_show_strategy_screen()
 
 
 func _on_reset_button_pressed() -> void:
-	game_state.start_new_match(selected_faction)
+	game_state.start_new_match(selected_faction, selected_difficulty)
 	_show_strategy_screen()
 
 
 func _on_play_again_pressed() -> void:
-	game_state.start_new_match(selected_faction)
+	game_state.start_new_match(selected_faction, selected_difficulty)
 	_show_strategy_screen()
 
 
 func _on_main_menu_pressed() -> void:
-	game_state.start_new_match(selected_faction)
+	game_state.start_new_match(selected_faction, selected_difficulty)
 	_show_faction_select()
 
 

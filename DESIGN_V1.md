@@ -626,6 +626,18 @@ actual_gain = base_gain
 
 CPU progress should be clamped between 0 and 100.
 
+### Difficulty profiles
+
+Hard preserves the original CPU simulation. Easy and Medium reduce CPU pace, increase launch failures, and make competitors use smaller vehicles more often.
+
+| Difficulty | CPU speed | Crash multiplier | Big Rocket | Shuttle | SpinLaunch |
+|---|---:|---:|---:|---:|---:|
+| Easy | 75% | 2.0x | 20% | 45% | 35% |
+| Medium | 90% | 1.5x | 45% | 40% | 15% |
+| Hard | 100% | 1.0x | 100% | 0% | 0% |
+
+CPU vehicle progress multipliers are 1.0 for Big Rocket, 0.8 for Shuttle, and 0.45 for SpinLaunch. Difficulty changes made in Options apply when the next match begins.
+
 ---
 
 ## 19. News system

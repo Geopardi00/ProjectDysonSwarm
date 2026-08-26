@@ -109,7 +109,8 @@ Opening / options:
 
 - Opening buttons are stacked Start, Options, and Exit Game beneath the title logo.
 - The opening title, button dimensions, and gaps have Inspector controls with matching editor/runtime placement.
-- Options changes master, music, and SFX volume plus fullscreen brightness live and saves them to `user://settings.cfg`.
+- Options changes master, music, and SFX volume plus fullscreen brightness live, selects Easy/Medium/Hard difficulty, and saves them to `user://settings.cfg`.
+- Difficulty changes apply to the next match. Hard preserves the original CPU pace; Easy and Medium slow CPU progress, increase crash chance, and make rivals favor Shuttle and SpinLaunch missions.
 - How To Play opens inside the same options panel and documents the faction-neutral goal, cargo flow, controls, and launch outcomes.
 - Back and `Esc` return from instructions to Options and from Options to the opening menu.
 
@@ -197,6 +198,7 @@ Run from the project root:
 
 ```powershell
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/CargoSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/CpuDifficultySmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/CargoUiSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/StrategyScreenSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/LaunchFailurePanelSmokeTest.gd
@@ -211,6 +213,7 @@ Run from the project root:
 
 Latest checks passed before this checkpoint:
 
+- CPU difficulty smoke test passed.
 - Cargo smoke test passed.
 - Cargo UI smoke test passed.
 - Strategy screen smoke test passed.
@@ -235,6 +238,7 @@ Latest checks passed before this checkpoint:
 - 2026-08-25 checkpoint: Added subtle Inspector-tunable random pitch variation to repeated button-hover playback.
 - 2026-08-25 checkpoint: Added illustrated successful-launch, race-won, and race-lost panels; launch outcomes share one layout, game-over outcomes share another, and all action buttons sit beneath their panels.
 - 2026-08-26 checkpoint: Added bidirectional mouse-wheel rotation for selected packing pieces while preserving `R` and isolating wheel input to the cargo grid so the piece list still scrolls normally.
+- 2026-08-26 checkpoint: Added saved Easy/Medium/Hard settings that apply on the next match, with difficulty-specific CPU pace, crash risk, vehicle selection, and vehicle-aware news.
 
 ## Suggested Next Steps
 

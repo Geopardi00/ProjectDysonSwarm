@@ -2,6 +2,43 @@ extends RefCounted
 class_name GameData
 
 const MATERIAL_FUEL := "fuel"
+const DEFAULT_DIFFICULTY := "hard"
+
+const CPU_VEHICLE_PROGRESS_MULTIPLIERS := {
+	"big_rocket": 1.0,
+	"space_shuttle": 0.8,
+	"spinlaunch": 0.45,
+}
+
+const DIFFICULTY_PROFILES := {
+	"easy": {
+		"cpu_speed_multiplier": 0.75,
+		"cpu_crash_multiplier": 2.0,
+		"cpu_vehicle_weights": {
+			"big_rocket": 20.0,
+			"space_shuttle": 45.0,
+			"spinlaunch": 35.0,
+		},
+	},
+	"medium": {
+		"cpu_speed_multiplier": 0.9,
+		"cpu_crash_multiplier": 1.5,
+		"cpu_vehicle_weights": {
+			"big_rocket": 45.0,
+			"space_shuttle": 40.0,
+			"spinlaunch": 15.0,
+		},
+	},
+	"hard": {
+		"cpu_speed_multiplier": 1.0,
+		"cpu_crash_multiplier": 1.0,
+		"cpu_vehicle_weights": {
+			"big_rocket": 100.0,
+			"space_shuttle": 0.0,
+			"spinlaunch": 0.0,
+		},
+	},
+}
 
 const MATERIALS := [
 	"fuel",
@@ -246,6 +283,15 @@ const TEST_MANIFESTS := {
 
 static func get_vehicle(vehicle_id: String) -> Dictionary:
 	return VEHICLES.get(vehicle_id, {}).duplicate(true)
+
+
+static func normalize_difficulty(difficulty: String) -> String:
+	var normalized := difficulty.to_lower()
+	return normalized if DIFFICULTY_PROFILES.has(normalized) else DEFAULT_DIFFICULTY
+
+
+static func get_difficulty_profile(difficulty: String) -> Dictionary:
+	return DIFFICULTY_PROFILES[normalize_difficulty(difficulty)].duplicate(true)
 
 
 static func get_test_manifest(manifest_id: String) -> Dictionary:

@@ -6,6 +6,9 @@ signal master_volume_changed(percent: float)
 signal music_volume_changed(percent: float)
 signal sfx_volume_changed(percent: float)
 signal brightness_changed(percent: float)
+signal difficulty_changed(difficulty: String)
+
+const DIFFICULTY_IDS: Array[String] = ["easy", "medium", "hard"]
 
 var button_navigation_delay := 0.08
 var button_navigation_pending := false
@@ -22,14 +25,17 @@ var button_navigation_pending := false
 @onready var sfx_volume_value_label: Label = %SfxVolumeValueLabel
 @onready var brightness_slider: HSlider = %BrightnessSlider
 @onready var brightness_value_label: Label = %BrightnessValueLabel
+@onready var difficulty_option: OptionButton = %DifficultyOption
 @onready var instructions_label: Label = %InstructionsLabel
 
 
 func _ready() -> void:
+	_populate_difficulty_options()
 	volume_slider.value_changed.connect(_on_volume_value_changed)
 	music_volume_slider.value_changed.connect(_on_music_volume_value_changed)
 	sfx_volume_slider.value_changed.connect(_on_sfx_volume_value_changed)
 	brightness_slider.value_changed.connect(_on_brightness_value_changed)
+	difficulty_option.item_selected.connect(_on_difficulty_item_selected)
 	%HowToPlayButton.pressed.connect(_queue_button_navigation.bind(show_instructions_page))
 	%OptionsBackButton.pressed.connect(_queue_button_navigation.bind(back_requested.emit))
 	%InstructionsBackButton.pressed.connect(_queue_button_navigation.bind(show_options_page))
@@ -44,13 +50,15 @@ func setup(
 	music_percent: float,
 	sfx_percent: float,
 	brightness_percent: float,
-	show_background: bool = true
+	show_background: bool = true,
+	difficulty: String = "hard"
 ) -> void:
 	background.visible = show_background
 	volume_slider.set_value_no_signal(clampf(volume_percent, volume_slider.min_value, volume_slider.max_value))
 	music_volume_slider.set_value_no_signal(clampf(music_percent, music_volume_slider.min_value, music_volume_slider.max_value))
 	sfx_volume_slider.set_value_no_signal(clampf(sfx_percent, sfx_volume_slider.min_value, sfx_volume_slider.max_value))
 	brightness_slider.set_value_no_signal(clampf(brightness_percent, brightness_slider.min_value, brightness_slider.max_value))
+	difficulty_option.select(DIFFICULTY_IDS.find(_normalize_difficulty(difficulty)))
 	_update_value_labels()
 
 
@@ -101,6 +109,28 @@ func _on_sfx_volume_value_changed(value: float) -> void:
 func _on_brightness_value_changed(value: float) -> void:
 	_update_value_labels()
 	brightness_changed.emit(value)
+
+
+func _on_difficulty_item_selected(index: int) -> void:
+	if index < 0 or index >= DIFFICULTY_IDS.size():
+		return
+	difficulty_changed.emit(DIFFICULTY_IDS[index])
+
+
+func get_selected_difficulty() -> String:
+	var index := difficulty_option.selected
+	return DIFFICULTY_IDS[index] if index >= 0 and index < DIFFICULTY_IDS.size() else "hard"
+
+
+func _populate_difficulty_options() -> void:
+	difficulty_option.clear()
+	for difficulty: String in DIFFICULTY_IDS:
+		difficulty_option.add_item(difficulty.to_upper())
+
+
+func _normalize_difficulty(difficulty: String) -> String:
+	var normalized := difficulty.to_lower()
+	return normalized if DIFFICULTY_IDS.has(normalized) else "hard"
 
 
 func _update_value_labels() -> void:

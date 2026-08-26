@@ -42,12 +42,22 @@ func add_player_launch_crash(vehicle_name: String, placed_fuel: int, required_fu
 
 func add_cpu_update(result: Dictionary) -> void:
 	var name := String(result.get("display_name", "CPU"))
+	var vehicle_name := String(result.get("vehicle_name", "launch vehicle"))
 	var progress := float(result.get("progress_percent", 0.0))
 	var gain := float(result.get("actual_gain", 0.0))
 	if bool(result.get("crashed", false)):
-		add_message("%s suffers a launch anomaly. Readiness still crawls to %.1f%%." % [name, progress])
+		add_message("%s suffers a %s launch anomaly. Readiness still crawls to %.1f%%." % [
+			name,
+			vehicle_name,
+			progress,
+		])
 	else:
-		add_message("%s advances by %.1f points, reaching %.1f%% readiness." % [name, gain, progress])
+		add_message("%s advances by %.1f points with %s, reaching %.1f%% readiness." % [
+			name,
+			gain,
+			vehicle_name,
+			progress,
+		])
 	if float(result.get("previous_progress", 0.0)) < 50.0 and progress >= 50.0:
 		add_message("%s passes 50%% moonbase readiness." % name)
 	if float(result.get("previous_progress", 0.0)) < 75.0 and progress >= 75.0:

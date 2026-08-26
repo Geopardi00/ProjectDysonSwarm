@@ -64,11 +64,16 @@ func _run() -> void:
 	if not is_equal_approx(options.panel_art.modulate.a, 0.85):
 		_fail("Options panel did not use 85 percent opacity.")
 		return
+	if options.get_selected_difficulty() != "hard":
+		_fail("Options did not default to Hard difficulty.")
+		return
 
 	options.volume_slider.value = 35.0
 	options.music_volume_slider.value = 45.0
 	options.sfx_volume_slider.value = 55.0
 	options.brightness_slider.value = 125.0
+	options.difficulty_option.select(0)
+	options.difficulty_option.item_selected.emit(0)
 	await process_frame
 	if not is_equal_approx(main_instance.master_volume_percent, 35.0):
 		_fail("Master volume slider did not update Main.")
@@ -96,6 +101,12 @@ func _run() -> void:
 	):
 		_fail("Brightness slider did not apply the expected brightening filter.")
 		return
+	if main_instance.selected_difficulty != "easy":
+		_fail("Difficulty selector did not update Main.")
+		return
+	if main_instance.game_state.active_difficulty != "hard":
+		_fail("Changing difficulty modified the active match instead of the next match.")
+		return
 
 	main_instance._save_settings()
 	var saved_config := ConfigFile.new()
@@ -114,18 +125,27 @@ func _run() -> void:
 	if not is_equal_approx(float(saved_config.get_value("display", "brightness_percent", -1.0)), 125.0):
 		_fail("Saved brightness value was incorrect.")
 		return
+	if String(saved_config.get_value("gameplay", "difficulty", "")) != "easy":
+		_fail("Saved difficulty value was incorrect.")
+		return
 	main_instance.master_volume_percent = 100.0
 	main_instance.music_bus_volume_percent = 100.0
 	main_instance.sfx_bus_volume_percent = 100.0
 	main_instance.brightness_percent = 100.0
+	main_instance.selected_difficulty = "hard"
 	main_instance._load_settings()
 	if (
 		not is_equal_approx(main_instance.master_volume_percent, 35.0)
 		or not is_equal_approx(main_instance.music_bus_volume_percent, 45.0)
 		or not is_equal_approx(main_instance.sfx_bus_volume_percent, 55.0)
 		or not is_equal_approx(main_instance.brightness_percent, 125.0)
+		or main_instance.selected_difficulty != "easy"
 	):
 		_fail("Options settings were not restored from disk.")
+		return
+	main_instance.game_state.start_new_match("USA", main_instance.selected_difficulty)
+	if main_instance.game_state.active_difficulty != "easy":
+		_fail("The next match did not adopt the saved difficulty.")
 		return
 
 	options.show_instructions_page()
