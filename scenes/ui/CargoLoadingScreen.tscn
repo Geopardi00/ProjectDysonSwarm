@@ -2,8 +2,6 @@
 
 [ext_resource type="Script" uid="uid://lqyo3k06v45w" path="res://scenes/ui/CargoLoadingScreen.gd" id="1_cargo_loading"]
 [ext_resource type="Texture2D" uid="uid://jdd6xt5nsnso" path="res://assets/ui/backgrounds/ui_bg_space_loading_1920x1080.png" id="2_background"]
-[ext_resource type="Texture2D" uid="uid://v18ueb4hewi0" path="res://assets/ui/panels/empty_panel_vehicle_info_frame.png" id="3_vehicle_panel"]
-[ext_resource type="Texture2D" uid="uid://bhab58eau625x" path="res://assets/ui/panels/empty_panel.png" id="4_cargo_panel"]
 [ext_resource type="FontFile" uid="uid://i1vysh7sha26" path="res://assets/ui/fonts/zekton/Zekton-Regular.otf" id="4_yev54"]
 [ext_resource type="PackedScene" uid="uid://dhequ46dd2nt1" path="res://scenes/ui/CargoHoldPanel.tscn" id="5_hold_panel"]
 [ext_resource type="Texture2D" uid="uid://ccub0wdomtcwr" path="res://assets/ui/materials/fuel_icon.png" id="6_fuel_icon"]
@@ -14,22 +12,12 @@
 [ext_resource type="Texture2D" uid="uid://bu80cuu63ho7" path="res://assets/ui/materials/rare_materials_icon.png" id="11_rare_icon"]
 [ext_resource type="Texture2D" uid="uid://bjrxdj3h0b11a" path="res://assets/ui/materials/propellant_icon.png" id="12_propellant_icon"]
 [ext_resource type="Texture2D" uid="uid://ci17eak0r3yey" path="res://assets/ui/panels/empty_panel02.png" id="13_moonbase_panel"]
+[ext_resource type="Texture2D" uid="uid://nenq2m0xhyai" path="res://assets/ui/panels/available_cargo_panel.png" id="15_5f7s1"]
+[ext_resource type="Texture2D" uid="uid://deft10te04swm" path="res://assets/ui/panels/cargo_loading_panel.png" id="15_arohg"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_outline"]
 outline_size = 4
 outline_color = Color(0, 0, 0, 1)
-
-[sub_resource type="FontVariation" id="FontVariation_x3rdk"]
-base_font = ExtResource("4_yev54")
-spacing_glyph = 2
-
-[sub_resource type="FontVariation" id="FontVariation_5f7s1"]
-base_font = ExtResource("4_yev54")
-spacing_glyph = 2
-
-[sub_resource type="FontVariation" id="FontVariation_arohg"]
-base_font = ExtResource("4_yev54")
-spacing_glyph = 2
 
 [sub_resource type="FontVariation" id="FontVariation_4vco7"]
 base_font = ExtResource("4_yev54")
@@ -44,6 +32,18 @@ base_font = ExtResource("4_yev54")
 spacing_glyph = 2
 
 [sub_resource type="FontVariation" id="FontVariation_3huh5"]
+base_font = ExtResource("4_yev54")
+spacing_glyph = 2
+
+[sub_resource type="FontVariation" id="FontVariation_jhns4"]
+base_font = ExtResource("4_yev54")
+spacing_glyph = 2
+
+[sub_resource type="FontVariation" id="FontVariation_a0npk"]
+base_font = ExtResource("4_yev54")
+spacing_glyph = 2
+
+[sub_resource type="FontVariation" id="FontVariation_squlk"]
 base_font = ExtResource("4_yev54")
 spacing_glyph = 2
 
@@ -129,7 +129,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("3_vehicle_panel")
+texture = ExtResource("15_arohg")
 expand_mode = 1
 
 [node name="Margin" type="MarginContainer" parent="RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel" unique_id=879764191]
@@ -206,7 +206,7 @@ offset_bottom = 175.71199
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_x3rdk")
+theme_override_fonts/font = SubResource("FontVariation_4vco7")
 theme_override_font_sizes/font_size = 18
 text = "Assigned payload: 50 / 500"
 
@@ -227,7 +227,7 @@ offset_bottom = 248.81271
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_5f7s1")
+theme_override_fonts/font = SubResource("FontVariation_b1t20")
 theme_override_font_sizes/font_size = 18
 text = "Assigned fuel: 50 / 200"
 
@@ -248,7 +248,7 @@ offset_bottom = 341.62442
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_arohg")
+theme_override_fonts/font = SubResource("FontVariation_keh4i")
 theme_override_font_sizes/font_size = 18
 text = "Fuel assigned is below required minimum."
 autowrap_mode = 3
@@ -481,7 +481,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("4_cargo_panel")
+texture = ExtResource("15_5f7s1")
 expand_mode = 1
 
 [node name="Margin" type="MarginContainer" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel" unique_id=1140003788]
@@ -632,7 +632,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("3_vehicle_panel")
+texture = ExtResource("15_arohg")
 expand_mode = 1
 
 [node name="Margin" type="MarginContainer" parent="RootMargin/Layout/PackingPanel/PackingInfoPanel" unique_id=2059010156]
@@ -1011,7 +1011,7 @@ offset_bottom = 670.6244
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_4vco7")
+theme_override_fonts/font = SubResource("FontVariation_3huh5")
 theme_override_font_sizes/font_size = 18
 text = "Not enough fuel placed. Launch will crash."
 autowrap_mode = 3
@@ -1059,7 +1059,7 @@ offset_bottom = 175.71199
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_b1t20")
+theme_override_fonts/font = SubResource("FontVariation_jhns4")
 theme_override_font_sizes/font_size = 18
 text = "Placed payload: 50 / 500"
 
@@ -1080,7 +1080,7 @@ offset_bottom = 248.81271
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_keh4i")
+theme_override_fonts/font = SubResource("FontVariation_a0npk")
 theme_override_font_sizes/font_size = 18
 text = "Placed fuel: 50 / 200"
 
@@ -1102,7 +1102,7 @@ offset_bottom = -324.0
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
-theme_override_fonts/font = SubResource("FontVariation_3huh5")
+theme_override_fonts/font = SubResource("FontVariation_squlk")
 theme_override_font_sizes/font_size = 18
 text = "Fuel assigned is below required minimum."
 autowrap_mode = 3
@@ -1168,7 +1168,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("4_cargo_panel")
+texture = ExtResource("15_5f7s1")
 expand_mode = 1
 
 [node name="FrameRegions" type="Control" parent="RootMargin/Layout/PackingPanel/PackingListPanel" unique_id=1652788559]
@@ -1201,7 +1201,6 @@ offset_bottom = 4.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_font_sizes/font_size = 20
-text = "Cargo pieces"
 vertical_alignment = 1
 
 [node name="ContentRegion" type="Control" parent="RootMargin/Layout/PackingPanel/PackingListPanel/FrameRegions" unique_id=1984144237]

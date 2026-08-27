@@ -3,10 +3,12 @@
 [ext_resource type="Script" uid="uid://bh760qdg4caml" path="res://scenes/ui/StrategyScreen.gd" id="1_strategy"]
 [ext_resource type="FontFile" uid="uid://i1vysh7sha26" path="res://assets/ui/fonts/zekton/Zekton-Regular.otf" id="2_0kx2o"]
 [ext_resource type="Texture2D" uid="uid://bhab58eau625x" path="res://assets/ui/panels/empty_panel.png" id="2_status_panel"]
-[ext_resource type="Texture2D" uid="uid://v18ueb4hewi0" path="res://assets/ui/panels/empty_panel_vehicle_info_frame.png" id="3_vehicle_panel"]
 [ext_resource type="Texture2D" uid="uid://dtifx5c1gwlmy" path="res://assets/ui/vehicles/big_rocket_icon.png" id="4_big_rocket"]
+[ext_resource type="Texture2D" uid="uid://cehtn6ycxsrq1" path="res://assets/ui/panels/big_roccket_panel.png" id="4_tbwtm"]
 [ext_resource type="Texture2D" uid="uid://qxu885v6cymm" path="res://assets/ui/vehicles/space_shuttle_icon.png" id="5_shuttle"]
 [ext_resource type="Texture2D" uid="uid://cjkbie8je4bhr" path="res://assets/ui/vehicles/spinlaunch_icon.png" id="6_spinlaunch"]
+[ext_resource type="Texture2D" uid="uid://xye16bthp2li" path="res://assets/ui/panels/space_shuttle_panel.png" id="6_yxg0o"]
+[ext_resource type="Texture2D" uid="uid://bn4uhy2m5lpl3" path="res://assets/ui/panels/spinalunch_panel.png" id="8_4n17s"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_outline"]
 outline_size = 4
@@ -206,7 +208,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("3_vehicle_panel")
+texture = ExtResource("4_tbwtm")
 expand_mode = 1
 stretch_mode = 5
 
@@ -236,6 +238,7 @@ anchors_preset = 0
 
 [node name="BigRocketTitle" type="Label" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=1040822183]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_top = 3.0
 offset_right = 244.0
@@ -245,7 +248,6 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("2_0kx2o")
 theme_override_font_sizes/font_size = 22
-text = "Big Rocket"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
 
@@ -365,7 +367,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("3_vehicle_panel")
+texture = ExtResource("6_yxg0o")
 expand_mode = 1
 stretch_mode = 5
 
@@ -395,6 +397,7 @@ anchors_preset = 0
 
 [node name="ShuttleTitle" type="Label" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=1582791049]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_top = 2.0
 offset_right = 244.0
@@ -404,7 +407,6 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("2_0kx2o")
 theme_override_font_sizes/font_size = 22
-text = "Space Shuttle"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
 
@@ -524,7 +526,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-texture = ExtResource("3_vehicle_panel")
+texture = ExtResource("8_4n17s")
 expand_mode = 1
 stretch_mode = 5
 
@@ -554,6 +556,7 @@ anchors_preset = 0
 
 [node name="SpinLaunchTitle" type="Label" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=995763902]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_top = 3.0
 offset_right = 244.0
@@ -563,7 +566,6 @@ theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("2_0kx2o")
 theme_override_font_sizes/font_size = 22
-text = "SpinLaunch"
 label_settings = SubResource("LabelSettings_outline")
 horizontal_alignment = 1
 
@@ -759,7 +761,7 @@ theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Add Test News"
 
-[node name="DebugLaunchFailureButton" type="Button" parent="Layout/DebugRow"]
+[node name="DebugLaunchFailureButton" type="Button" parent="Layout/DebugRow" unique_id=1605522398]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -768,7 +770,7 @@ theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("2_0kx2o")
 text = "Test Launch Failure"
 
-[node name="DebugLaunchSuccessButton" type="Button" parent="Layout/DebugRow"]
+[node name="DebugLaunchSuccessButton" type="Button" parent="Layout/DebugRow" unique_id=1623380804]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)

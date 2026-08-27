@@ -18,8 +18,7 @@ const CARGO_PIECE_TINT_ALPHA := 0.68
 const PREVIEW_AVAILABLE_COLOR := Color(0.88, 0.92, 0.95, 0.42)
 const PREVIEW_BLOCKED_COLOR := Color(1.0, 0.18, 0.12, 0.38)
 const PREVIEW_BLOCKED_STRIPE_COLOR := Color(1.0, 0.24, 0.04, 0.95)
-const PREVIEW_BLOCKED_OUTER_GLOW_COLOR := Color(1.0, 0.08, 0.01, 0.24)
-const PREVIEW_BLOCKED_GLOW_COLOR := Color(1.0, 0.14, 0.02, 0.58)
+const PREVIEW_BLOCKED_GLOW_COLOR := Color(1.0, 0.12, 0.02, 0.32)
 const PREVIEW_BLOCKED_OUTLINE_COLOR := Color(1.0, 0.25, 0.04, 1.0)
 
 var packing_state
@@ -208,16 +207,8 @@ func _draw_blocked_preview_cell(cell: Vector2i) -> void:
 		)
 		diagonal += stripe_spacing
 
-	var outer_glow_width := maxf(8.0, cell_size * 0.2)
-	var glow_width := maxf(5.0, cell_size * 0.13)
+	var glow_width := maxf(5.0, cell_size * 0.12)
 	var outline_width := maxf(2.0, cell_size * 0.05)
-	draw_rect(
-		rect.grow(-outer_glow_width * 0.5),
-		PREVIEW_BLOCKED_OUTER_GLOW_COLOR,
-		false,
-		outer_glow_width,
-		true
-	)
 	draw_rect(rect.grow(-glow_width * 0.5), PREVIEW_BLOCKED_GLOW_COLOR, false, glow_width, true)
 	draw_rect(rect.grow(-outline_width * 0.5), PREVIEW_BLOCKED_OUTLINE_COLOR, false, outline_width, true)
 

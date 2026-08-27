@@ -231,7 +231,7 @@ layout_mode = 2
 
 [node name="HowToPlayButton" type="Button" parent="PanelCenter/Panel/ContentMargin/OptionsPage"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(260, 48)
+custom_minimum_size = Vector2(180, 48)
 layout_mode = 2
 size_flags_horizontal = 4
 text = "HOW TO PLAY"
