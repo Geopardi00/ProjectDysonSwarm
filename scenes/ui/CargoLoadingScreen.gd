@@ -344,6 +344,13 @@ func _apply_piece_scrollbar_width() -> void:
 		scroll_bar.scale.x = width_scale
 
 
+func _reset_piece_scroll_positions() -> void:
+	for scroll_path: String in PIECE_SCROLL_PATHS:
+		var scroll := get_node_or_null(scroll_path) as ScrollContainer
+		if scroll != null:
+			scroll.scroll_vertical = 0
+
+
 func _apply_packing_manifest_style() -> void:
 	var assignment_materials := get_node_or_null(
 		"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons"
@@ -408,6 +415,7 @@ func start_assignment(vehicle_id: String, remaining_requirements: Dictionary = {
 	packing_panel.visible = false
 	_rebuild_assignment_piece_buttons()
 	_refresh()
+	_reset_piece_scroll_positions.call_deferred()
 
 
 func set_moonbase_requirements(requirements: Dictionary) -> void:
@@ -1146,6 +1154,7 @@ func _on_confirm_pressed() -> void:
 	assignment_panel.visible = false
 	packing_panel.visible = true
 	_refresh()
+	_reset_piece_scroll_positions.call_deferred()
 
 
 func _on_packing_piece_pressed(instance_id: String) -> void:
