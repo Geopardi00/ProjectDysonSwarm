@@ -11,6 +11,7 @@ func _init() -> void:
 func _run() -> void:
 	var main := MainScene.instantiate()
 	main.settings_file_path = TEST_SETTINGS_PATH
+	main.demo_mode = false
 	root.add_child(main)
 	await process_frame
 
@@ -39,6 +40,9 @@ func _run() -> void:
 		or not strategy_screen.has_node("Layout/DebugRow/DebugLaunchSuccessButton")
 	):
 		_fail("Strategy screen is missing the launch-result debug buttons.")
+		return
+	if not strategy_screen.debug_row.visible:
+		_fail("Full-game mode did not preserve the strategy debug controls.")
 		return
 	if strategy_screen.news_label.get_parent().get_parent().get_parent().get_parent().name != "NewsPanel":
 		_fail("Strategy screen news feed is not inside the right-side news panel.")

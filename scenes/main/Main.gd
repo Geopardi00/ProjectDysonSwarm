@@ -1116,7 +1116,7 @@ func _show_strategy_screen() -> void:
 	strategy_screen.debug_launch_failure_requested.connect(_queue_button_navigation.bind(_on_debug_launch_failure_pressed))
 	strategy_screen.debug_launch_success_requested.connect(_queue_button_navigation.bind(_on_debug_launch_success_pressed))
 	_set_active_screen(strategy_screen)
-	strategy_screen.setup(game_state.get_summary(), SHOW_DEBUG_ACTIONS)
+	strategy_screen.setup(game_state.get_summary(), SHOW_DEBUG_ACTIONS and not demo_mode)
 
 
 func _show_launch_result(result: Dictionary) -> void:

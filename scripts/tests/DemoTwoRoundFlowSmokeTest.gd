@@ -25,6 +25,9 @@ func _run() -> void:
 	await process_frame
 	if main.game_state.player_faction != "EU" or main.active_screen.name != "StrategyScreen":
 		return _fail(main, "Demo match did not start with the selected faction.")
+	var demo_debug_row := main.active_screen.get_node_or_null("Layout/DebugRow") as Control
+	if demo_debug_row == null or demo_debug_row.visible:
+		return _fail(main, "Demo mode did not hide the strategy debug controls.")
 
 	var first_result: Dictionary = main.launch_manager.resolve_launch(
 		"spinlaunch",

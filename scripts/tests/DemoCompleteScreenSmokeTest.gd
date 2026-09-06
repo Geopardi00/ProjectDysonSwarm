@@ -22,9 +22,9 @@ func _run() -> void:
 	var steam_placeholder := screen.get_node_or_null("PanelCenter/Panel/ContentMargin/Content/SteamPlaceholder") as Label
 	var replay_button := screen.get_node_or_null("PanelCenter/Panel/ContentMargin/Content/ReplayButton") as Button
 	var exit_button := screen.get_node_or_null("PanelCenter/Panel/ContentMargin/Content/ExitButton") as Button
-	if title == null or not title.text.contains("THANK YOU"):
+	if title == null or title.text != "Thank you for playing this demo":
 		return _fail(screen, "Demo completion screen did not include its thank-you title.")
-	if message == null or not message.text.to_lower().contains("wishlist"):
+	if message == null or message.text != "If you enjoyed playing it, you can wishlist Project Dyson’s Swarm on Steam.":
 		return _fail(screen, "Demo completion screen did not include the wishlist message.")
 	if steam_placeholder == null or not steam_placeholder.text.contains("PLACEHOLDER"):
 		return _fail(screen, "Demo completion screen did not include the Steam link placeholder.")
