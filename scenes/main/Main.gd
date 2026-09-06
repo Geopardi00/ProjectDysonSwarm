@@ -7,6 +7,7 @@ const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 const StrategyScreenScene := preload("res://scenes/ui/StrategyScreen.tscn")
 const OptionsScreenScene := preload("res://scenes/ui/OptionsScreen.tscn")
 const PauseMenuScreenScene := preload("res://scenes/ui/PauseMenuScreen.tscn")
+const DemoCompleteScreenScene := preload("res://scenes/ui/DemoCompleteScreen.tscn")
 const OPENING_GLITCH_SHADER := preload("res://assets/shaders/opening_glitch.gdshader")
 const OPENING_GLITCH_SOUND := preload("res://audio/sfx/glitch.wav")
 const OPENING_CUTSCENE_PATH := "res://assets/cutscene/0001-0360.ogv"
@@ -31,6 +32,7 @@ const MUSIC_BUS_NAME := &"Music"
 const SFX_BUS_NAME := &"SFX"
 
 const SHOW_DEBUG_ACTIONS := true
+const DEMO_MAX_ROUNDS := 2
 const LAUNCH_RESULT_BUTTON_WIDTH := 220
 const LAUNCH_RESULT_BUTTON_HEIGHT := 44
 const LAUNCH_FAILURE_PANEL_SIZE := Vector2(812.0, 781.0)
@@ -82,6 +84,7 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 		_update_editor_opening_preview()
 
 @export_category("Opening Cutscene")
+@export var demo_mode := true
 @export_range(0.0, 2.0, 0.05, "suffix:s") var opening_glitch_duration := 0.4
 @export_range(0.0, 15.0, 0.05, "suffix:s") var cutscene_explosion_time := 2.0
 
@@ -605,11 +608,11 @@ func _show_faction_select() -> void:
 	_set_active_screen(_build_faction_select_screen())
 
 
-func _show_opening_cutscene() -> void:
+func _start_opening_transition() -> void:
 	if opening_glitch_layer != null or opening_cutscene_layer != null:
 		return
 	if opening_glitch_duration <= 0.0:
-		_begin_opening_cutscene()
+		_finish_opening_transition()
 		return
 
 	opening_glitch_layer = ColorRect.new()
@@ -631,7 +634,17 @@ func _show_opening_cutscene() -> void:
 
 	var glitch_tween := opening_glitch_layer.create_tween()
 	glitch_tween.tween_interval(opening_glitch_duration)
-	glitch_tween.tween_callback(_begin_opening_cutscene)
+	glitch_tween.tween_callback(_finish_opening_transition)
+
+
+func _finish_opening_transition() -> void:
+	if demo_mode:
+		if opening_glitch_layer != null:
+			opening_glitch_layer.queue_free()
+			opening_glitch_layer = null
+		_show_faction_select()
+		return
+	_begin_opening_cutscene()
 
 
 func _begin_opening_cutscene() -> void:
@@ -824,7 +837,7 @@ func _build_opening_screen() -> Control:
 	button_stack.add_theme_constant_override("separation", int(opening_menu_button_spacing))
 	layout.add_child(button_stack)
 
-	var start_button := _build_opening_menu_button("StartButton", "START", _show_opening_cutscene)
+	var start_button := _build_opening_menu_button("StartButton", "START", _start_opening_transition)
 	button_stack.add_child(start_button)
 	button_stack.add_child(_build_opening_menu_button("OptionsButton", "OPTIONS", _show_options_screen))
 	button_stack.add_child(_build_opening_menu_button("ExitButton", "EXIT GAME", _exit_game))
@@ -1239,6 +1252,15 @@ func _show_game_over_screen() -> void:
 	_apply_game_over_layout()
 
 
+func _show_demo_complete_screen() -> void:
+	cargo_loading_screen.visible = false
+	_set_corner_logo_visible(true)
+	var demo_complete_screen = DemoCompleteScreenScene.instantiate()
+	demo_complete_screen.replay_requested.connect(_queue_button_navigation.bind(_on_demo_replay_requested))
+	demo_complete_screen.exit_requested.connect(_queue_button_navigation.bind(_exit_game))
+	_set_active_screen(demo_complete_screen)
+
+
 func _build_game_over_screen() -> Control:
 	var summary := game_state.get_summary()
 	var player_won := bool(summary["player_won"])
@@ -1377,6 +1399,9 @@ func _on_assignment_cancelled() -> void:
 
 
 func _on_result_continue_pressed() -> void:
+	if demo_mode and game_state.launches_attempted >= DEMO_MAX_ROUNDS:
+		_show_demo_complete_screen()
+		return
 	if game_state.game_over:
 		_show_game_over_screen()
 	else:
@@ -1408,6 +1433,12 @@ func _on_play_again_pressed() -> void:
 func _on_main_menu_pressed() -> void:
 	game_state.start_new_match(selected_faction, selected_difficulty)
 	_show_faction_select()
+
+
+func _on_demo_replay_requested() -> void:
+	selected_faction = ""
+	game_state.start_new_match("USA", selected_difficulty)
+	_show_opening_screen()
 
 
 func _on_debug_add_news_pressed() -> void:

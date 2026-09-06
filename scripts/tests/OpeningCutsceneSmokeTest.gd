@@ -58,7 +58,8 @@ func _run() -> void:
 
 	main.opening_glitch_duration = 0.05
 	main.cutscene_explosion_time = 0.0
-	main._show_opening_cutscene()
+	main.demo_mode = false
+	main._start_opening_transition()
 	await process_frame
 	if main.opening_glitch_layer == null:
 		_fail("Opening glitch effect did not start before the cutscene.")

@@ -1,0 +1,99 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/DemoCompleteScreen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/panels/panel_options.png" id="2_panel"]
+[ext_resource type="FontFile" path="res://assets/ui/fonts/zekton/Zekton-Regular.otf" id="3_font"]
+
+[node name="DemoCompleteScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="PanelCenter" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Control" parent="PanelCenter"]
+custom_minimum_size = Vector2(814, 781)
+layout_mode = 2
+
+[node name="PanelArt" type="TextureRect" parent="PanelCenter/Panel"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ContentMargin" type="MarginContainer" parent="PanelCenter/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 70.0
+offset_top = 112.0
+offset_right = -70.0
+offset_bottom = -70.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="PanelCenter/Panel/ContentMargin"]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="Title" type="Label" parent="PanelCenter/Panel/ContentMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("3_font")
+theme_override_font_sizes/font_size = 34
+text = "THANK YOU FOR PLAYING"
+horizontal_alignment = 1
+
+[node name="Message" type="Label" parent="PanelCenter/Panel/ContentMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Thank you for playing this demo.\nIf you enjoyed it, you can wishlist Project Dyson Swarm on Steam."
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="SteamPlaceholder" type="Label" parent="PanelCenter/Panel/ContentMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.78, 0.32, 1)
+theme_override_font_sizes/font_size = 20
+text = "STEAM PAGE LINK - PLACEHOLDER"
+horizontal_alignment = 1
+
+[node name="ButtonSpacer" type="Control" parent="PanelCenter/Panel/ContentMargin/Content"]
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+
+[node name="ReplayButton" type="Button" parent="PanelCenter/Panel/ContentMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "PLAY DEMO AGAIN"
+
+[node name="ExitButton" type="Button" parent="PanelCenter/Panel/ContentMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 44)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "EXIT GAME"
