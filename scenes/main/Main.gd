@@ -36,6 +36,9 @@ const LAUNCH_RESULT_BUTTON_WIDTH := 220
 const LAUNCH_RESULT_BUTTON_HEIGHT := 44
 const LAUNCH_FAILURE_PANEL_SIZE := Vector2(812.0, 781.0)
 const LAUNCH_FAILURE_TEXT_SIZE := Vector2(684.0, 230.0)
+const LAUNCH_READINESS_BAR_HEIGHT := 18.0
+const LAUNCH_READINESS_BEFORE_COLOR := Color("#9C5A26")
+const LAUNCH_READINESS_GAIN_COLOR := Color("#F08A34")
 const GAME_OVER_PANEL_SIZE := Vector2(812.0, 781.0)
 const GAME_OVER_TEXT_SIZE := Vector2(684.0, 230.0)
 const GAME_OVER_BUTTON_ROW_SIZE := Vector2(292.0, 44.0)
@@ -137,6 +140,9 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 	set(value):
 		launch_failure_text_y = value
 		_apply_launch_failure_layout()
+
+@export_range(0.0, 2.0, 0.05, "suffix:s") var launch_readiness_count_delay := 0.35
+@export_range(0.1, 4.0, 0.05, "suffix:s") var launch_readiness_count_duration := 1.4
 
 @export_category("Game Over Panel Layout")
 @export_range(-800.0, 800.0, 1.0, "suffix:px") var game_over_panel_x := 0.0:
@@ -1113,6 +1119,7 @@ func _show_launch_result(result: Dictionary) -> void:
 	launch_failure_text = launch_failure_panel.get_node(text_name) as Control
 	launch_failure_continue_button = active_screen.get_node("ContinueButton") as Button
 	_apply_launch_failure_layout()
+	_animate_launch_readiness(result)
 
 
 func _build_launch_result_screen(result: Dictionary) -> Control:
@@ -1176,6 +1183,8 @@ func _build_illustrated_launch_result_screen(
 	title.add_theme_font_size_override("font_size", 28)
 	text_group.add_child(title)
 
+	text_group.add_child(_build_launch_readiness_block(result))
+
 	var details := Label.new()
 	details.name = "Details"
 	details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1200,6 +1209,105 @@ func _build_illustrated_launch_result_screen(
 
 	UiAssetsScript.apply_text_outline(screen)
 	return screen
+
+
+# Readiness meter: the dim segment is progress before this launch, the bright
+# segment counts up to the new total once the screen is shown.
+func _build_launch_readiness_block(result: Dictionary) -> Control:
+	var before := float(result.get("readiness_before", 0.0))
+	var block := VBoxContainer.new()
+	block.name = "Readiness"
+	block.add_theme_constant_override("separation", 6)
+
+	var header := HBoxContainer.new()
+	header.name = "Header"
+	block.add_child(header)
+	var caption := Label.new()
+	caption.name = "Caption"
+	caption.text = "MOONBASE READINESS"
+	caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	caption.add_theme_font_size_override("font_size", 18)
+	header.add_child(caption)
+	var value_label := Label.new()
+	value_label.name = "Value"
+	value_label.add_theme_font_size_override("font_size", 18)
+	value_label.text = _format_readiness_value(before, before, result)
+	header.add_child(value_label)
+
+	var bars := Control.new()
+	bars.name = "Bars"
+	bars.custom_minimum_size = Vector2(0.0, LAUNCH_READINESS_BAR_HEIGHT)
+	block.add_child(bars)
+	var gain_bar := _build_readiness_bar("GainBar", LAUNCH_READINESS_GAIN_COLOR, true)
+	gain_bar.value = before
+	bars.add_child(gain_bar)
+	var before_bar := _build_readiness_bar("BeforeBar", LAUNCH_READINESS_BEFORE_COLOR, false)
+	before_bar.value = before
+	bars.add_child(before_bar)
+	return block
+
+
+func _build_readiness_bar(bar_name: String, fill_color: Color, with_background: bool) -> ProgressBar:
+	var bar := ProgressBar.new()
+	bar.name = bar_name
+	bar.max_value = 100.0
+	bar.step = 0.0
+	bar.show_percentage = false
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var background := StyleBoxFlat.new()
+	if with_background:
+		background.bg_color = Color(0.03, 0.05, 0.08, 0.85)
+		background.border_color = Color(0.62, 0.68, 0.76, 0.55)
+		background.set_border_width_all(1)
+	else:
+		background.bg_color = Color.TRANSPARENT
+	background.set_corner_radius_all(2)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = fill_color
+	fill.set_corner_radius_all(2)
+	bar.add_theme_stylebox_override("background", background)
+	bar.add_theme_stylebox_override("fill", fill)
+	return bar
+
+
+func _animate_launch_readiness(result: Dictionary) -> void:
+	var gain_bar := active_screen.find_child("GainBar", true, false) as ProgressBar
+	var value_label := active_screen.find_child("Value", true, false) as Label
+	if gain_bar == null or value_label == null:
+		return
+	var before := float(result.get("readiness_before", 0.0))
+	var after := float(result.get("readiness_after", before))
+	if is_equal_approx(before, after):
+		value_label.text = _format_readiness_value(before, after, result)
+		return
+	var tween := gain_bar.create_tween()
+	tween.tween_interval(launch_readiness_count_delay)
+	tween.tween_method(
+		_set_launch_readiness_display.bind(gain_bar, value_label, before, result),
+		before,
+		after,
+		launch_readiness_count_duration
+	).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(gain_bar, "modulate", Color(1.35, 1.35, 1.35, 1.0), 0.08)
+	tween.tween_property(gain_bar, "modulate", Color.WHITE, 0.35)
+
+
+func _set_launch_readiness_display(
+	value: float,
+	gain_bar: ProgressBar,
+	value_label: Label,
+	before: float,
+	result: Dictionary
+) -> void:
+	gain_bar.value = value
+	value_label.text = _format_readiness_value(before, value, result)
+
+
+func _format_readiness_value(before: float, current: float, result: Dictionary) -> String:
+	if not bool(result.get("success", false)):
+		return "%.1f%%  (unchanged)" % before
+	return "%.1f%%  (+%.1f)" % [current, current - before]
 
 
 func _apply_launch_failure_layout() -> void:
@@ -1559,32 +1667,25 @@ func _format_launch_result(result: Dictionary) -> String:
 	if result.is_empty():
 		return "Launch result unavailable."
 
+	# Kept short so the text stays in the panel's sky area above the illustration;
+	# the readiness meter above already shows the before/after values.
 	var lines: Array[String] = [
-		"Vehicle: %s" % String(result.get("vehicle_name", "")),
-		"Days advanced: %d" % int(result.get("launch_days", 0)),
-		"Fuel: %d / %d" % [
+		"%s  ·  %d days  ·  Fuel %d / %d" % [
+			String(result.get("vehicle_name", "")),
+			int(result.get("launch_days", 0)),
 			int(result.get("placed_fuel", 0)),
 			int(result.get("required_fuel", 0)),
 		],
 	]
 
 	if bool(result.get("success", false)):
-		lines.append("Launch successful.")
-		lines.append("Readiness: %.1f%% -> %.1f%%" % [
-			float(result.get("readiness_before", 0.0)),
-			float(result.get("readiness_after", 0.0)),
-		])
-		lines.append("")
-		lines.append("Delivered construction materials:")
-		lines.append(_format_material_amounts(result.get("delivery_result", {}).get("used", {}), "- none"))
-		var wasted_text := _format_material_amounts(result.get("delivery_result", {}).get("wasted", {}), "")
+		var delivery: Dictionary = result.get("delivery_result", {})
+		lines.append("Delivered: %s" % _format_material_inline(delivery.get("used", {}), "nothing useful"))
+		var wasted_text := _format_material_inline(delivery.get("wasted", {}), "")
 		if wasted_text != "":
-			lines.append("")
-			lines.append("Wasted overdelivery:")
-			lines.append(wasted_text)
+			lines.append("Wasted overdelivery: %s" % wasted_text)
 	else:
 		lines.append("Launch failed. Cargo lost.")
-		lines.append("Readiness unchanged: %.1f%%" % float(result.get("readiness_before", 0.0)))
 
 	return "\n".join(lines)
 
@@ -1637,15 +1738,13 @@ func _format_news(messages: Array) -> String:
 	return "\n".join(lines)
 
 
-func _format_material_amounts(materials: Dictionary, empty_text: String) -> String:
-	var lines: Array[String] = []
+func _format_material_inline(materials: Dictionary, empty_text: String) -> String:
+	var parts: Array[String] = []
 	for material: String in GameDataScript.CONSTRUCTION_MATERIALS:
 		var amount := int(materials.get(material, 0))
 		if amount > 0:
-			lines.append("- %s: %d" % [_format_material_name(material), amount])
-	if lines.is_empty():
-		return empty_text
-	return "\n".join(lines)
+			parts.append("%s %d" % [_format_material_name(material), amount])
+	return empty_text if parts.is_empty() else ", ".join(parts)
 
 
 func _format_material_name(material: String) -> String:
