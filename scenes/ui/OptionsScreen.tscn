@@ -230,7 +230,6 @@ custom_minimum_size = Vector2(0, 70)
 layout_mode = 2
 
 [node name="HowToPlayButton" type="Button" parent="PanelCenter/Panel/ContentMargin/OptionsPage"]
-theme_type_variation = &"PrimaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 48)
 layout_mode = 2
@@ -238,7 +237,6 @@ size_flags_horizontal = 4
 text = "HOW TO PLAY"
 
 [node name="OptionsBackButton" type="Button" parent="PanelCenter/Panel/ContentMargin/OptionsPage"]
-theme_type_variation = &"PrimaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 44)
 layout_mode = 2
@@ -275,7 +273,6 @@ text = "GOAL\nReach 100% moonbase readiness before competing factions.\n\nSTRATE
 autowrap_mode = 3
 
 [node name="InstructionsBackButton" type="Button" parent="PanelCenter/Panel/ContentMargin/InstructionsPage"]
-theme_type_variation = &"PrimaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 44)
 layout_mode = 2

@@ -22,8 +22,8 @@ opening_vertical_offset = 51.0
 opening_title_button_spacing = 0.0
 opening_title_width = 1800.0
 opening_title_height = 473.0
-opening_button_width = 240.0
-opening_button_height = 56.0
+opening_button_width = 141.0
+opening_button_height = 24.0
 corner_logo_x = -20.0
 corner_logo_y = -15.0
 corner_logo_width = 408.0
@@ -140,8 +140,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 115.0
-offset_bottom = 115.0
+offset_top = 83.0
+offset_bottom = 83.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 0
@@ -162,8 +162,7 @@ size_flags_horizontal = 4
 theme_override_constants/separation = 8
 
 [node name="StartButton" type="Button" parent="EditorOpeningPreview/Layout/ButtonStack" unique_id=1505724276]
-theme_type_variation = &"PrimaryButton"
-custom_minimum_size = Vector2(240, 56)
+custom_minimum_size = Vector2(141, 24)
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2
@@ -174,8 +173,7 @@ theme_override_fonts/font = SubResource("FontVariation_dc040")
 text = "START"
 
 [node name="OptionsButton" type="Button" parent="EditorOpeningPreview/Layout/ButtonStack" unique_id=1886465872]
-theme_type_variation = &"PrimaryButton"
-custom_minimum_size = Vector2(240, 56)
+custom_minimum_size = Vector2(141, 24)
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2
@@ -186,8 +184,7 @@ theme_override_fonts/font = SubResource("FontVariation_dc040")
 text = "OPTIONS"
 
 [node name="ExitButton" type="Button" parent="EditorOpeningPreview/Layout/ButtonStack" unique_id=2124917468]
-theme_type_variation = &"PrimaryButton"
-custom_minimum_size = Vector2(240, 56)
+custom_minimum_size = Vector2(141, 24)
 layout_mode = 2
 size_flags_horizontal = 4
 mouse_filter = 2

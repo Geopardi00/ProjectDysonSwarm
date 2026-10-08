@@ -157,7 +157,6 @@ custom_minimum_size = Vector2(0, 48)
 layout_mode = 0
 
 [node name="BigRocketButton" type="Button" parent="Margin/VehiclePanel/BigRocketCard/Margin/Content" unique_id=1029576737]
-theme_type_variation = &"PrimaryButton"
 custom_minimum_size = Vector2(180, 42)
 layout_mode = 0
 offset_left = 32.0
@@ -287,7 +286,6 @@ custom_minimum_size = Vector2(0, 48)
 layout_mode = 0
 
 [node name="ShuttleButton" type="Button" parent="Margin/VehiclePanel/ShuttleCard/Margin/Content" unique_id=908295657]
-theme_type_variation = &"PrimaryButton"
 custom_minimum_size = Vector2(180, 42)
 layout_mode = 0
 offset_left = 32.0
@@ -417,7 +415,6 @@ custom_minimum_size = Vector2(0, 48)
 layout_mode = 0
 
 [node name="SpinLaunchButton" type="Button" parent="Margin/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=766913185]
-theme_type_variation = &"PrimaryButton"
 custom_minimum_size = Vector2(180, 42)
 layout_mode = 0
 offset_left = 32.0
