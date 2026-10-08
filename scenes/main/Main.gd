@@ -31,7 +31,7 @@ const UI_TWEEN_DOWN_META := &"dyson_ui_tween_down"
 const MUSIC_BUS_NAME := &"Music"
 const SFX_BUS_NAME := &"SFX"
 
-const SHOW_DEBUG_ACTIONS := true
+const DEMO_BUILD_SETTING := "dyson/build/demo_mode"
 const DEMO_MAX_ROUNDS := 2
 const LAUNCH_RESULT_BUTTON_WIDTH := 220
 const LAUNCH_RESULT_BUTTON_HEIGHT := 44
@@ -84,7 +84,6 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 		_update_editor_opening_preview()
 
 @export_category("Opening Cutscene")
-@export var demo_mode := true
 @export_range(0.0, 2.0, 0.05, "suffix:s") var opening_glitch_duration := 0.4
 @export_range(0.0, 15.0, 0.05, "suffix:s") var cutscene_explosion_time := 2.0
 
@@ -172,6 +171,10 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 @onready var root_margin: MarginContainer = $RootMargin
 @onready var cargo_loading_screen: CargoLoadingScreen = %CargoLoadingScreen
 
+# Demo builds are exported with the "demo" feature tag, which flips the
+# dyson/build/demo_mode project setting. Debug actions only exist in editor runs.
+var demo_mode := bool(ProjectSettings.get_setting(DEMO_BUILD_SETTING, false))
+var show_debug_actions := OS.has_feature("editor")
 var game_state: GameState
 var launch_manager: LaunchManager
 var selected_faction := ""
@@ -1109,7 +1112,7 @@ func _show_strategy_screen() -> void:
 	strategy_screen.debug_launch_failure_requested.connect(_queue_button_navigation.bind(_on_debug_launch_failure_pressed))
 	strategy_screen.debug_launch_success_requested.connect(_queue_button_navigation.bind(_on_debug_launch_success_pressed))
 	_set_active_screen(strategy_screen)
-	strategy_screen.setup(game_state.get_summary(), SHOW_DEBUG_ACTIONS and not demo_mode)
+	strategy_screen.setup(game_state.get_summary(), show_debug_actions and not demo_mode)
 
 
 func _show_launch_result(result: Dictionary) -> void:
@@ -1425,7 +1428,7 @@ func _on_play_again_pressed() -> void:
 
 func _on_main_menu_pressed() -> void:
 	game_state.start_new_match(selected_faction, selected_difficulty)
-	_show_faction_select()
+	_show_opening_screen()
 
 
 func _on_demo_replay_requested() -> void:

@@ -79,6 +79,12 @@ func _run() -> void:
 		_fail(main, "Lost-race buttons were not below the panel.")
 		return
 
+	main._on_main_menu_pressed()
+	await process_frame
+	if main.active_screen == null or main.active_screen.name != "OpeningScreen":
+		_fail(main, "Main Menu did not return to the opening screen.")
+		return
+
 	_cleanup(main)
 	print("Game over panel smoke test passed.")
 	quit(0)

@@ -2,7 +2,7 @@ extends RefCounted
 class_name GameData
 
 const MATERIAL_FUEL := "fuel"
-const DEFAULT_DIFFICULTY := "hard"
+const DEFAULT_DIFFICULTY := "medium"
 
 const CPU_VEHICLE_PROGRESS_MULTIPLIERS := {
 	"big_rocket": 1.0,

@@ -64,8 +64,8 @@ func _run() -> void:
 	if not is_equal_approx(options.panel_art.modulate.a, 0.85):
 		_fail("Options panel did not use 85 percent opacity.")
 		return
-	if options.get_selected_difficulty() != "hard":
-		_fail("Options did not default to Hard difficulty.")
+	if options.get_selected_difficulty() != "medium":
+		_fail("Options did not default to Medium difficulty.")
 		return
 
 	options.volume_slider.value = 35.0
@@ -104,7 +104,7 @@ func _run() -> void:
 	if main_instance.selected_difficulty != "easy":
 		_fail("Difficulty selector did not update Main.")
 		return
-	if main_instance.game_state.active_difficulty != "hard":
+	if main_instance.game_state.active_difficulty != "medium":
 		_fail("Changing difficulty modified the active match instead of the next match.")
 		return
 
