@@ -57,12 +57,10 @@ func _run() -> void:
 		return
 
 	main.opening_glitch_duration = 0.05
-	main.cutscene_explosion_time = 0.0
-	main.demo_mode = false
 	main._start_opening_transition()
 	await process_frame
 	if main.opening_glitch_layer == null:
-		_fail("Opening glitch effect did not start before the cutscene.")
+		_fail("Opening glitch effect did not start after Start.")
 		return
 	if (
 		main.opening_glitch_player == null
@@ -72,39 +70,14 @@ func _run() -> void:
 	):
 		_fail("Opening glitch effect did not play glitch.wav.")
 		return
-	if main.opening_cutscene_layer != null:
-		_fail("Opening cutscene started before the glitch effect finished.")
-		return
 	await create_timer(0.1).timeout
 	await process_frame
 
-	if main.opening_cutscene_layer == null:
-		_fail("Opening cutscene layer was not created.")
+	if main.opening_glitch_layer != null:
+		_fail("Opening glitch effect was not cleaned up.")
 		return
-	if main.opening_cutscene_player == null or not main.opening_cutscene_player.is_playing():
-		_fail("Opening cutscene video did not start playing.")
-		return
-	if main.opening_cutscene_player.bus != &"SFX":
-		_fail("Opening cutscene audio was not routed to the SFX bus.")
-		return
-	if main.cutscene_explosion_player == null or not main.cutscene_explosion_player.is_playing():
-		_fail("Cutscene explosion sound did not play at its configured time.")
-		return
-	if main.cutscene_explosion_player.bus != &"SFX":
-		_fail("Cutscene explosion sound was not routed to the SFX bus.")
-		return
-	if main.music_player != null and main.music_player.stream_paused:
-		_fail("Background music was paused during the cutscene.")
-		return
-
-	main._finish_opening_cutscene()
-	await process_frame
-
-	if main.opening_cutscene_layer != null or main.opening_cutscene_player != null:
-		_fail("Opening cutscene was not cleaned up after finishing.")
-		return
-	if main.active_screen == null:
-		_fail("Faction selection did not open after the cutscene.")
+	if main.active_screen == null or main.active_screen.name != "FactionSelectScreen":
+		_fail("Faction selection did not open after the glitch.")
 		return
 	if main.corner_logo == null or not main.corner_logo.visible:
 		_fail("Faction selection did not restore the corner logo.")

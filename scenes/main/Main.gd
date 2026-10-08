@@ -10,8 +10,7 @@ const PauseMenuScreenScene := preload("res://scenes/ui/PauseMenuScreen.tscn")
 const DemoCompleteScreenScene := preload("res://scenes/ui/DemoCompleteScreen.tscn")
 const OPENING_GLITCH_SHADER := preload("res://assets/shaders/opening_glitch.gdshader")
 const OPENING_GLITCH_SOUND := preload("res://audio/sfx/glitch.wav")
-const OPENING_CUTSCENE_PATH := "res://assets/cutscene/0001-0360.ogv"
-const CUTSCENE_EXPLOSION_SOUND_PATH := "res://audio/sfx/explosion.wav"
+const LogoAssemblyIntroScene := preload("res://scenes/intro/LogoAssemblyIntro.tscn")
 const BUTTON_CLICK_SOUND := preload("res://audio/sfx/button_click.wav")
 const BUTTON_HOVER_SOUND := preload("res://audio/sfx/button_hover.wav")
 const LAUNCH_FAILURE_PANEL := preload("res://assets/ui/panels/launch_failure_panel.png")
@@ -83,9 +82,14 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 		opening_menu_button_spacing = value
 		_update_editor_opening_preview()
 
-@export_category("Opening Cutscene")
+@export_category("Opening Intro")
+## Plays the logo assembly intro once when the game boots.
+@export var play_intro_on_boot := true
+@export_range(0.0, 1.0, 0.01) var title_backlight_strength := 0.3:
+	set(value):
+		title_backlight_strength = value
+		_update_editor_opening_preview()
 @export_range(0.0, 2.0, 0.05, "suffix:s") var opening_glitch_duration := 0.4
-@export_range(0.0, 15.0, 0.05, "suffix:s") var cutscene_explosion_time := 2.0
 
 @export_category("Corner Logo Layout")
 @export_range(-500.0, 1920.0, 1.0, "suffix:px") var corner_logo_x := 10.0:
@@ -186,10 +190,7 @@ var background_music_streams: Array[AudioStream] = []
 var current_music_index := 0
 var opening_glitch_layer: ColorRect
 var opening_glitch_player: AudioStreamPlayer
-var opening_cutscene_layer: Control
-var opening_cutscene_player: VideoStreamPlayer
-var cutscene_explosion_player: AudioStreamPlayer
-var cutscene_explosion_played := false
+var logo_intro: LogoAssemblyIntro
 var button_click_player: AudioStreamPlayer
 var button_hover_player: AudioStreamPlayer
 var launch_failure_panel: TextureRect
@@ -244,6 +245,8 @@ func _ready() -> void:
 
 	_clear_root_margin()
 	_show_opening_screen()
+	if play_intro_on_boot:
+		_start_logo_intro()
 
 
 func _exit_tree() -> void:
@@ -605,7 +608,7 @@ func _show_faction_select() -> void:
 
 
 func _start_opening_transition() -> void:
-	if opening_glitch_layer != null or opening_cutscene_layer != null:
+	if opening_glitch_layer != null:
 		return
 	if opening_glitch_duration <= 0.0:
 		_finish_opening_transition()
@@ -634,74 +637,10 @@ func _start_opening_transition() -> void:
 
 
 func _finish_opening_transition() -> void:
-	if demo_mode:
-		if opening_glitch_layer != null:
-			opening_glitch_layer.queue_free()
-			opening_glitch_layer = null
-		_show_faction_select()
-		return
-	_begin_opening_cutscene()
-
-
-func _begin_opening_cutscene() -> void:
 	if opening_glitch_layer != null:
 		opening_glitch_layer.queue_free()
 		opening_glitch_layer = null
-	var cutscene_stream := load(OPENING_CUTSCENE_PATH) as VideoStream
-	if cutscene_stream == null:
-		push_warning("Could not load opening cutscene: %s" % OPENING_CUTSCENE_PATH)
-		_show_faction_select()
-		return
-
-	opening_cutscene_layer = Control.new()
-	opening_cutscene_layer.name = "OpeningCutscene"
-	opening_cutscene_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	opening_cutscene_layer.mouse_filter = Control.MOUSE_FILTER_STOP
-
-	var black_background := ColorRect.new()
-	black_background.set_anchors_preset(Control.PRESET_FULL_RECT)
-	black_background.color = Color.BLACK
-	black_background.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	opening_cutscene_layer.add_child(black_background)
-
-	opening_cutscene_player = VideoStreamPlayer.new()
-	opening_cutscene_player.name = "Video"
-	opening_cutscene_player.set_anchors_preset(Control.PRESET_FULL_RECT)
-	opening_cutscene_player.expand = true
-	opening_cutscene_player.bus = SFX_BUS_NAME
-	opening_cutscene_player.stream = cutscene_stream
-	opening_cutscene_player.finished.connect(_finish_opening_cutscene)
-	opening_cutscene_layer.add_child(opening_cutscene_player)
-
-	var explosion_stream := load(CUTSCENE_EXPLOSION_SOUND_PATH) as AudioStream
-	if explosion_stream != null:
-		cutscene_explosion_player = AudioStreamPlayer.new()
-		cutscene_explosion_player.name = "ExplosionSound"
-		cutscene_explosion_player.stream = explosion_stream
-		cutscene_explosion_player.bus = SFX_BUS_NAME
-		opening_cutscene_layer.add_child(cutscene_explosion_player)
-	else:
-		push_warning("Could not load cutscene explosion sound: %s" % CUTSCENE_EXPLOSION_SOUND_PATH)
-	cutscene_explosion_played = false
-
-	var skip_hint := Label.new()
-	skip_hint.text = "ESC TO SKIP"
-	skip_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	skip_hint.anchor_left = 0.0
-	skip_hint.anchor_right = 1.0
-	skip_hint.anchor_top = 1.0
-	skip_hint.anchor_bottom = 1.0
-	skip_hint.offset_left = 24.0
-	skip_hint.offset_top = -52.0
-	skip_hint.offset_right = -24.0
-	skip_hint.offset_bottom = -20.0
-	skip_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UiAssetsScript.apply_text_outline(skip_hint)
-	UiAssetsScript.apply_semibold_font(skip_hint)
-	opening_cutscene_layer.add_child(skip_hint)
-
-	add_child(opening_cutscene_layer)
-	opening_cutscene_player.play()
+	_show_faction_select()
 
 
 func _on_opening_glitch_sound_finished() -> void:
@@ -710,28 +649,33 @@ func _on_opening_glitch_sound_finished() -> void:
 		opening_glitch_player = null
 
 
-func _finish_opening_cutscene() -> void:
-	if opening_cutscene_layer == null:
+func _start_logo_intro() -> void:
+	if active_screen == null or active_screen.name != "OpeningScreen":
 		return
-	if opening_cutscene_player != null:
-		opening_cutscene_player.stop()
-	opening_cutscene_layer.queue_free()
-	opening_cutscene_layer = null
-	opening_cutscene_player = null
-	cutscene_explosion_player = null
-	cutscene_explosion_played = false
-	_show_faction_select()
+	var title_logo := active_screen.get_node_or_null("Layout/TitleLogo") as TextureRect
+	var button_stack := active_screen.get_node_or_null("Layout/ButtonStack") as Control
+	if title_logo == null or button_stack == null:
+		return
+	logo_intro = LogoAssemblyIntroScene.instantiate() as LogoAssemblyIntro
+	logo_intro.finished.connect(_on_logo_intro_finished)
+	add_child(logo_intro)
+	logo_intro.hide_targets(title_logo, button_stack, title_logo.get_node_or_null("Backlight") as Control)
+	# Let the opening layout settle so the pieces land exactly on the menu logo.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if is_instance_valid(logo_intro):
+		logo_intro.play()
 
 
-func _process(_delta: float) -> void:
-	if opening_cutscene_player == null or cutscene_explosion_player == null:
-		return
-	if cutscene_explosion_played or not opening_cutscene_player.is_playing():
-		return
-	if opening_cutscene_player.stream_position < cutscene_explosion_time:
-		return
-	cutscene_explosion_played = true
-	cutscene_explosion_player.play()
+func _on_logo_intro_finished() -> void:
+	logo_intro = null
+
+
+func _cancel_logo_intro() -> void:
+	if logo_intro != null and is_instance_valid(logo_intro):
+		logo_intro.finished.disconnect(_on_logo_intro_finished)
+		logo_intro.queue_free()
+	logo_intro = null
 
 
 func _show_opening_screen() -> void:
@@ -826,6 +770,8 @@ func _build_opening_screen() -> Control:
 	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layout.add_child(logo)
+	if title_backlight_strength > 0.0:
+		logo.add_child(_build_title_backlight())
 
 	var button_stack := VBoxContainer.new()
 	button_stack.name = "ButtonStack"
@@ -843,6 +789,43 @@ func _build_opening_screen() -> Control:
 		UiAssetsScript.apply_semibold_font(button as Control)
 	screen.add_child(layout)
 	return screen
+
+
+# Soft additive glow behind the title so the dark navy lettering separates from space.
+func _build_title_backlight() -> Control:
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.45, 1.0])
+	gradient.colors = PackedColorArray([
+		Color(0.55, 0.72, 1.0, title_backlight_strength),
+		Color(0.35, 0.5, 0.85, title_backlight_strength * 0.4),
+		Color(0.2, 0.3, 0.6, 0.0),
+	])
+	var glow_texture := GradientTexture2D.new()
+	glow_texture.gradient = gradient
+	glow_texture.fill = GradientTexture2D.FILL_RADIAL
+	glow_texture.fill_from = Vector2(0.5, 0.5)
+	glow_texture.fill_to = Vector2(1.0, 0.5)
+	glow_texture.width = 256
+	glow_texture.height = 256
+
+	var glow_material := CanvasItemMaterial.new()
+	glow_material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+
+	var backlight := TextureRect.new()
+	backlight.name = "Backlight"
+	backlight.texture = glow_texture
+	backlight.material = glow_material
+	backlight.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	backlight.stretch_mode = TextureRect.STRETCH_SCALE
+	backlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	backlight.show_behind_parent = true
+	var glow_size := Vector2(opening_title_height * 3.0 * 1.15, opening_title_height * 1.7)
+	backlight.set_anchors_preset(Control.PRESET_CENTER)
+	backlight.offset_left = -glow_size.x * 0.5
+	backlight.offset_top = -glow_size.y * 0.5
+	backlight.offset_right = glow_size.x * 0.5
+	backlight.offset_bottom = glow_size.y * 0.5
+	return backlight
 
 
 func _build_opening_menu_button(button_name: String, button_text: String, callback: Callable) -> Button:
@@ -872,6 +855,13 @@ func _update_editor_opening_preview() -> void:
 	layout.offset_bottom = opening_vertical_offset + opening_stack_compensation
 	layout.add_theme_constant_override("separation", int(opening_title_button_spacing))
 	logo.custom_minimum_size = Vector2(opening_title_width, opening_title_height)
+	# Preview-only glow: added without an owner so it is never saved into Main.tscn.
+	var old_backlight := logo.get_node_or_null("Backlight")
+	if old_backlight != null:
+		logo.remove_child(old_backlight)
+		old_backlight.queue_free()
+	if title_backlight_strength > 0.0:
+		logo.add_child(_build_title_backlight())
 	button_stack.add_theme_constant_override("separation", int(opening_menu_button_spacing))
 	for button: Node in button_stack.get_children():
 		(button as Button).custom_minimum_size = Vector2(opening_button_width, opening_button_height)
@@ -881,10 +871,6 @@ func _update_editor_opening_preview() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if opening_cutscene_layer != null and event.is_action_pressed("ui_cancel"):
-		get_viewport().set_input_as_handled()
-		_finish_opening_cutscene()
-		return
 	if not event.is_action_pressed("ui_cancel"):
 		return
 	if pause_overlay != null:
@@ -1473,6 +1459,7 @@ func _set_active_screen(screen: Control) -> void:
 
 
 func _clear_active_screen() -> void:
+	_cancel_logo_intro()
 	if active_screen != null and is_instance_valid(active_screen):
 		active_screen.queue_free()
 	active_screen = null

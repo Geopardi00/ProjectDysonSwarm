@@ -23,15 +23,11 @@ func _run() -> void:
 	await process_frame
 	if main.opening_glitch_layer == null:
 		return _fail(main, "Demo Start did not begin the opening glitch.")
-	if main.opening_cutscene_layer != null:
-		return _fail(main, "Demo opening created the cutscene before the glitch finished.")
 
 	await create_timer(0.1).timeout
 	await process_frame
 	if main.opening_glitch_layer != null:
 		return _fail(main, "Demo opening glitch was not cleaned up.")
-	if main.opening_cutscene_layer != null or main.opening_cutscene_player != null:
-		return _fail(main, "Demo opening started the cutscene instead of skipping it.")
 	if main.active_screen == null or main.active_screen.name != "FactionSelectScreen":
 		return _fail(main, "Demo opening did not go directly to faction selection.")
 	if main.corner_logo == null or not main.corner_logo.visible:
