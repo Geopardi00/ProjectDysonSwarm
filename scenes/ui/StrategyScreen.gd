@@ -433,7 +433,7 @@ func _set_stretched_offsets(control: Control, base: Vector4, delta: Vector2) -> 
 func setup(summary: Dictionary, show_debug_actions: bool) -> void:
 	day_label.text = "Day %d" % int(summary["days_elapsed"])
 	faction_label.text = "Player faction: %s" % String(summary["player_faction"])
-	readiness_label.text = "Moonbase readiness: %.1f%%" % float(summary["player_readiness_percent"])
+	readiness_label.text = "Moonbase readiness"
 	readiness_bar.max_value = 100.0
 	readiness_bar.value = float(summary["player_readiness_percent"])
 	launches_label.text = "Launches: %d  Success: %d  Failed: %d" % [
