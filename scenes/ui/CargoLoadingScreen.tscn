@@ -462,6 +462,7 @@ layout_mode = 2
 text = "Reset Assignments"
 
 [node name="ConfirmButton" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCenter/ActionRow" unique_id=937785345]
+theme_type_variation = &"PrimaryButton"
 unique_name_in_owner = true
 layout_mode = 2
 text = "Confirm Assignments"
@@ -1126,6 +1127,7 @@ offset_right = 776.0
 offset_bottom = 902.0
 
 [node name="LaunchButton" type="Button" parent="RootMargin/Layout/PackingPanel/PackingCenter" unique_id=725150069]
+theme_type_variation = &"PrimaryButton"
 unique_name_in_owner = true
 layout_mode = 0
 offset_left = 426.0

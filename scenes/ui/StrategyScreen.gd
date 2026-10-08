@@ -267,6 +267,9 @@ func _ready() -> void:
 		var card: Dictionary = vehicle_cards[vehicle_id]
 		var button := card["button"] as Button
 		button.pressed.connect(vehicle_selected.emit.bind(vehicle_id))
+		# Card stats sit on the parchment art: dark ink reads better than outlined white.
+		for stat_key: String in ["payload", "fuel", "days", "grid"]:
+			UiAssetsScript.mark_parchment_text(card[stat_key] as Control)
 
 	UiAssetsScript.apply_text_outline(self)
 

@@ -29,11 +29,11 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_strategy")
-day_font_size = 18
-faction_font_size = 16
-status_info_font_size = 14
-news_title_font_size = 18
-news_body_font_size = 14
+day_font_size = 22
+faction_font_size = 18
+status_info_font_size = 17
+news_title_font_size = 20
+news_body_font_size = 16
 status_panel_y = 31.0
 status_text_y = 101.0
 big_rocket_title_y = -2.0
@@ -348,6 +348,7 @@ custom_minimum_size = Vector2(0, 48)
 anchors_preset = 0
 
 [node name="BigRocketButton" type="Button" parent="Layout/Panels/VehiclePanel/BigRocketCard/Margin/Content" unique_id=303592902]
+theme_type_variation = &"PrimaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 42)
 layout_mode = 0
@@ -507,6 +508,7 @@ custom_minimum_size = Vector2(0, 48)
 anchors_preset = 0
 
 [node name="ShuttleButton" type="Button" parent="Layout/Panels/VehiclePanel/ShuttleCard/Margin/Content" unique_id=489353861]
+theme_type_variation = &"PrimaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 42)
 layout_mode = 0
@@ -667,6 +669,7 @@ custom_minimum_size = Vector2(0, 48)
 anchors_preset = 0
 
 [node name="SpinLaunchButton" type="Button" parent="Layout/Panels/VehiclePanel/SpinLaunchCard/Margin/Content" unique_id=1553686673]
+theme_type_variation = &"PrimaryButton"
 unique_name_in_owner = true
 custom_minimum_size = Vector2(180, 42)
 layout_mode = 0

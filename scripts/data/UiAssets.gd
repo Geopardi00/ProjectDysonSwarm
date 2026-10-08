@@ -4,6 +4,9 @@ class_name UiAssets
 const BACKGROUND := "res://assets/ui/backgrounds/ui_bg_space_loading_1920x1080.png"
 const TITLE_LOGO := "res://assets/ui/title/title_logo.png"
 const UI_FONT := preload("res://assets/ui/fonts/zekton/Zekton-Regular.otf")
+const PARCHMENT_TEXT_META := &"dyson_parchment_text"
+# Matches the navy panel headings printed on the parchment art.
+const PARCHMENT_TEXT_COLOR := Color("#1B2A44")
 
 static var _semibold_ui_font: FontVariation
 
@@ -134,8 +137,32 @@ static func apply_text_outline(node: Node, outline_size: int = 4) -> void:
 	if node is Label or node is Button:
 		var control := node as Control
 		control.add_theme_font_override("font", UI_FONT)
-		control.add_theme_color_override("font_color", Color.WHITE)
-		control.add_theme_color_override("font_outline_color", Color.BLACK)
-		control.add_theme_constant_override("outline_size", outline_size)
+		if control.has_meta(PARCHMENT_TEXT_META):
+			_apply_parchment_colors(control)
+		else:
+			control.add_theme_color_override("font_color", Color.WHITE)
+			control.add_theme_color_override("font_outline_color", Color.BLACK)
+			control.add_theme_constant_override("outline_size", outline_size)
 	for child: Node in node.get_children():
 		apply_text_outline(child, outline_size)
+
+
+## Marks text that sits on the beige parchment panels: dark ink, no outline.
+## The mark survives later apply_text_outline passes over the same screen.
+static func mark_parchment_text(control: Control) -> void:
+	if control == null:
+		return
+	control.set_meta(PARCHMENT_TEXT_META, true)
+	_apply_parchment_colors(control)
+
+
+static func _apply_parchment_colors(control: Control) -> void:
+	control.add_theme_color_override("font_color", PARCHMENT_TEXT_COLOR)
+	control.add_theme_constant_override("outline_size", 0)
+	# LabelSettings win over theme overrides, so give the label its own inked copy.
+	var label := control as Label
+	if label != null and label.label_settings != null and label.label_settings.font_color != PARCHMENT_TEXT_COLOR:
+		var inked := label.label_settings.duplicate() as LabelSettings
+		inked.font_color = PARCHMENT_TEXT_COLOR
+		inked.outline_size = 0
+		label.label_settings = inked

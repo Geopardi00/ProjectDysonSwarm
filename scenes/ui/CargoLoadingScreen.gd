@@ -220,8 +220,30 @@ func _ready() -> void:
 		return
 	_bind_scene_nodes()
 	_build_material_buttons()
+	_mark_parchment_labels()
 	UiAssetsScript.apply_text_outline(self)
 	visible = false
+
+
+# Text printed directly on the beige info panels reads as dark ink rather than
+# outlined white.
+func _mark_parchment_labels() -> void:
+	for label_path: String in METER_LABEL_PATHS:
+		UiAssetsScript.mark_parchment_text(get_node_or_null(label_path) as Control)
+	UiAssetsScript.mark_parchment_text(get_node_or_null(
+		"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent/PackingSelectedCargoLabel"
+	) as Control)
+	var assignment_materials := get_node_or_null(
+		"RootMargin/Layout/AssignmentPanel/AssignmentInfoPanel/Margin/InfoContent/MaterialButtons"
+	)
+	var packing_content := get_node_or_null(
+		"RootMargin/Layout/PackingPanel/PackingInfoPanel/Margin/PackingInfoContent"
+	)
+	for node_name: String in MANIFEST_NODE_NAMES:
+		if assignment_materials != null:
+			UiAssetsScript.mark_parchment_text(assignment_materials.get_node_or_null("%sAmountLabel" % node_name) as Control)
+		if packing_content != null:
+			UiAssetsScript.mark_parchment_text(packing_content.get_node_or_null("PackingManifest%sLabel" % node_name) as Control)
 
 
 func _apply_moonbase_panel_layout() -> void:

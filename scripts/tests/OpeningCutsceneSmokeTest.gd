@@ -47,6 +47,12 @@ func _run() -> void:
 		if runtime_buttons.get_child(index).name != expected_button_names[index] or preview_buttons.get_child(index).name != expected_button_names[index]:
 			_fail("Opening menu button order did not match the editor preview.")
 			return
+		if runtime_buttons.get_child(index).theme_type_variation != &"PrimaryButton":
+			_fail("Opening menu buttons did not use the PrimaryButton theme style.")
+			return
+	if String(ProjectSettings.get_setting("gui/theme/custom", "")) != "res://assets/ui/theme/dyson_theme.tres":
+		_fail("The project UI theme is not set to dyson_theme.tres.")
+		return
 	if not is_equal_approx(runtime_logo.global_position.y, preview_logo.global_position.y):
 		_fail("Runtime opening title position did not match the editor preview: %.1f vs %.1f." % [
 			runtime_logo.global_position.y,

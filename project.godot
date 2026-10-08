@@ -24,6 +24,10 @@ window/stretch/mode="canvas_items"
 
 build/demo_mode=false
 
+[gui]
+
+theme/custom="res://assets/ui/theme/dyson_theme.tres"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

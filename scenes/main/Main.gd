@@ -32,8 +32,9 @@ const SFX_BUS_NAME := &"SFX"
 
 const DEMO_BUILD_SETTING := "dyson/build/demo_mode"
 const DEMO_MAX_ROUNDS := 2
-const LAUNCH_RESULT_BUTTON_WIDTH := 220
-const LAUNCH_RESULT_BUTTON_HEIGHT := 44
+const PRIMARY_BUTTON := &"PrimaryButton"
+const LAUNCH_RESULT_BUTTON_WIDTH := 240
+const LAUNCH_RESULT_BUTTON_HEIGHT := 56
 const LAUNCH_FAILURE_PANEL_SIZE := Vector2(812.0, 781.0)
 const LAUNCH_FAILURE_TEXT_SIZE := Vector2(684.0, 230.0)
 const LAUNCH_READINESS_BAR_HEIGHT := 18.0
@@ -41,8 +42,8 @@ const LAUNCH_READINESS_BEFORE_COLOR := Color("#9C5A26")
 const LAUNCH_READINESS_GAIN_COLOR := Color("#F08A34")
 const GAME_OVER_PANEL_SIZE := Vector2(812.0, 781.0)
 const GAME_OVER_TEXT_SIZE := Vector2(684.0, 230.0)
-const GAME_OVER_BUTTON_ROW_SIZE := Vector2(292.0, 44.0)
-const GAME_OVER_BUTTON_SIZE := Vector2(140.0, 44.0)
+const GAME_OVER_BUTTON_ROW_SIZE := Vector2(392.0, 56.0)
+const GAME_OVER_BUTTON_SIZE := Vector2(190.0, 56.0)
 const FACTION_SELECT_LOGO_SIZE := Vector2(256, 256)
 const FACTION_LOGO_HIGHLIGHT_SCALE := Vector2(1.08, 1.08)
 const FACTION_LOGO_NORMAL_SCALE := Vector2.ONE
@@ -840,6 +841,7 @@ func _build_opening_menu_button(button_name: String, button_text: String, callba
 	button.name = button_name
 	button.text = button_text
 	button.custom_minimum_size = Vector2(opening_button_width, opening_button_height)
+	button.theme_type_variation = PRIMARY_BUTTON
 	button.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	button.pressed.connect(_queue_button_navigation.bind(callback))
 	return button
@@ -1005,30 +1007,32 @@ func _build_faction_select_screen() -> Control:
 	menu_stack.offset_left = -120.0
 	menu_stack.offset_top = 164.0
 	menu_stack.offset_right = 120.0
-	menu_stack.offset_bottom = 312.0
+	menu_stack.offset_bottom = 348.0
 	menu_stack.add_theme_constant_override("separation", 8)
 	layout.add_child(menu_stack)
 
 	var start_button := Button.new()
 	start_button.name = "StartButton"
 	start_button.text = "START"
-	start_button.custom_minimum_size = Vector2(240, 44)
+	start_button.custom_minimum_size = Vector2(240, 56)
+	start_button.theme_type_variation = PRIMARY_BUTTON
 	start_button.disabled = selected_faction == ""
-	start_button.modulate = Color(1.18, 1.03, 0.74, 1.0) if selected_faction != "" else Color(0.62, 0.62, 0.62, 1.0)
 	start_button.pressed.connect(_queue_button_navigation.bind(_on_start_match_pressed))
 	menu_stack.add_child(start_button)
 
 	var options_button := Button.new()
 	options_button.name = "OptionsButton"
 	options_button.text = "OPTIONS"
-	options_button.custom_minimum_size = Vector2(240, 44)
+	options_button.custom_minimum_size = Vector2(240, 56)
+	options_button.theme_type_variation = PRIMARY_BUTTON
 	options_button.pressed.connect(_queue_button_navigation.bind(_show_faction_options_screen))
 	menu_stack.add_child(options_button)
 
 	var exit_button := Button.new()
 	exit_button.name = "ExitButton"
 	exit_button.text = "EXIT GAME"
-	exit_button.custom_minimum_size = Vector2(240, 44)
+	exit_button.custom_minimum_size = Vector2(240, 56)
+	exit_button.theme_type_variation = PRIMARY_BUTTON
 	exit_button.pressed.connect(_queue_button_navigation.bind(_exit_game))
 	menu_stack.add_child(exit_button)
 
@@ -1195,6 +1199,7 @@ func _build_illustrated_launch_result_screen(
 	var continue_button := Button.new()
 	continue_button.name = "ContinueButton"
 	continue_button.text = "Continue"
+	continue_button.theme_type_variation = PRIMARY_BUTTON
 	continue_button.set_anchors_preset(Control.PRESET_CENTER)
 	continue_button.offset_left = -LAUNCH_RESULT_BUTTON_WIDTH * 0.5 + launch_failure_panel_x
 	continue_button.offset_top = LAUNCH_FAILURE_PANEL_SIZE.y * 0.5 + 16.0 + launch_failure_panel_y
@@ -1408,6 +1413,7 @@ func _build_game_over_screen() -> Control:
 	var again_button := Button.new()
 	again_button.name = "AgainButton"
 	again_button.custom_minimum_size = GAME_OVER_BUTTON_SIZE
+	again_button.theme_type_variation = PRIMARY_BUTTON
 	again_button.text = "Play Again" if player_won else "Try Again"
 	again_button.pressed.connect(_queue_button_navigation.bind(_on_play_again_pressed))
 	row.add_child(again_button)
@@ -1415,6 +1421,7 @@ func _build_game_over_screen() -> Control:
 	var menu_button := Button.new()
 	menu_button.name = "MainMenuButton"
 	menu_button.custom_minimum_size = GAME_OVER_BUTTON_SIZE
+	menu_button.theme_type_variation = PRIMARY_BUTTON
 	menu_button.text = "Main Menu"
 	menu_button.pressed.connect(_queue_button_navigation.bind(_on_main_menu_pressed))
 	row.add_child(menu_button)
