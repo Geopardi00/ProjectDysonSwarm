@@ -210,9 +210,16 @@ func _run() -> void:
 		return
 
 	screen.start_assignment("space_shuttle", {"copper": 10})
-	if not screen.moonbase_needs_label.text.contains("Copper: 10 / 140 remaining"):
+	if not screen.moonbase_needs_label.text.contains("Copper:\t10 / 140 remaining"):
 		_fail("Cargo screen did not show passed moonbase remaining requirements.")
 		return
+	if screen.moonbase_needs_label.tab_stops.size() != 2:
+		_fail("Moonbase needs text was not laid out in tab-aligned columns.")
+		return
+	for piece_button: Node in screen.find_children("*", "Button", true, false):
+		if (piece_button as Button).tooltip_text != "":
+			_fail("Cargo screen button %s still shows a hover tooltip." % piece_button.name)
+			return
 	if screen.assignment_grid_preview.grid_width != 4 or screen.assignment_grid_preview.grid_height != 8:
 		_fail("Cargo screen did not show a 4x8 Shuttle cargo hold preview.")
 		return

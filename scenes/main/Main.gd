@@ -7,10 +7,10 @@ const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
 const StrategyScreenScene := preload("res://scenes/ui/StrategyScreen.tscn")
 const OptionsScreenScene := preload("res://scenes/ui/OptionsScreen.tscn")
 const PauseMenuScreenScene := preload("res://scenes/ui/PauseMenuScreen.tscn")
+const DemoCompleteScreenScene := preload("res://scenes/ui/DemoCompleteScreen.tscn")
 const OPENING_GLITCH_SHADER := preload("res://assets/shaders/opening_glitch.gdshader")
 const OPENING_GLITCH_SOUND := preload("res://audio/sfx/glitch.wav")
-const OPENING_CUTSCENE_PATH := "res://assets/cutscene/0001-0360.ogv"
-const CUTSCENE_EXPLOSION_SOUND_PATH := "res://audio/sfx/explosion.wav"
+const LogoAssemblyIntroScene := preload("res://scenes/intro/LogoAssemblyIntro.tscn")
 const BUTTON_CLICK_SOUND := preload("res://audio/sfx/button_click.wav")
 const BUTTON_HOVER_SOUND := preload("res://audio/sfx/button_hover.wav")
 const LAUNCH_FAILURE_PANEL := preload("res://assets/ui/panels/launch_failure_panel.png")
@@ -30,11 +30,15 @@ const UI_TWEEN_DOWN_META := &"dyson_ui_tween_down"
 const MUSIC_BUS_NAME := &"Music"
 const SFX_BUS_NAME := &"SFX"
 
-const SHOW_DEBUG_ACTIONS := true
+const DEMO_BUILD_SETTING := "dyson/build/demo_mode"
+const DEMO_MAX_ROUNDS := 2
 const LAUNCH_RESULT_BUTTON_WIDTH := 220
 const LAUNCH_RESULT_BUTTON_HEIGHT := 44
 const LAUNCH_FAILURE_PANEL_SIZE := Vector2(812.0, 781.0)
 const LAUNCH_FAILURE_TEXT_SIZE := Vector2(684.0, 230.0)
+const LAUNCH_READINESS_BAR_HEIGHT := 18.0
+const LAUNCH_READINESS_BEFORE_COLOR := Color("#9C5A26")
+const LAUNCH_READINESS_GAIN_COLOR := Color("#F08A34")
 const GAME_OVER_PANEL_SIZE := Vector2(812.0, 781.0)
 const GAME_OVER_TEXT_SIZE := Vector2(684.0, 230.0)
 const GAME_OVER_BUTTON_ROW_SIZE := Vector2(292.0, 44.0)
@@ -81,9 +85,14 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 		opening_menu_button_spacing = value
 		_update_editor_opening_preview()
 
-@export_category("Opening Cutscene")
+@export_category("Opening Intro")
+## Plays the logo assembly intro once when the game boots.
+@export var play_intro_on_boot := true
+@export_range(0.0, 1.0, 0.01) var title_backlight_strength := 0.3:
+	set(value):
+		title_backlight_strength = value
+		_update_editor_opening_preview()
 @export_range(0.0, 2.0, 0.05, "suffix:s") var opening_glitch_duration := 0.4
-@export_range(0.0, 15.0, 0.05, "suffix:s") var cutscene_explosion_time := 2.0
 
 @export_category("Corner Logo Layout")
 @export_range(-500.0, 1920.0, 1.0, "suffix:px") var corner_logo_x := 10.0:
@@ -132,6 +141,9 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 		launch_failure_text_y = value
 		_apply_launch_failure_layout()
 
+@export_range(0.0, 2.0, 0.05, "suffix:s") var launch_readiness_count_delay := 0.35
+@export_range(0.1, 4.0, 0.05, "suffix:s") var launch_readiness_count_duration := 1.4
+
 @export_category("Game Over Panel Layout")
 @export_range(-800.0, 800.0, 1.0, "suffix:px") var game_over_panel_x := 0.0:
 	set(value):
@@ -169,6 +181,11 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 @onready var root_margin: MarginContainer = $RootMargin
 @onready var cargo_loading_screen: CargoLoadingScreen = %CargoLoadingScreen
 
+# Demo builds are exported with the "demo" feature tag. The dyson/build/demo_mode
+# project setting forces demo mode for editor runs. Debug actions only exist in
+# editor runs.
+var demo_mode := OS.has_feature("demo") or bool(ProjectSettings.get_setting(DEMO_BUILD_SETTING, false))
+var show_debug_actions := OS.has_feature("editor")
 var game_state: GameState
 var launch_manager: LaunchManager
 var selected_faction := ""
@@ -180,10 +197,7 @@ var background_music_streams: Array[AudioStream] = []
 var current_music_index := 0
 var opening_glitch_layer: ColorRect
 var opening_glitch_player: AudioStreamPlayer
-var opening_cutscene_layer: Control
-var opening_cutscene_player: VideoStreamPlayer
-var cutscene_explosion_player: AudioStreamPlayer
-var cutscene_explosion_played := false
+var logo_intro: LogoAssemblyIntro
 var button_click_player: AudioStreamPlayer
 var button_hover_player: AudioStreamPlayer
 var launch_failure_panel: TextureRect
@@ -238,6 +252,8 @@ func _ready() -> void:
 
 	_clear_root_margin()
 	_show_opening_screen()
+	if play_intro_on_boot:
+		_start_logo_intro()
 
 
 func _exit_tree() -> void:
@@ -557,13 +573,6 @@ func _apply_background_music_volume() -> void:
 
 
 func _load_background_music_stream(music_path: String) -> AudioStream:
-	if music_path.get_extension().to_lower() == "mp3":
-		var music_data := FileAccess.get_file_as_bytes(music_path)
-		if music_data.is_empty():
-			return null
-		var mp3_stream := AudioStreamMP3.new()
-		mp3_stream.data = music_data
-		return mp3_stream
 	return load(music_path) as AudioStream
 
 
@@ -605,11 +614,11 @@ func _show_faction_select() -> void:
 	_set_active_screen(_build_faction_select_screen())
 
 
-func _show_opening_cutscene() -> void:
-	if opening_glitch_layer != null or opening_cutscene_layer != null:
+func _start_opening_transition() -> void:
+	if opening_glitch_layer != null:
 		return
 	if opening_glitch_duration <= 0.0:
-		_begin_opening_cutscene()
+		_finish_opening_transition()
 		return
 
 	opening_glitch_layer = ColorRect.new()
@@ -631,68 +640,14 @@ func _show_opening_cutscene() -> void:
 
 	var glitch_tween := opening_glitch_layer.create_tween()
 	glitch_tween.tween_interval(opening_glitch_duration)
-	glitch_tween.tween_callback(_begin_opening_cutscene)
+	glitch_tween.tween_callback(_finish_opening_transition)
 
 
-func _begin_opening_cutscene() -> void:
+func _finish_opening_transition() -> void:
 	if opening_glitch_layer != null:
 		opening_glitch_layer.queue_free()
 		opening_glitch_layer = null
-	var cutscene_stream := load(OPENING_CUTSCENE_PATH) as VideoStream
-	if cutscene_stream == null:
-		push_warning("Could not load opening cutscene: %s" % OPENING_CUTSCENE_PATH)
-		_show_faction_select()
-		return
-
-	opening_cutscene_layer = Control.new()
-	opening_cutscene_layer.name = "OpeningCutscene"
-	opening_cutscene_layer.set_anchors_preset(Control.PRESET_FULL_RECT)
-	opening_cutscene_layer.mouse_filter = Control.MOUSE_FILTER_STOP
-
-	var black_background := ColorRect.new()
-	black_background.set_anchors_preset(Control.PRESET_FULL_RECT)
-	black_background.color = Color.BLACK
-	black_background.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	opening_cutscene_layer.add_child(black_background)
-
-	opening_cutscene_player = VideoStreamPlayer.new()
-	opening_cutscene_player.name = "Video"
-	opening_cutscene_player.set_anchors_preset(Control.PRESET_FULL_RECT)
-	opening_cutscene_player.expand = true
-	opening_cutscene_player.bus = SFX_BUS_NAME
-	opening_cutscene_player.stream = cutscene_stream
-	opening_cutscene_player.finished.connect(_finish_opening_cutscene)
-	opening_cutscene_layer.add_child(opening_cutscene_player)
-
-	var explosion_stream := load(CUTSCENE_EXPLOSION_SOUND_PATH) as AudioStream
-	if explosion_stream != null:
-		cutscene_explosion_player = AudioStreamPlayer.new()
-		cutscene_explosion_player.name = "ExplosionSound"
-		cutscene_explosion_player.stream = explosion_stream
-		cutscene_explosion_player.bus = SFX_BUS_NAME
-		opening_cutscene_layer.add_child(cutscene_explosion_player)
-	else:
-		push_warning("Could not load cutscene explosion sound: %s" % CUTSCENE_EXPLOSION_SOUND_PATH)
-	cutscene_explosion_played = false
-
-	var skip_hint := Label.new()
-	skip_hint.text = "ESC TO SKIP"
-	skip_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	skip_hint.anchor_left = 0.0
-	skip_hint.anchor_right = 1.0
-	skip_hint.anchor_top = 1.0
-	skip_hint.anchor_bottom = 1.0
-	skip_hint.offset_left = 24.0
-	skip_hint.offset_top = -52.0
-	skip_hint.offset_right = -24.0
-	skip_hint.offset_bottom = -20.0
-	skip_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	UiAssetsScript.apply_text_outline(skip_hint)
-	UiAssetsScript.apply_semibold_font(skip_hint)
-	opening_cutscene_layer.add_child(skip_hint)
-
-	add_child(opening_cutscene_layer)
-	opening_cutscene_player.play()
+	_show_faction_select()
 
 
 func _on_opening_glitch_sound_finished() -> void:
@@ -701,28 +656,33 @@ func _on_opening_glitch_sound_finished() -> void:
 		opening_glitch_player = null
 
 
-func _finish_opening_cutscene() -> void:
-	if opening_cutscene_layer == null:
+func _start_logo_intro() -> void:
+	if active_screen == null or active_screen.name != "OpeningScreen":
 		return
-	if opening_cutscene_player != null:
-		opening_cutscene_player.stop()
-	opening_cutscene_layer.queue_free()
-	opening_cutscene_layer = null
-	opening_cutscene_player = null
-	cutscene_explosion_player = null
-	cutscene_explosion_played = false
-	_show_faction_select()
+	var title_logo := active_screen.get_node_or_null("Layout/TitleLogo") as TextureRect
+	var button_stack := active_screen.get_node_or_null("Layout/ButtonStack") as Control
+	if title_logo == null or button_stack == null:
+		return
+	logo_intro = LogoAssemblyIntroScene.instantiate() as LogoAssemblyIntro
+	logo_intro.finished.connect(_on_logo_intro_finished)
+	add_child(logo_intro)
+	logo_intro.hide_targets(title_logo, button_stack, title_logo.get_node_or_null("Backlight") as Control)
+	# Let the opening layout settle so the pieces land exactly on the menu logo.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if is_instance_valid(logo_intro):
+		logo_intro.play()
 
 
-func _process(_delta: float) -> void:
-	if opening_cutscene_player == null or cutscene_explosion_player == null:
-		return
-	if cutscene_explosion_played or not opening_cutscene_player.is_playing():
-		return
-	if opening_cutscene_player.stream_position < cutscene_explosion_time:
-		return
-	cutscene_explosion_played = true
-	cutscene_explosion_player.play()
+func _on_logo_intro_finished() -> void:
+	logo_intro = null
+
+
+func _cancel_logo_intro() -> void:
+	if logo_intro != null and is_instance_valid(logo_intro):
+		logo_intro.finished.disconnect(_on_logo_intro_finished)
+		logo_intro.queue_free()
+	logo_intro = null
 
 
 func _show_opening_screen() -> void:
@@ -817,6 +777,8 @@ func _build_opening_screen() -> Control:
 	logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	layout.add_child(logo)
+	if title_backlight_strength > 0.0:
+		logo.add_child(_build_title_backlight())
 
 	var button_stack := VBoxContainer.new()
 	button_stack.name = "ButtonStack"
@@ -824,7 +786,7 @@ func _build_opening_screen() -> Control:
 	button_stack.add_theme_constant_override("separation", int(opening_menu_button_spacing))
 	layout.add_child(button_stack)
 
-	var start_button := _build_opening_menu_button("StartButton", "START", _show_opening_cutscene)
+	var start_button := _build_opening_menu_button("StartButton", "START", _start_opening_transition)
 	button_stack.add_child(start_button)
 	button_stack.add_child(_build_opening_menu_button("OptionsButton", "OPTIONS", _show_options_screen))
 	button_stack.add_child(_build_opening_menu_button("ExitButton", "EXIT GAME", _exit_game))
@@ -834,6 +796,43 @@ func _build_opening_screen() -> Control:
 		UiAssetsScript.apply_semibold_font(button as Control)
 	screen.add_child(layout)
 	return screen
+
+
+# Soft additive glow behind the title so the dark navy lettering separates from space.
+func _build_title_backlight() -> Control:
+	var gradient := Gradient.new()
+	gradient.offsets = PackedFloat32Array([0.0, 0.45, 1.0])
+	gradient.colors = PackedColorArray([
+		Color(0.55, 0.72, 1.0, title_backlight_strength),
+		Color(0.35, 0.5, 0.85, title_backlight_strength * 0.4),
+		Color(0.2, 0.3, 0.6, 0.0),
+	])
+	var glow_texture := GradientTexture2D.new()
+	glow_texture.gradient = gradient
+	glow_texture.fill = GradientTexture2D.FILL_RADIAL
+	glow_texture.fill_from = Vector2(0.5, 0.5)
+	glow_texture.fill_to = Vector2(1.0, 0.5)
+	glow_texture.width = 256
+	glow_texture.height = 256
+
+	var glow_material := CanvasItemMaterial.new()
+	glow_material.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+
+	var backlight := TextureRect.new()
+	backlight.name = "Backlight"
+	backlight.texture = glow_texture
+	backlight.material = glow_material
+	backlight.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	backlight.stretch_mode = TextureRect.STRETCH_SCALE
+	backlight.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	backlight.show_behind_parent = true
+	var glow_size := Vector2(opening_title_height * 3.0 * 1.15, opening_title_height * 1.7)
+	backlight.set_anchors_preset(Control.PRESET_CENTER)
+	backlight.offset_left = -glow_size.x * 0.5
+	backlight.offset_top = -glow_size.y * 0.5
+	backlight.offset_right = glow_size.x * 0.5
+	backlight.offset_bottom = glow_size.y * 0.5
+	return backlight
 
 
 func _build_opening_menu_button(button_name: String, button_text: String, callback: Callable) -> Button:
@@ -863,6 +862,13 @@ func _update_editor_opening_preview() -> void:
 	layout.offset_bottom = opening_vertical_offset + opening_stack_compensation
 	layout.add_theme_constant_override("separation", int(opening_title_button_spacing))
 	logo.custom_minimum_size = Vector2(opening_title_width, opening_title_height)
+	# Preview-only glow: added without an owner so it is never saved into Main.tscn.
+	var old_backlight := logo.get_node_or_null("Backlight")
+	if old_backlight != null:
+		logo.remove_child(old_backlight)
+		old_backlight.queue_free()
+	if title_backlight_strength > 0.0:
+		logo.add_child(_build_title_backlight())
 	button_stack.add_theme_constant_override("separation", int(opening_menu_button_spacing))
 	for button: Node in button_stack.get_children():
 		(button as Button).custom_minimum_size = Vector2(opening_button_width, opening_button_height)
@@ -872,10 +878,6 @@ func _update_editor_opening_preview() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if opening_cutscene_layer != null and event.is_action_pressed("ui_cancel"):
-		get_viewport().set_input_as_handled()
-		_finish_opening_cutscene()
-		return
 	if not event.is_action_pressed("ui_cancel"):
 		return
 	if pause_overlay != null:
@@ -1103,7 +1105,7 @@ func _show_strategy_screen() -> void:
 	strategy_screen.debug_launch_failure_requested.connect(_queue_button_navigation.bind(_on_debug_launch_failure_pressed))
 	strategy_screen.debug_launch_success_requested.connect(_queue_button_navigation.bind(_on_debug_launch_success_pressed))
 	_set_active_screen(strategy_screen)
-	strategy_screen.setup(game_state.get_summary(), SHOW_DEBUG_ACTIONS)
+	strategy_screen.setup(game_state.get_summary(), show_debug_actions and not demo_mode)
 
 
 func _show_launch_result(result: Dictionary) -> void:
@@ -1118,6 +1120,7 @@ func _show_launch_result(result: Dictionary) -> void:
 	launch_failure_text = launch_failure_panel.get_node(text_name) as Control
 	launch_failure_continue_button = active_screen.get_node("ContinueButton") as Button
 	_apply_launch_failure_layout()
+	_animate_launch_readiness(result)
 
 
 func _build_launch_result_screen(result: Dictionary) -> Control:
@@ -1181,6 +1184,8 @@ func _build_illustrated_launch_result_screen(
 	title.add_theme_font_size_override("font_size", 28)
 	text_group.add_child(title)
 
+	text_group.add_child(_build_launch_readiness_block(result))
+
 	var details := Label.new()
 	details.name = "Details"
 	details.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1205,6 +1210,105 @@ func _build_illustrated_launch_result_screen(
 
 	UiAssetsScript.apply_text_outline(screen)
 	return screen
+
+
+# Readiness meter: the dim segment is progress before this launch, the bright
+# segment counts up to the new total once the screen is shown.
+func _build_launch_readiness_block(result: Dictionary) -> Control:
+	var before := float(result.get("readiness_before", 0.0))
+	var block := VBoxContainer.new()
+	block.name = "Readiness"
+	block.add_theme_constant_override("separation", 6)
+
+	var header := HBoxContainer.new()
+	header.name = "Header"
+	block.add_child(header)
+	var caption := Label.new()
+	caption.name = "Caption"
+	caption.text = "MOONBASE READINESS"
+	caption.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	caption.add_theme_font_size_override("font_size", 18)
+	header.add_child(caption)
+	var value_label := Label.new()
+	value_label.name = "Value"
+	value_label.add_theme_font_size_override("font_size", 18)
+	value_label.text = _format_readiness_value(before, before, result)
+	header.add_child(value_label)
+
+	var bars := Control.new()
+	bars.name = "Bars"
+	bars.custom_minimum_size = Vector2(0.0, LAUNCH_READINESS_BAR_HEIGHT)
+	block.add_child(bars)
+	var gain_bar := _build_readiness_bar("GainBar", LAUNCH_READINESS_GAIN_COLOR, true)
+	gain_bar.value = before
+	bars.add_child(gain_bar)
+	var before_bar := _build_readiness_bar("BeforeBar", LAUNCH_READINESS_BEFORE_COLOR, false)
+	before_bar.value = before
+	bars.add_child(before_bar)
+	return block
+
+
+func _build_readiness_bar(bar_name: String, fill_color: Color, with_background: bool) -> ProgressBar:
+	var bar := ProgressBar.new()
+	bar.name = bar_name
+	bar.max_value = 100.0
+	bar.step = 0.0
+	bar.show_percentage = false
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var background := StyleBoxFlat.new()
+	if with_background:
+		background.bg_color = Color(0.03, 0.05, 0.08, 0.85)
+		background.border_color = Color(0.62, 0.68, 0.76, 0.55)
+		background.set_border_width_all(1)
+	else:
+		background.bg_color = Color.TRANSPARENT
+	background.set_corner_radius_all(2)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = fill_color
+	fill.set_corner_radius_all(2)
+	bar.add_theme_stylebox_override("background", background)
+	bar.add_theme_stylebox_override("fill", fill)
+	return bar
+
+
+func _animate_launch_readiness(result: Dictionary) -> void:
+	var gain_bar := active_screen.find_child("GainBar", true, false) as ProgressBar
+	var value_label := active_screen.find_child("Value", true, false) as Label
+	if gain_bar == null or value_label == null:
+		return
+	var before := float(result.get("readiness_before", 0.0))
+	var after := float(result.get("readiness_after", before))
+	if is_equal_approx(before, after):
+		value_label.text = _format_readiness_value(before, after, result)
+		return
+	var tween := gain_bar.create_tween()
+	tween.tween_interval(launch_readiness_count_delay)
+	tween.tween_method(
+		_set_launch_readiness_display.bind(gain_bar, value_label, before, result),
+		before,
+		after,
+		launch_readiness_count_duration
+	).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(gain_bar, "modulate", Color(1.35, 1.35, 1.35, 1.0), 0.08)
+	tween.tween_property(gain_bar, "modulate", Color.WHITE, 0.35)
+
+
+func _set_launch_readiness_display(
+	value: float,
+	gain_bar: ProgressBar,
+	value_label: Label,
+	before: float,
+	result: Dictionary
+) -> void:
+	gain_bar.value = value
+	value_label.text = _format_readiness_value(before, value, result)
+
+
+func _format_readiness_value(before: float, current: float, result: Dictionary) -> String:
+	if not bool(result.get("success", false)):
+		return "%.1f%%  (unchanged)" % before
+	return "%.1f%%  (+%.1f)" % [current, current - before]
 
 
 func _apply_launch_failure_layout() -> void:
@@ -1237,6 +1341,15 @@ func _show_game_over_screen() -> void:
 	game_over_text = game_over_panel.get_node("GameOverText") as Control
 	game_over_button_row = active_screen.get_node("GameOverButtons") as Control
 	_apply_game_over_layout()
+
+
+func _show_demo_complete_screen() -> void:
+	cargo_loading_screen.visible = false
+	_set_corner_logo_visible(true)
+	var demo_complete_screen = DemoCompleteScreenScene.instantiate()
+	demo_complete_screen.replay_requested.connect(_queue_button_navigation.bind(_on_demo_replay_requested))
+	demo_complete_screen.exit_requested.connect(_queue_button_navigation.bind(_exit_game))
+	_set_active_screen(demo_complete_screen)
 
 
 func _build_game_over_screen() -> Control:
@@ -1377,6 +1490,9 @@ func _on_assignment_cancelled() -> void:
 
 
 func _on_result_continue_pressed() -> void:
+	if demo_mode and game_state.launches_attempted >= DEMO_MAX_ROUNDS:
+		_show_demo_complete_screen()
+		return
 	if game_state.game_over:
 		_show_game_over_screen()
 	else:
@@ -1407,7 +1523,13 @@ func _on_play_again_pressed() -> void:
 
 func _on_main_menu_pressed() -> void:
 	game_state.start_new_match(selected_faction, selected_difficulty)
-	_show_faction_select()
+	_show_opening_screen()
+
+
+func _on_demo_replay_requested() -> void:
+	selected_faction = ""
+	game_state.start_new_match("USA", selected_difficulty)
+	_show_opening_screen()
 
 
 func _on_debug_add_news_pressed() -> void:
@@ -1446,6 +1568,7 @@ func _set_active_screen(screen: Control) -> void:
 
 
 func _clear_active_screen() -> void:
+	_cancel_logo_intro()
 	if active_screen != null and is_instance_valid(active_screen):
 		active_screen.queue_free()
 	active_screen = null
@@ -1545,32 +1668,25 @@ func _format_launch_result(result: Dictionary) -> String:
 	if result.is_empty():
 		return "Launch result unavailable."
 
+	# Kept short so the text stays in the panel's sky area above the illustration;
+	# the readiness meter above already shows the before/after values.
 	var lines: Array[String] = [
-		"Vehicle: %s" % String(result.get("vehicle_name", "")),
-		"Days advanced: %d" % int(result.get("launch_days", 0)),
-		"Fuel: %d / %d" % [
+		"%s  ·  %d days  ·  Fuel %d / %d" % [
+			String(result.get("vehicle_name", "")),
+			int(result.get("launch_days", 0)),
 			int(result.get("placed_fuel", 0)),
 			int(result.get("required_fuel", 0)),
 		],
 	]
 
 	if bool(result.get("success", false)):
-		lines.append("Launch successful.")
-		lines.append("Readiness: %.1f%% -> %.1f%%" % [
-			float(result.get("readiness_before", 0.0)),
-			float(result.get("readiness_after", 0.0)),
-		])
-		lines.append("")
-		lines.append("Delivered construction materials:")
-		lines.append(_format_material_amounts(result.get("delivery_result", {}).get("used", {}), "- none"))
-		var wasted_text := _format_material_amounts(result.get("delivery_result", {}).get("wasted", {}), "")
+		var delivery: Dictionary = result.get("delivery_result", {})
+		lines.append("Delivered: %s" % _format_material_inline(delivery.get("used", {}), "nothing useful"))
+		var wasted_text := _format_material_inline(delivery.get("wasted", {}), "")
 		if wasted_text != "":
-			lines.append("")
-			lines.append("Wasted overdelivery:")
-			lines.append(wasted_text)
+			lines.append("Wasted overdelivery: %s" % wasted_text)
 	else:
 		lines.append("Launch failed. Cargo lost.")
-		lines.append("Readiness unchanged: %.1f%%" % float(result.get("readiness_before", 0.0)))
 
 	return "\n".join(lines)
 
@@ -1623,15 +1739,13 @@ func _format_news(messages: Array) -> String:
 	return "\n".join(lines)
 
 
-func _format_material_amounts(materials: Dictionary, empty_text: String) -> String:
-	var lines: Array[String] = []
+func _format_material_inline(materials: Dictionary, empty_text: String) -> String:
+	var parts: Array[String] = []
 	for material: String in GameDataScript.CONSTRUCTION_MATERIALS:
 		var amount := int(materials.get(material, 0))
 		if amount > 0:
-			lines.append("- %s: %d" % [_format_material_name(material), amount])
-	if lines.is_empty():
-		return empty_text
-	return "\n".join(lines)
+			parts.append("%s %d" % [_format_material_name(material), amount])
+	return empty_text if parts.is_empty() else ", ".join(parts)
 
 
 func _format_material_name(material: String) -> String:

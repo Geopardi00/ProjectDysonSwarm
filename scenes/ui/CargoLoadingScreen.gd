@@ -44,6 +44,7 @@ const MANIFEST_NODE_NAMES: Array[String] = [
 	"RareMetals",
 	"Propellant",
 ]
+const MOONBASE_NEEDS_COLUMN_GAP := 28.0
 const MATERIAL_TINTS := {
 	"fuel": Color("#E8452E"),
 	"carbon_metals": Color("#4F5B66"),
@@ -597,7 +598,7 @@ func _rebuild_assignment_piece_buttons() -> void:
 		button.visible = true
 		button.disabled = false
 		button.text = ""
-		button.tooltip_text = piece.display_name
+		button.tooltip_text = ""
 		button.icon = _get_half_size_piece_texture(piece.shape_id)
 		button.expand_icon = false
 		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -622,7 +623,6 @@ func _rebuild_packing_piece_buttons() -> void:
 		button.custom_minimum_size = PACKING_PIECE_SLOT_SIZE
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.text = ""
-		button.tooltip_text = _format_packing_piece_button_text(piece)
 		button.icon = _get_packing_piece_texture(piece.shape_id)
 		button.modulate = _get_material_tint(piece.material)
 		button.expand_icon = false
@@ -910,30 +910,6 @@ func _rebuild_copy_buttons() -> void:
 		copy_buttons_row.add_child(button)
 
 
-func _format_assignment_group_button_text(group: Dictionary) -> String:
-	var piece: CargoPiece = group["pieces"][0]
-	var pieces: Array = group["pieces"]
-	var assigned_summary := _format_group_assignment_summary(pieces)
-	var selected_marker := " *" if piece.shape_id == selected_shape_id else ""
-	return "%s%s x%d | %d units each\n%s" % [
-		piece.display_name,
-		selected_marker,
-		pieces.size(),
-		piece.get_payload_units(),
-		assigned_summary,
-	]
-
-
-func _format_packing_piece_button_text(piece: CargoPiece) -> String:
-	var selected_marker := " *" if piece.instance_id == selected_piece_id else ""
-	return "%s%s | %s | %d units" % [
-		piece.display_name,
-		selected_marker,
-		_format_material_name(piece.material),
-		piece.get_payload_units(),
-	]
-
-
 func _update_material_amount_labels() -> void:
 	for material: String in GameDataScript.MATERIALS:
 		var amount_label := material_amount_labels.get(material, null) as Label
@@ -971,20 +947,51 @@ func _get_material_tint(material: String) -> Color:
 func _format_moonbase_needs() -> String:
 	# Keep the title in the panel's header strip and start the material rows
 	# below it in the dark content region.
+	# Rows are tab-separated into material / remaining / assigned columns; the
+	# label's tab stops are sized from the widest cell so the columns line up.
 	var lines: Array[String] = ["Moonbase material needs", ""]
+	var name_cells: Array[String] = []
+	var remaining_cells: Array[String] = []
 	for material: String in GameDataScript.CONSTRUCTION_MATERIALS:
 		var remaining := int(moonbase_remaining_requirements.get(material, GameDataScript.MOONBASE_REQUIREMENTS.get(material, 0)))
 		var total := int(GameDataScript.MOONBASE_REQUIREMENTS.get(material, 0))
 		var assigned := assignment.get_assigned_amount_for_material(material)
-		lines.append("%s: %d / %d remaining | assigned: %d" % [
-			_format_material_name(material),
-			remaining,
-			total,
-			assigned,
-		])
+		var name_cell := "%s:" % _format_material_name(material)
+		var remaining_cell := "%d / %d remaining" % [remaining, total]
+		name_cells.append(name_cell)
+		remaining_cells.append(remaining_cell)
+		lines.append("%s\t%s\tassigned: %d" % [name_cell, remaining_cell, assigned])
 		if assigned > remaining:
 			lines.append("Warning: assigned %s exceeds remaining need. Extra will be wasted if delivered." % _format_material_name(material))
+	_apply_moonbase_needs_tab_stops(name_cells, remaining_cells)
 	return "\n".join(lines)
+
+
+func _apply_moonbase_needs_tab_stops(name_cells: Array[String], remaining_cells: Array[String]) -> void:
+	if moonbase_needs_label == null:
+		return
+	var font: Font = null
+	var font_size := 0
+	if moonbase_needs_label.label_settings != null:
+		font = moonbase_needs_label.label_settings.font
+		font_size = moonbase_needs_label.label_settings.font_size
+	if font == null:
+		font = moonbase_needs_label.get_theme_font("font")
+	if font_size <= 0:
+		font_size = moonbase_needs_label.get_theme_font_size("font_size")
+	# Tab stops are widths: the first tab ends the name column, the second the
+	# remaining column.
+	moonbase_needs_label.tab_stops = PackedFloat32Array([
+		_get_widest_text(font, font_size, name_cells) + MOONBASE_NEEDS_COLUMN_GAP,
+		_get_widest_text(font, font_size, remaining_cells) + MOONBASE_NEEDS_COLUMN_GAP,
+	])
+
+
+func _get_widest_text(font: Font, font_size: int, cells: Array[String]) -> float:
+	var widest := 0.0
+	for cell: String in cells:
+		widest = maxf(widest, font.get_string_size(cell, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x)
+	return ceilf(widest)
 
 
 func _format_packing_summary() -> String:
@@ -1063,23 +1070,6 @@ func _get_assignment_group(shape_id: String) -> Dictionary:
 		if String(group.get("shape_id", "")) == shape_id:
 			return group
 	return {}
-
-
-func _format_group_assignment_summary(pieces: Array) -> String:
-	var material_names: Array[String] = []
-	var assigned_count := 0
-	for piece: CargoPiece in pieces:
-		var assigned_piece := assignment.get_assigned_piece(piece.instance_id)
-		if assigned_piece != null:
-			assigned_count += 1
-			material_names.append(_format_material_name(assigned_piece.material))
-	if material_names.is_empty():
-		return "0 / %d assigned" % pieces.size()
-	return "%d / %d assigned: %s" % [
-		assigned_count,
-		pieces.size(),
-		" + ".join(material_names),
-	]
 
 
 func _copy_label(index: int) -> String:

@@ -518,7 +518,6 @@ offset_top = -20.000002
 offset_right = 438.0
 offset_bottom = 260.0
 scale = Vector2(0.74942815, 0.74942815)
-tooltip_text = "Cargo piece slot 1"
 flat = true
 
 [node name="PieceSlot02Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList" unique_id=401233998]
@@ -528,7 +527,6 @@ offset_top = 173.0
 offset_right = 438.0
 offset_bottom = 453.0
 scale = Vector2(0.7495316, 0.7495316)
-tooltip_text = "Cargo piece slot 2"
 flat = true
 
 [node name="PieceSlot03Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList" unique_id=1851333185]
@@ -538,7 +536,6 @@ offset_top = 379.0
 offset_right = 438.0
 offset_bottom = 659.0
 scale = Vector2(0.74968374, 0.74968374)
-tooltip_text = "Cargo piece slot 3"
 flat = true
 
 [node name="PieceSlot04Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList" unique_id=1161664008]
@@ -548,7 +545,6 @@ offset_top = 584.0
 offset_right = 438.0
 offset_bottom = 864.0
 scale = Vector2(0.74913985, 0.74913985)
-tooltip_text = "Cargo piece slot 4"
 flat = true
 
 [node name="PieceSlot05Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList" unique_id=237660663]
@@ -558,7 +554,6 @@ offset_top = 788.0
 offset_right = 438.0
 offset_bottom = 1068.0
 scale = Vector2(0.7503749, 0.7503749)
-tooltip_text = "Cargo piece slot 5"
 flat = true
 
 [node name="PieceSlot06Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList" unique_id=473254778]
@@ -568,7 +563,6 @@ offset_top = 995.0
 offset_right = 439.0
 offset_bottom = 1275.0
 scale = Vector2(0.74973917, 0.74973917)
-tooltip_text = "Cargo piece slot 6"
 flat = true
 
 [node name="PieceSlot07Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList" unique_id=1149530109]
@@ -578,7 +572,6 @@ offset_top = 1204.0
 offset_right = 439.0
 offset_bottom = 1484.0
 scale = Vector2(0.74992055, 0.74992055)
-tooltip_text = "Cargo piece slot 7"
 flat = true
 
 [node name="PieceSlot08Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList" unique_id=1258652092]
@@ -588,7 +581,6 @@ offset_top = 1413.0
 offset_right = 439.0
 offset_bottom = 1693.0
 scale = Vector2(0.74965394, 0.74965394)
-tooltip_text = "Cargo piece slot 8"
 flat = true
 
 [node name="PieceSlot09Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList" unique_id=2087030318]
@@ -598,7 +590,6 @@ offset_top = 1622.0
 offset_right = 439.0
 offset_bottom = 1902.0
 scale = Vector2(0.750406, 0.750406)
-tooltip_text = "Cargo piece slot 9"
 flat = true
 
 [node name="PieceSlot10Button" type="Button" parent="RootMargin/Layout/AssignmentPanel/AssignmentCargoListPanel/Margin/PieceScroll/PieceList" unique_id=1883735150]
@@ -608,7 +599,6 @@ offset_top = 1831.0
 offset_right = 439.0
 offset_bottom = 2111.0
 scale = Vector2(0.74998915, 0.74998915)
-tooltip_text = "Cargo piece slot 10"
 flat = true
 
 [node name="PackingPanel" type="HBoxContainer" parent="RootMargin/Layout" unique_id=964763926]

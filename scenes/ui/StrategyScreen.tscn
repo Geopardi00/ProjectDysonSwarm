@@ -14,6 +14,13 @@
 outline_size = 4
 outline_color = Color(0, 0, 0, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_readiness_fill"]
+bg_color = Color(0.9411765, 0.5411765, 0.20392157, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
 [node name="StrategyScreen" type="Control" unique_id=517629500]
 layout_mode = 3
 anchors_preset = 15
@@ -155,6 +162,7 @@ text = "Moonbase readiness"
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
+theme_override_styles/fill = SubResource("StyleBoxFlat_readiness_fill")
 
 [node name="LaunchesLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=1575240056]
 unique_name_in_owner = true

@@ -10,7 +10,7 @@ func _init() -> void:
 
 
 func _run() -> void:
-	if GameDataScript.normalize_difficulty("unknown") != "hard":
+	if GameDataScript.normalize_difficulty("unknown") != "medium":
 		return _fail("Unknown difficulty did not fall back to Hard.")
 
 	var hard_cpu = CPUCompetitorScript.new()

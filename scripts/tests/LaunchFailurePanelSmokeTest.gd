@@ -86,7 +86,7 @@ func _run() -> void:
 	if success_text.position != shared_text_position:
 		_fail(main, "Successful and failed launch text did not share the same position.")
 		return
-	if not success_details.text.contains("Launch successful."):
+	if not success_details.text.contains("Delivered: Copper 10"):
 		_fail(main, "Successful launch information was not placed inside the panel.")
 		return
 	if success_continue.position.y <= success_panel.position.y + success_panel.size.y:
