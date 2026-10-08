@@ -11,6 +11,7 @@ func _init() -> void:
 func _run() -> void:
 	var main := MainScene.instantiate()
 	main.settings_file_path = TEST_SETTINGS_PATH
+	main.play_intro_on_boot = false
 	root.add_child(main)
 	main.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	main.size = Vector2(1920, 1080)
@@ -58,7 +59,6 @@ func _run() -> void:
 
 	main.opening_glitch_duration = 0.05
 	main._start_opening_transition()
-	await process_frame
 	if main.opening_glitch_layer == null:
 		_fail("Opening glitch effect did not start after Start.")
 		return

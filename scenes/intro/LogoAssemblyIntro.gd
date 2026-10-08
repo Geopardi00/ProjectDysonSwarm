@@ -11,6 +11,7 @@ const SHINE_SHADER := preload("res://assets/shaders/title_shine.gdshader")
 const LAND_SOUND := preload("res://audio/sfx/button_click.wav")
 const LOCK_SOUND := preload("res://audio/sfx/explosion.wav")
 const SFX_BUS_NAME := &"SFX"
+const MAX_FRAME_STEP := 1.0 / 30.0
 # Steel tones taken from the logo lettering, with the logo's orange as an accent.
 const BLOCK_COLORS: Array[Color] = [
 	Color("#3A4F68"),
@@ -156,7 +157,8 @@ func _input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	if not _playing:
 		return
-	_elapsed += delta
+	# Cap the step so a loading hitch slows the intro instead of skipping ahead.
+	_elapsed += minf(delta, MAX_FRAME_STEP)
 	_black.color.a = 1.0 - _smooth(_elapsed / maxf(fade_in_duration, 0.001))
 
 	var all_revealed := true

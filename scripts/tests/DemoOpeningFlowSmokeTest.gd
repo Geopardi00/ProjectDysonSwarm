@@ -13,6 +13,7 @@ func _run() -> void:
 	main.settings_file_path = TEST_SETTINGS_PATH
 	main.demo_mode = true
 	main.opening_glitch_duration = 0.05
+	main.play_intro_on_boot = false
 	root.add_child(main)
 	main.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	main.size = Vector2(1920.0, 1080.0)
@@ -20,7 +21,6 @@ func _run() -> void:
 	await process_frame
 
 	main._start_opening_transition()
-	await process_frame
 	if main.opening_glitch_layer == null:
 		return _fail(main, "Demo Start did not begin the opening glitch.")
 
