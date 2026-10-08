@@ -560,13 +560,6 @@ func _apply_background_music_volume() -> void:
 
 
 func _load_background_music_stream(music_path: String) -> AudioStream:
-	if music_path.get_extension().to_lower() == "mp3":
-		var music_data := FileAccess.get_file_as_bytes(music_path)
-		if music_data.is_empty():
-			return null
-		var mp3_stream := AudioStreamMP3.new()
-		mp3_stream.data = music_data
-		return mp3_stream
 	return load(music_path) as AudioStream
 
 
