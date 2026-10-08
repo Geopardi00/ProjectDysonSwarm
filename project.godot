@@ -27,4 +27,3 @@ renderer/rendering_method="gl_compatibility"
 [dyson]
 
 build/demo_mode=false
-build/demo_mode.demo=true

@@ -181,9 +181,10 @@ const BACKGROUND_MUSIC_PATHS: Array[String] = [
 @onready var root_margin: MarginContainer = $RootMargin
 @onready var cargo_loading_screen: CargoLoadingScreen = %CargoLoadingScreen
 
-# Demo builds are exported with the "demo" feature tag, which flips the
-# dyson/build/demo_mode project setting. Debug actions only exist in editor runs.
-var demo_mode := bool(ProjectSettings.get_setting(DEMO_BUILD_SETTING, false))
+# Demo builds are exported with the "demo" feature tag. The dyson/build/demo_mode
+# project setting forces demo mode for editor runs. Debug actions only exist in
+# editor runs.
+var demo_mode := OS.has_feature("demo") or bool(ProjectSettings.get_setting(DEMO_BUILD_SETTING, false))
 var show_debug_actions := OS.has_feature("editor")
 var game_state: GameState
 var launch_manager: LaunchManager
