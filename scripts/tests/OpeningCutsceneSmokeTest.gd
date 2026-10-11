@@ -39,10 +39,10 @@ func _run() -> void:
 	if runtime_logo == null or preview_logo == null:
 		_fail("Opening title logos were not available for comparison.")
 		return
-	if runtime_buttons == null or preview_buttons == null or runtime_buttons.get_child_count() != 3 or preview_buttons.get_child_count() != 3:
-		_fail("Opening menu did not provide matching Start, Options, and Exit button stacks.")
+	if runtime_buttons == null or preview_buttons == null or runtime_buttons.get_child_count() != 4 or preview_buttons.get_child_count() != 4:
+		_fail("Opening menu did not provide matching Start, Challenges, Options, and Exit button stacks.")
 		return
-	var expected_button_names := ["StartButton", "OptionsButton", "ExitButton"]
+	var expected_button_names := ["StartButton", "ChallengesButton", "OptionsButton", "ExitButton"]
 	for index: int in range(expected_button_names.size()):
 		if runtime_buttons.get_child(index).name != expected_button_names[index] or preview_buttons.get_child(index).name != expected_button_names[index]:
 			_fail("Opening menu button order did not match the editor preview.")

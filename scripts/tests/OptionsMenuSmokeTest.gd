@@ -43,13 +43,13 @@ func _run() -> void:
 	await process_frame
 
 	var opening_stack := main_instance.active_screen.get_node_or_null("Layout/ButtonStack") as VBoxContainer
-	if opening_stack == null or opening_stack.get_child_count() != 3:
-		_fail("Opening menu did not contain three buttons.")
+	if opening_stack == null or opening_stack.get_child_count() != 4:
+		_fail("Opening menu did not contain four buttons.")
 		return
-	var expected_names := ["StartButton", "OptionsButton", "ExitButton"]
+	var expected_names := ["StartButton", "ChallengesButton", "OptionsButton", "ExitButton"]
 	for index: int in range(expected_names.size()):
 		if opening_stack.get_child(index).name != expected_names[index]:
-			_fail("Opening menu buttons were not ordered Start, Options, Exit.")
+			_fail("Opening menu buttons were not ordered Start, Challenges, Options, Exit.")
 			return
 
 	main_instance._show_options_screen()

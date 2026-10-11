@@ -1,0 +1,12 @@
+Update #1: Challenge Mode
+That gives you a reason to contact players again after release.
+Possible future modes could be:
+- different cargo piece sets !!!
+- randomized Moon-base material requirements
+- one-life / no-failure challenge !!!
+- limited launch count 
+- fixed vehicle challenge  
+- extreme CPU difficulty
+- daily/weekly seeded puzzle
+- score attack
+- fastest-completion mode !!!

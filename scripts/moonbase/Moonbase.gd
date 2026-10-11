@@ -1,6 +1,7 @@
 extends RefCounted
 class_name Moonbase
 
+var initial_requirements: Dictionary = {}
 var remaining_requirements: Dictionary = {}
 var total_required := 0
 var useful_delivered := 0
@@ -8,6 +9,7 @@ var wasted_materials := 0
 
 
 func setup(requirements: Dictionary) -> void:
+	initial_requirements = requirements.duplicate(true)
 	remaining_requirements = requirements.duplicate(true)
 	total_required = 0
 	useful_delivered = 0

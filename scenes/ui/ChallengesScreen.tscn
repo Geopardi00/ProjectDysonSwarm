@@ -1,0 +1,122 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/ui/ChallengesScreen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/ui/backgrounds/ui_bg_space_loading_1920x1080.png" id="2_background"]
+[ext_resource type="Texture2D" path="res://assets/ui/panels/panel_options.png" id="3_panel"]
+[ext_resource type="FontFile" path="res://assets/ui/fonts/zekton/Zekton-Regular.otf" id="4_font"]
+
+[node name="ChallengesScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="PanelCenter" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="Control" parent="PanelCenter"]
+custom_minimum_size = Vector2(814, 781)
+layout_mode = 2
+
+[node name="PanelArt" type="TextureRect" parent="PanelCenter/Panel"]
+unique_name_in_owner = true
+modulate = Color(1, 1, 1, 0.85)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("3_panel")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ContentMargin" type="MarginContainer" parent="PanelCenter/Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 54.0
+offset_top = 102.0
+offset_right = -54.0
+offset_bottom = -48.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Content" type="VBoxContainer" parent="PanelCenter/Panel/ContentMargin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="PanelCenter/Panel/ContentMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_font")
+theme_override_font_sizes/font_size = 34
+text = "CHALLENGES"
+horizontal_alignment = 1
+
+[node name="ModifierList" type="VBoxContainer" parent="PanelCenter/Panel/ContentMargin/Content"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="RecordLabel" type="Label" parent="PanelCenter/Panel/ContentMargin/Content"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.78, 0.32, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="LockedLabel" type="Label" parent="PanelCenter/Panel/ContentMargin/Content"]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.78, 0.32, 1)
+theme_override_font_sizes/font_size = 20
+text = "LOCKED: challenges are available in the full game."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="ButtonRow" type="HBoxContainer" parent="PanelCenter/Panel/ContentMargin/Content"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="BackButton" type="Button" parent="PanelCenter/Panel/ContentMargin/Content/ButtonRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 44)
+layout_mode = 2
+text = "BACK"
+
+[node name="ContinueButton" type="Button" parent="PanelCenter/Panel/ContentMargin/Content/ButtonRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(180, 44)
+layout_mode = 2
+text = "CONTINUE"

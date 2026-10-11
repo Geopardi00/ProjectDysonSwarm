@@ -71,6 +71,16 @@ func add_game_over_winner(winner_name: String, player_won: bool) -> void:
 		add_message("Space race lost. %s completed its moonbase before you." % winner_name)
 
 
+func add_challenge_failed(loss_reason: String) -> void:
+	match loss_reason:
+		"failure_limit":
+			add_message("Challenge failed. The mission could not survive another lost launch.")
+		"launch_limit":
+			add_message("Challenge failed. The launch allowance ran out before the moonbase was ready.")
+		_:
+			add_message("Challenge failed.")
+
+
 func _format_nonzero_materials(materials: Dictionary) -> String:
 	var parts: Array[String] = []
 	for material: String in materials.keys():

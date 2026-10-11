@@ -1,14 +1,15 @@
 # Project Dyson Swarm - State of Game
 
-Last updated: 2026-08-25
+Last updated: 2026-10-11
 
 ## Current Prototype Status
 
-Milestones 1-5 are implemented and Milestone 7 has an editor-driven art/UI pass in progress.
+Milestones 1-5 and the Milestone 7 visual pass are implemented. The game is in release prep: demo and full builds come from separate export presets, and Update #1 (Challenge Mode) has its core in place. The Milestone 6 balance pass has not been done yet.
 
 Working loop:
 
-- Opening screen shows the title logo over the space background with Start, Options, and Exit Game buttons.
+- On boot, an in-engine intro assembles the title logo from cargo-style blocks, then a light sweep crosses the title and the menu fades in. Any key, click or gamepad button skips it.
+- Opening screen shows the title logo over the space background with Start, Challenges, Options, and Exit Game buttons.
 - Options provides persistent live master, music, SFX, and brightness controls plus a scrollable How To Play page.
 - Faction select screen lets the player choose USA, China, or EU before starting and also provides Options and Exit Game controls.
 - Strategy screen shows day, player faction, readiness, moonbase needs, CPU progress, news, and vehicle selection.
@@ -23,6 +24,41 @@ Working loop:
 - Launch result feedback appears before returning to strategy.
 - CPU competitors progress after time advances.
 - Win/loss opens a game over screen.
+
+## Demo And Full Builds
+
+- The "Project Dyson's Swarm (Demo)" export preset adds the `demo` feature tag. The game checks `OS.has_feature("demo")`. For editor testing, set `dyson/build/demo_mode` in Project Settings (it must stay `false`).
+- The demo ends after two rounds with a thank-you screen offering replay and exit.
+- Debug buttons only appear in editor runs, never in exported builds.
+- The Challenges screen opens in the demo, but every control is locked with "LOCKED: challenges are available in the full game."
+- `export_presets.cfg` is gitignored and exists only locally. Both presets exclude `scripts/tests/*`, so smoke tests are not shipped.
+- 2026-10-11 check:
+  - Both presets export cleanly.
+  - The demo pack carries the `demo` custom feature and the full pack does not.
+  - Exported builds ignore `--script`, so an in-game click-through of the real `.exe` still has to be done by hand.
+
+## Challenge Mode (Update #1)
+
+Plan: `UpdatePlans/Update1_ChallengeMode_Plan.md`.
+
+- `scripts/rules/MatchRules.gd` layers challenge rules on top of a standard match. It never changes cargo or launch resolution. It can set:
+  - no rivals
+  - a crash limit and a launch limit
+  - allowed vehicles
+  - the piece set id
+  - custom moonbase needs
+  - a CPU profile override
+  - a fixed rng seed
+- `scripts/data/ChallengeData.gd` defines the stackable modifiers and their incompatibilities:
+  - Time Trial: no rivals, score is in-game days
+  - One Life
+  - Launch Limit: 4 / 6 / 8
+  - Fixed Vehicle: SpinLaunch only together with Time Trial
+  - Extreme Rivals: not together with Time Trial
+- `scripts/records/ChallengeRecords.gd` saves the best win per modifier combination to `user://challenge_records.cfg`. Fewest days wins; ties go to fewer launches.
+- Opening Start always plays a normal match. The Challenges screen keeps the last combination for next time.
+- Strategy and game-over screens show the active challenge, launches left, crashes allowed, loss reasons and records.
+- Not yet built: Random Needs (Phase 2) and alternate cargo piece sets (Phase 3, needs piece sketches).
 
 ## Locked Cargo Rules
 
@@ -184,13 +220,14 @@ Launch result / game over:
 
 ## Known Rough Edges
 
-- Some UI is still generated dynamically, especially packing piece preview buttons and copy buttons.
+- Some UI is still generated dynamically, especially packing piece preview buttons, copy buttons and the Challenges modifier rows.
 - Large layout surfaces are now scene/editor-backed, but exact pixel polish is still in progress.
-- Cargo hold panel art and click/grid alignment have been tuned for Big Rocket but may need verification for Shuttle and SpinLaunch.
+- Cargo hold alignment for Big Rocket, Shuttle and SpinLaunch was verified on 2026-10-11. Placed pieces render in the right cells, and real mouse clicks on each hold's corner cells select those cells.
 - Material needs panel is text-first; it can later become icon/progress-bar based.
 - Panel textures may still need exact padding and scale adjustments.
-- Debug buttons are currently visible on the strategy screen.
 - `esc_gear.png` and `button_hover2.wav` are present in the asset tree but are not currently wired into runtime UI/audio.
+- `Main.gd` still has unused `_format_needs` / `_format_competitors` helpers.
+- The `polish/ui-theme` branch (project UI theme and larger text) is not merged yet.
 
 ## Useful Validation Commands
 
@@ -208,6 +245,12 @@ Run from the project root:
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/PauseMenuSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/UiSoundSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/ButtonTweenSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/LogoIntroSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/DemoOpeningFlowSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/DemoTwoRoundFlowSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/DemoCompleteScreenSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/ChallengeRulesSmokeTest.gd
+& 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --script res://scripts/tests/ChallengesScreenSmokeTest.gd
 & 'C:\Program Files\Godot_v4.6.1-stable_win64.exe\Godot_v4.6.1-stable_win64_console.exe' --headless --path . --quit-after 1 res://scenes/main/Main.tscn
 ```
 
@@ -239,12 +282,25 @@ Latest checks passed before this checkpoint:
 - 2026-08-25 checkpoint: Added illustrated successful-launch, race-won, and race-lost panels; launch outcomes share one layout, game-over outcomes share another, and all action buttons sit beneath their panels.
 - 2026-08-26 checkpoint: Added bidirectional mouse-wheel rotation for selected packing pieces while preserving `R` and isolating wheel input to the cargo grid so the piece list still scrolls normally.
 - 2026-08-26 checkpoint: Added saved Easy/Medium/Hard settings that apply on the next match, with difficulty-specific CPU pace, crash risk, vehicle selection, and vehicle-aware news.
+- 2026-09-06 checkpoint: Added the two-round demo flow and demo completion screen, and hid the debug controls in exported builds.
+- 2026-10-08 checkpoint: Release cleanup (PR #1):
+  - Demo builds are chosen by the export preset.
+  - Medium is now the default difficulty.
+  - The in-engine logo assembly intro replaced the video.
+  - The readiness meter animates on launch results.
+- 2026-10-11 checkpoint: Added Challenge Mode: the match rules layer, the Challenges screen, records and the locked demo state.
+- 2026-10-11 checkpoint: Fixed the intro handoff:
+  - The title no longer darkens during the sweep.
+  - There is no scale pop when the blocks become the title.
+  - The sweep starts at the logo edge.
+  - No seams show between revealed blocks.
+- 2026-10-11 checkpoint: All 17 headless smoke tests pass. Both export presets build. Cargo hold alignment is verified for all three vehicles.
 
 ## Suggested Next Steps
 
-1. Playtest current visual pass and take screenshots.
-2. Verify cargo hold panel/grid alignment for Shuttle and SpinLaunch.
-3. Continue tuning exact panel positions in `.tscn` scenes.
-4. Hide or gate debug buttons.
-5. Improve moonbase needs display using material icons.
-6. Continue first visual pass before changing balance.
+1. Merge `feature/challenge-rules` and `polish/ui-theme` into `main`.
+2. Click through both exported `.exe` builds by hand: demo lock, two-round demo end, no debug buttons, a full match.
+3. Balance pass (Milestone 6): 10-15 minute matches, a fair Medium, a useful SpinLaunch. Time Trial's best possible run, about 90 days, is a benchmark.
+4. Keep a backup of `export_presets.cfg`, since it is not in git.
+5. Update #1 content: Random Needs, then alternate cargo sets.
+6. Improve moonbase needs display using material icons.

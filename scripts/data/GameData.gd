@@ -40,6 +40,20 @@ const DIFFICULTY_PROFILES := {
 	},
 }
 
+# CPU profiles reachable only through challenge rules, never from Options.
+# Starting values; tune in playtest.
+const CHALLENGE_CPU_PROFILES := {
+	"extreme": {
+		"cpu_speed_multiplier": 1.15,
+		"cpu_crash_multiplier": 0.75,
+		"cpu_vehicle_weights": {
+			"big_rocket": 100.0,
+			"space_shuttle": 0.0,
+			"spinlaunch": 0.0,
+		},
+	},
+}
+
 const MATERIALS := [
 	"fuel",
 	"carbon_metals",
@@ -212,6 +226,14 @@ const CARGO_PIECE_SETS := {
 	],
 }
 
+const STANDARD_PIECE_SET_ID := "standard"
+
+# Challenge piece sets, keyed by set id and then vehicle id. A set only needs to
+# list the vehicles it changes; any vehicle it omits uses the standard set.
+const PIECE_SETS := {
+	STANDARD_PIECE_SET_ID: CARGO_PIECE_SETS,
+}
+
 const MOONBASE_REQUIREMENTS := {
 	"carbon_metals": 320,
 	"silicon": 220,
@@ -294,17 +316,38 @@ static func get_difficulty_profile(difficulty: String) -> Dictionary:
 	return DIFFICULTY_PROFILES[normalize_difficulty(difficulty)].duplicate(true)
 
 
+# Like normalize_difficulty, but also accepts challenge-only CPU profiles.
+static func normalize_cpu_profile(profile_id: String) -> String:
+	var normalized := profile_id.to_lower()
+	return normalized if CHALLENGE_CPU_PROFILES.has(normalized) else normalize_difficulty(normalized)
+
+
+static func get_cpu_profile(profile_id: String) -> Dictionary:
+	var normalized := normalize_cpu_profile(profile_id)
+	if CHALLENGE_CPU_PROFILES.has(normalized):
+		return CHALLENGE_CPU_PROFILES[normalized].duplicate(true)
+	return get_difficulty_profile(normalized)
+
+
 static func get_test_manifest(manifest_id: String) -> Dictionary:
 	return TEST_MANIFESTS.get(manifest_id, {}).duplicate(true)
 
 
-static func get_piece_set(vehicle_id: String) -> Array:
-	return CARGO_PIECE_SETS.get(vehicle_id, []).duplicate(true)
+static func get_piece_set(vehicle_id: String, set_id: String = STANDARD_PIECE_SET_ID) -> Array:
+	var piece_set: Dictionary = PIECE_SETS.get(set_id, CARGO_PIECE_SETS)
+	if not piece_set.has(vehicle_id):
+		piece_set = CARGO_PIECE_SETS
+	return piece_set.get(vehicle_id, []).duplicate(true)
 
 
-static func get_piece_set_preview_data(vehicle_id: String, filled_cell: String = "#", empty_cell: String = ".") -> Array[Dictionary]:
+static func get_piece_set_preview_data(
+	vehicle_id: String,
+	filled_cell: String = "#",
+	empty_cell: String = ".",
+	set_id: String = STANDARD_PIECE_SET_ID
+) -> Array[Dictionary]:
 	var previews: Array[Dictionary] = []
-	for definition: Dictionary in get_piece_set(vehicle_id):
+	for definition: Dictionary in get_piece_set(vehicle_id, set_id):
 		var cells := _to_vector2i_array(definition.get("cells", []))
 		var cell_count := cells.size()
 		previews.append({
