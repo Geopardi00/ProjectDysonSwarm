@@ -12,6 +12,7 @@ signal debug_launch_success_requested
 
 const GameDataScript := preload("res://scripts/data/GameData.gd")
 const UiAssetsScript := preload("res://scripts/data/UiAssets.gd")
+const DISALLOWED_CARD_MODULATE := Color(0.5, 0.5, 0.5, 1.0)
 
 @export_category("Strategy Panel Layout")
 @export_range(0.0, 180.0, 1.0, "suffix:px") var panel_top_position := 76.0:
@@ -228,6 +229,7 @@ func _ready() -> void:
 
 	vehicle_cards = {
 		"big_rocket": {
+			"card": $Layout/Panels/VehiclePanel/BigRocketCard,
 			"icon": %BigRocketIcon,
 			"title": %BigRocketTitle,
 			"payload": %BigRocketPayloadLabel,
@@ -237,6 +239,7 @@ func _ready() -> void:
 			"button": %BigRocketButton,
 		},
 		"space_shuttle": {
+			"card": $Layout/Panels/VehiclePanel/ShuttleCard,
 			"icon": %ShuttleIcon,
 			"title": %ShuttleTitle,
 			"payload": %ShuttlePayloadLabel,
@@ -246,6 +249,7 @@ func _ready() -> void:
 			"button": %ShuttleButton,
 		},
 		"spinlaunch": {
+			"card": $Layout/Panels/VehiclePanel/SpinLaunchCard,
 			"icon": %SpinLaunchIcon,
 			"title": %SpinLaunchTitle,
 			"payload": %SpinLaunchPayloadLabel,
@@ -436,18 +440,21 @@ func setup(summary: Dictionary, show_debug_actions: bool) -> void:
 	readiness_label.text = "Moonbase readiness"
 	readiness_bar.max_value = 100.0
 	readiness_bar.value = float(summary["player_readiness_percent"])
-	launches_label.text = "Launches: %d  Success: %d  Failed: %d" % [
-		int(summary["launches_attempted"]),
-		int(summary["successful_launches"]),
-		int(summary["failed_launches"]),
-	]
-	needs_label.text = _format_needs(summary["remaining_requirements"])
-	competitors_label.text = _format_competitors(summary["competitors"])
+	launches_label.text = _format_launches(summary)
+	needs_label.text = _format_needs(summary["remaining_requirements"], summary["total_requirements"])
+	if bool(summary.get("cpu_enabled", true)):
+		competitors_label.text = _format_competitors(summary["competitors"])
+	else:
+		competitors_label.text = "Time Trial: no rivals.\nFinish in as few days as possible.\n%s" % String(
+			summary.get("challenge_best_text", "")
+		)
 	news_label.text = _format_news(summary["news"])
 	debug_row.visible = show_debug_actions
 
+	var allowed_vehicles: Array = summary.get("allowed_vehicles", [])
 	for vehicle_id: String in vehicle_cards.keys():
 		_populate_vehicle_card(vehicle_id)
+		_set_vehicle_card_allowed(vehicle_id, allowed_vehicles.is_empty() or allowed_vehicles.has(vehicle_id))
 
 	UiAssetsScript.apply_text_outline(self)
 
@@ -478,13 +485,45 @@ func _populate_vehicle_card(vehicle_id: String) -> void:
 	]
 
 
-func _format_needs(remaining_requirements: Dictionary) -> String:
+func _set_vehicle_card_allowed(vehicle_id: String, allowed: bool) -> void:
+	var card: Dictionary = vehicle_cards[vehicle_id]
+	var button := card["button"] as Button
+	if not button.has_meta(&"allowed_text"):
+		button.set_meta(&"allowed_text", button.text)
+	button.disabled = not allowed
+	button.text = String(button.get_meta(&"allowed_text")) if allowed else "Not Allowed"
+	(card["card"] as CanvasItem).modulate = Color.WHITE if allowed else DISALLOWED_CARD_MODULATE
+
+
+func _format_launches(summary: Dictionary) -> String:
+	var lines: Array[String] = []
+	var challenge_name := String(summary.get("challenge_name", ""))
+	if not challenge_name.is_empty():
+		lines.append("Challenge: %s" % challenge_name)
+	lines.append("Launches: %d  Success: %d  Failed: %d" % [
+		int(summary["launches_attempted"]),
+		int(summary["successful_launches"]),
+		int(summary["failed_launches"]),
+	])
+	var limits: Array[String] = []
+	var max_launches := int(summary.get("max_launches", -1))
+	if max_launches >= 0:
+		limits.append("Launches left: %d" % maxi(max_launches - int(summary["launches_attempted"]), 0))
+	var max_failures := int(summary.get("max_failures", -1))
+	if max_failures >= 0:
+		limits.append("Crashes allowed: %d" % maxi(max_failures - int(summary["failed_launches"]), 0))
+	if not limits.is_empty():
+		lines.append("  ".join(limits))
+	return "\n".join(lines)
+
+
+func _format_needs(remaining_requirements: Dictionary, total_requirements: Dictionary) -> String:
 	var lines: Array[String] = ["Remaining moonbase needs:"]
 	for material: String in GameDataScript.CONSTRUCTION_MATERIALS:
 		lines.append("- %s: %d / %d" % [
 			_format_material_name(material),
 			int(remaining_requirements.get(material, 0)),
-			int(GameDataScript.MOONBASE_REQUIREMENTS.get(material, 0)),
+			int(total_requirements.get(material, 0)),
 		])
 	return "\n".join(lines)
 

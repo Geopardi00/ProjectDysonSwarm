@@ -8,6 +8,9 @@ const StrategyScreenScene := preload("res://scenes/ui/StrategyScreen.tscn")
 const OptionsScreenScene := preload("res://scenes/ui/OptionsScreen.tscn")
 const PauseMenuScreenScene := preload("res://scenes/ui/PauseMenuScreen.tscn")
 const DemoCompleteScreenScene := preload("res://scenes/ui/DemoCompleteScreen.tscn")
+const ChallengesScreenScene := preload("res://scenes/ui/ChallengesScreen.tscn")
+const ChallengeDataScript := preload("res://scripts/data/ChallengeData.gd")
+const ChallengeRecordsScript := preload("res://scripts/records/ChallengeRecords.gd")
 const OPENING_GLITCH_SHADER := preload("res://assets/shaders/opening_glitch.gdshader")
 const OPENING_GLITCH_SOUND := preload("res://audio/sfx/glitch.wav")
 const LogoAssemblyIntroScene := preload("res://scenes/intro/LogoAssemblyIntro.tscn")
@@ -32,6 +35,7 @@ const SFX_BUS_NAME := &"SFX"
 
 const DEMO_BUILD_SETTING := "dyson/build/demo_mode"
 const DEMO_MAX_ROUNDS := 2
+const OPENING_MENU_BUTTON_COUNT := 4
 const LAUNCH_RESULT_BUTTON_WIDTH := 220
 const LAUNCH_RESULT_BUTTON_HEIGHT := 44
 const LAUNCH_FAILURE_PANEL_SIZE := Vector2(812.0, 781.0)
@@ -219,6 +223,13 @@ var settings_loaded := false
 var pause_overlay: PauseMenuScreen
 var pause_options_screen: OptionsScreen
 var button_navigation_pending := false
+# The last challenge built on the Challenges screen. It only applies to matches
+# while challenge_active is true; Start on the opening menu plays a normal match.
+var challenge_selection: Dictionary = {}
+var challenge_active := false
+var challenge_records_path := ChallengeRecordsScript.DEFAULT_PATH
+var challenge_records: ChallengeRecords
+var last_challenge_record_result: Dictionary = {}
 
 
 func _ready() -> void:
@@ -695,6 +706,47 @@ func _show_options_screen() -> void:
 	_open_options_screen(_show_opening_screen)
 
 
+func _start_normal_match_flow() -> void:
+	challenge_active = false
+	_start_opening_transition()
+
+
+func _show_challenges_screen() -> void:
+	cargo_loading_screen.visible = false
+	_set_corner_logo_visible(false)
+	var challenges_screen := ChallengesScreenScene.instantiate() as ChallengesScreen
+	challenges_screen.button_navigation_delay = button_navigation_delay
+	challenges_screen.back_requested.connect(_show_opening_screen)
+	challenges_screen.continue_requested.connect(_on_challenge_continue_requested)
+	_set_active_screen(challenges_screen)
+	challenges_screen.setup(challenge_selection, _get_challenge_records(), demo_mode)
+
+
+func _on_challenge_continue_requested(selection: Dictionary) -> void:
+	if demo_mode:
+		return
+	challenge_selection = ChallengeDataScript.sanitize(selection)
+	challenge_active = not challenge_selection.is_empty()
+	_start_opening_transition()
+
+
+func _get_challenge_records() -> ChallengeRecords:
+	if challenge_records == null:
+		challenge_records = ChallengeRecordsScript.new()
+		challenge_records.load_records(challenge_records_path)
+	return challenge_records
+
+
+func _get_active_match_rules() -> MatchRules:
+	if not challenge_active or demo_mode:
+		return null
+	return ChallengeDataScript.build_rules(challenge_selection)
+
+
+func _get_active_challenge_name() -> String:
+	return ChallengeDataScript.describe(challenge_selection) if _get_active_match_rules() != null else ""
+
+
 func _show_faction_options_screen() -> void:
 	_open_options_screen(_show_faction_select)
 
@@ -762,7 +814,7 @@ func _build_opening_screen() -> Control:
 	var layout := VBoxContainer.new()
 	layout.name = "Layout"
 	layout.set_anchors_preset(Control.PRESET_FULL_RECT)
-	var opening_stack_compensation := opening_button_height + opening_menu_button_spacing
+	var opening_stack_compensation := _get_opening_stack_compensation()
 	layout.offset_top = opening_vertical_offset + opening_stack_compensation
 	layout.offset_bottom = opening_vertical_offset + opening_stack_compensation
 	layout.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -786,8 +838,9 @@ func _build_opening_screen() -> Control:
 	button_stack.add_theme_constant_override("separation", int(opening_menu_button_spacing))
 	layout.add_child(button_stack)
 
-	var start_button := _build_opening_menu_button("StartButton", "START", _start_opening_transition)
+	var start_button := _build_opening_menu_button("StartButton", "START", _start_normal_match_flow)
 	button_stack.add_child(start_button)
+	button_stack.add_child(_build_opening_menu_button("ChallengesButton", "CHALLENGES", _show_challenges_screen))
 	button_stack.add_child(_build_opening_menu_button("OptionsButton", "OPTIONS", _show_options_screen))
 	button_stack.add_child(_build_opening_menu_button("ExitButton", "EXIT GAME", _exit_game))
 
@@ -835,6 +888,12 @@ func _build_title_backlight() -> Control:
 	return backlight
 
 
+# The centered layout rises by half a button for every button in the stack, so
+# shift it back down to keep the title where it was with a single button.
+func _get_opening_stack_compensation() -> float:
+	return (OPENING_MENU_BUTTON_COUNT - 1) * 0.5 * (opening_button_height + opening_menu_button_spacing)
+
+
 func _build_opening_menu_button(button_name: String, button_text: String, callback: Callable) -> Button:
 	var button := Button.new()
 	button.name = button_name
@@ -857,7 +916,7 @@ func _update_editor_opening_preview() -> void:
 	var button_stack := preview.get_node_or_null("Layout/ButtonStack") as VBoxContainer
 	if layout == null or logo == null or button_stack == null:
 		return
-	var opening_stack_compensation := opening_button_height + opening_menu_button_spacing
+	var opening_stack_compensation := _get_opening_stack_compensation()
 	layout.offset_top = opening_vertical_offset + opening_stack_compensation
 	layout.offset_bottom = opening_vertical_offset + opening_stack_compensation
 	layout.add_theme_constant_override("separation", int(opening_title_button_spacing))
@@ -980,6 +1039,22 @@ func _build_faction_select_screen() -> Control:
 	prompt.offset_top = -FACTION_SELECT_LOGO_SIZE.y * 0.5 - 58.0
 	prompt.offset_bottom = prompt.offset_top + 32.0
 	layout.add_child(prompt)
+
+	var challenge_name := _get_active_challenge_name()
+	if not challenge_name.is_empty():
+		var challenge_label := Label.new()
+		challenge_label.name = "ChallengeLabel"
+		challenge_label.text = "CHALLENGE: %s" % challenge_name
+		challenge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		challenge_label.add_theme_font_size_override("font_size", 20)
+		challenge_label.add_theme_color_override("font_color", Color(1.0, 0.78, 0.32, 1.0))
+		challenge_label.anchor_left = 0.0
+		challenge_label.anchor_right = 1.0
+		challenge_label.anchor_top = 0.5
+		challenge_label.anchor_bottom = 0.5
+		challenge_label.offset_bottom = prompt.offset_top - 6.0
+		challenge_label.offset_top = challenge_label.offset_bottom - 28.0
+		layout.add_child(challenge_label)
 
 	var faction_row := HBoxContainer.new()
 	faction_row.anchor_left = 0.0
@@ -1105,7 +1180,17 @@ func _show_strategy_screen() -> void:
 	strategy_screen.debug_launch_failure_requested.connect(_queue_button_navigation.bind(_on_debug_launch_failure_pressed))
 	strategy_screen.debug_launch_success_requested.connect(_queue_button_navigation.bind(_on_debug_launch_success_pressed))
 	_set_active_screen(strategy_screen)
-	strategy_screen.setup(game_state.get_summary(), show_debug_actions and not demo_mode)
+	strategy_screen.setup(_get_strategy_summary(), show_debug_actions and not demo_mode)
+
+
+func _get_strategy_summary() -> Dictionary:
+	var summary := game_state.get_summary()
+	summary["challenge_name"] = _get_active_challenge_name()
+	summary["challenge_best_text"] = ""
+	if not summary["challenge_name"].is_empty():
+		var record := _get_challenge_records().get_record(ChallengeDataScript.get_record_key(challenge_selection))
+		summary["challenge_best_text"] = "Best: %s" % ChallengeRecords.format_record(record)
+	return summary
 
 
 func _show_launch_result(result: Dictionary) -> void:
@@ -1336,6 +1421,8 @@ func _apply_launch_failure_layout() -> void:
 func _show_game_over_screen() -> void:
 	cargo_loading_screen.visible = false
 	_set_corner_logo_visible(true)
+	if last_challenge_record_result.is_empty():
+		last_challenge_record_result = _submit_challenge_result()
 	_set_active_screen(_build_game_over_screen())
 	game_over_panel = active_screen.get_node("GameOverPanel") as TextureRect
 	game_over_text = game_over_panel.get_node("GameOverText") as Control
@@ -1381,7 +1468,7 @@ func _build_game_over_screen() -> Control:
 	var title := Label.new()
 	title.name = "Title"
 	title.add_theme_font_size_override("font_size", 32)
-	title.text = "Victory" if player_won else "Race Lost"
+	title.text = _get_game_over_title(summary)
 	text_group.add_child(title)
 
 	var details := Label.new()
@@ -1472,7 +1559,12 @@ func _build_debug_row() -> Control:
 func _open_assignment_screen(vehicle_id: String) -> void:
 	_clear_active_screen()
 	_set_corner_logo_visible(true)
-	cargo_loading_screen.start_assignment(vehicle_id, game_state.moonbase.remaining_requirements.duplicate(true))
+	cargo_loading_screen.start_assignment(
+		vehicle_id,
+		game_state.moonbase.remaining_requirements.duplicate(true),
+		game_state.moonbase.initial_requirements.duplicate(true),
+		game_state.active_rules.piece_set_id
+	)
 
 
 func _on_strategy_vehicle_selected(vehicle_id: String) -> void:
@@ -1507,17 +1599,20 @@ func _on_faction_button_pressed(faction_id: String) -> void:
 func _on_start_match_pressed() -> void:
 	if selected_faction == "":
 		return
-	game_state.start_new_match(selected_faction, selected_difficulty)
-	_show_strategy_screen()
+	_start_match()
 
 
 func _on_reset_button_pressed() -> void:
-	game_state.start_new_match(selected_faction, selected_difficulty)
-	_show_strategy_screen()
+	_start_match()
 
 
 func _on_play_again_pressed() -> void:
-	game_state.start_new_match(selected_faction, selected_difficulty)
+	_start_match()
+
+
+func _start_match() -> void:
+	game_state.start_new_match(selected_faction, selected_difficulty, _get_active_match_rules())
+	last_challenge_record_result = {}
 	_show_strategy_screen()
 
 
@@ -1528,6 +1623,7 @@ func _on_main_menu_pressed() -> void:
 
 func _on_demo_replay_requested() -> void:
 	selected_faction = ""
+	challenge_active = false
 	game_state.start_new_match("USA", selected_difficulty)
 	_show_opening_screen()
 
@@ -1691,7 +1787,69 @@ func _format_launch_result(result: Dictionary) -> String:
 	return "\n".join(lines)
 
 
+func _submit_challenge_result() -> Dictionary:
+	if _get_active_match_rules() == null:
+		return {}
+	var summary := game_state.get_summary()
+	return _get_challenge_records().submit_result(
+		ChallengeDataScript.get_record_key(challenge_selection),
+		bool(summary["player_won"]),
+		int(summary["days_elapsed"]),
+		int(summary["launches_attempted"])
+	)
+
+
+func _get_game_over_title(summary: Dictionary) -> String:
+	var player_won := bool(summary["player_won"])
+	if _get_active_challenge_name().is_empty():
+		return "Victory" if player_won else "Race Lost"
+	if player_won:
+		return "Time Trial Complete" if game_state.competitors.is_empty() else "Challenge Complete"
+	return "Race Lost" if String(summary["loss_reason"]) == GameState.LOSS_REASON_RIVAL_FINISHED else "Challenge Failed"
+
+
 func _format_game_over(summary: Dictionary) -> String:
+	var challenge_name := _get_active_challenge_name()
+	if challenge_name.is_empty():
+		return _format_race_game_over(summary)
+	var lines: Array[String] = ["Challenge: %s" % challenge_name]
+	var loss_reason := String(summary["loss_reason"])
+	if loss_reason == GameState.LOSS_REASON_FAILURE_LIMIT:
+		lines.append("A launch crashed. This challenge allows no failed launches.")
+	elif loss_reason == GameState.LOSS_REASON_LAUNCH_LIMIT:
+		lines.append("Out of launches (%d used) before the moonbase was ready." % int(summary["launches_attempted"]))
+	elif loss_reason == GameState.LOSS_REASON_RIVAL_FINISHED:
+		lines.append("%s completed its moonbase first." % String(summary["winner_name"]))
+	if bool(summary["player_won"]):
+		var launches := int(summary["launches_attempted"])
+		lines.append("Completed in %d days with %d %s (%d failed)." % [
+			int(summary["days_elapsed"]),
+			launches,
+			"launch" if launches == 1 else "launches",
+			int(summary["failed_launches"]),
+		])
+		lines.append(_format_challenge_record_line())
+	else:
+		lines.append("Readiness reached: %.1f%% after %d days." % [
+			float(summary["player_readiness_percent"]),
+			int(summary["days_elapsed"]),
+		])
+	return "\n".join(lines)
+
+
+func _format_challenge_record_line() -> String:
+	if bool(last_challenge_record_result.get("is_new_best", false)):
+		var previous: Dictionary = last_challenge_record_result.get("previous", {})
+		if previous.is_empty():
+			return "New record! First clear of this challenge."
+		return "New record! Previous best: %d days." % int(previous["best_days"])
+	var record := _get_challenge_records().get_record(ChallengeDataScript.get_record_key(challenge_selection))
+	if record.is_empty():
+		return ""
+	return "Best: %s." % ChallengeRecords.format_record(record)
+
+
+func _format_race_game_over(summary: Dictionary) -> String:
 	if bool(summary["player_won"]):
 		return "\n".join([
 			"Winning faction: %s" % String(summary["winner_name"]),

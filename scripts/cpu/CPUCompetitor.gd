@@ -20,8 +20,8 @@ func setup(id: String, data: Dictionary, selected_difficulty: String = GameDataS
 	speed_per_day = float(data.get("speed_per_day", 0.0))
 	crash_chance = float(data.get("crash_chance", 0.0))
 	news_style = data.get("news_style", "")
-	difficulty = GameDataScript.normalize_difficulty(selected_difficulty)
-	difficulty_profile = GameDataScript.get_difficulty_profile(difficulty)
+	difficulty = GameDataScript.normalize_cpu_profile(selected_difficulty)
+	difficulty_profile = GameDataScript.get_cpu_profile(difficulty)
 
 
 func advance_days(days: int, rng: RandomNumberGenerator) -> Dictionary:

@@ -12,10 +12,13 @@ var assigned_pieces: Dictionary = {}
 var locked := false
 
 
-func setup(selected_vehicle_id: String) -> void:
+func setup(selected_vehicle_id: String, piece_set_id: String = GameDataScript.STANDARD_PIECE_SET_ID) -> void:
 	vehicle_id = selected_vehicle_id
 	vehicle = GameDataScript.get_vehicle(vehicle_id)
-	available_pieces = CargoPieceScript.build_instances_for_vehicle(vehicle_id, GameDataScript.get_piece_set(vehicle_id))
+	available_pieces = CargoPieceScript.build_instances_for_vehicle(
+		vehicle_id,
+		GameDataScript.get_piece_set(vehicle_id, piece_set_id)
+	)
 	assigned_pieces.clear()
 	locked = false
 

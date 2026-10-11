@@ -16,6 +16,8 @@ func resolve_launch(vehicle_id: String, placed_manifest: Dictionary) -> Dictiona
 		return {}
 	if game_state.game_over:
 		return {"ignored": true, "reason": "game_over"}
+	if not game_state.is_vehicle_allowed(vehicle_id):
+		return {"ignored": true, "reason": "vehicle_not_allowed"}
 
 	var vehicle := GameDataScript.get_vehicle(vehicle_id)
 	if vehicle.is_empty():
@@ -47,7 +49,9 @@ func resolve_launch(vehicle_id: String, placed_manifest: Dictionary) -> Dictiona
 		game_state.news.add_cpu_update(cpu_result)
 
 	var winner_result := game_state.check_for_winner()
-	if bool(winner_result.get("has_winner", false)):
+	if bool(winner_result.get("game_over", false)) and not bool(winner_result.get("has_winner", false)):
+		game_state.news.add_challenge_failed(String(winner_result.get("loss_reason", "")))
+	elif bool(winner_result.get("has_winner", false)):
 		game_state.news.add_game_over_winner(
 			String(winner_result.get("winner_name", "")),
 			bool(winner_result.get("player_won", false))

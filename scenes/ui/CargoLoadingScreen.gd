@@ -165,6 +165,7 @@ var packing_status_text := ""
 var button_navigation_delay := 0.08
 var button_navigation_pending := false
 var moonbase_remaining_requirements: Dictionary = {}
+var moonbase_total_requirements: Dictionary = {}
 var piece_buttons: Dictionary = {}
 var packing_piece_buttons: Dictionary = {}
 var half_size_piece_textures: Dictionary = {}
@@ -401,10 +402,15 @@ func _apply_packing_manifest_style() -> void:
 			target_icon.visible = false
 
 
-func start_assignment(vehicle_id: String, remaining_requirements: Dictionary = {}) -> void:
+func start_assignment(
+	vehicle_id: String,
+	remaining_requirements: Dictionary = {},
+	total_requirements: Dictionary = {},
+	piece_set_id: String = GameDataScript.STANDARD_PIECE_SET_ID
+) -> void:
 	assignment = CargoAssignmentScript.new()
-	assignment.setup(vehicle_id)
-	set_moonbase_requirements(remaining_requirements)
+	assignment.setup(vehicle_id, piece_set_id)
+	set_moonbase_requirements(remaining_requirements, total_requirements)
 	packing_state = null
 	phase = CargoPhase.ASSIGNMENT
 	selected_shape_id = ""
@@ -419,9 +425,13 @@ func start_assignment(vehicle_id: String, remaining_requirements: Dictionary = {
 	_reset_piece_scroll_positions.call_deferred()
 
 
-func set_moonbase_requirements(requirements: Dictionary) -> void:
+func set_moonbase_requirements(requirements: Dictionary, total_requirements: Dictionary = {}) -> void:
+	if total_requirements.is_empty():
+		moonbase_total_requirements = GameDataScript.MOONBASE_REQUIREMENTS.duplicate(true)
+	else:
+		moonbase_total_requirements = total_requirements.duplicate(true)
 	if requirements.is_empty():
-		moonbase_remaining_requirements = GameDataScript.MOONBASE_REQUIREMENTS.duplicate(true)
+		moonbase_remaining_requirements = moonbase_total_requirements.duplicate(true)
 	else:
 		moonbase_remaining_requirements = requirements.duplicate(true)
 
@@ -953,8 +963,8 @@ func _format_moonbase_needs() -> String:
 	var name_cells: Array[String] = []
 	var remaining_cells: Array[String] = []
 	for material: String in GameDataScript.CONSTRUCTION_MATERIALS:
-		var remaining := int(moonbase_remaining_requirements.get(material, GameDataScript.MOONBASE_REQUIREMENTS.get(material, 0)))
-		var total := int(GameDataScript.MOONBASE_REQUIREMENTS.get(material, 0))
+		var total := int(moonbase_total_requirements.get(material, 0))
+		var remaining := int(moonbase_remaining_requirements.get(material, total))
 		var assigned := assignment.get_assigned_amount_for_material(material)
 		var name_cell := "%s:" % _format_material_name(material)
 		var remaining_cell := "%d / %d remaining" % [remaining, total]
