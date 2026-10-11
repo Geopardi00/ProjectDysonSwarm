@@ -12,6 +12,10 @@ const LAND_SOUND := preload("res://audio/sfx/button_click.wav")
 const LOCK_SOUND := preload("res://audio/sfx/explosion.wav")
 const SFX_BUS_NAME := &"SFX"
 const MAX_FRAME_STEP := 1.0 / 30.0
+# Shine progress where the slanted band is just outside the logo, so the sweep
+# is visible from its first frame to its last.
+const SHINE_START := -0.17
+const SHINE_END := 1.17
 # Steel tones taken from the logo lettering, with the logo's orange as an accent.
 const BLOCK_COLORS: Array[Color] = [
 	Color("#3A4F68"),
@@ -46,7 +50,9 @@ const BLOCK_COLORS: Array[Color] = [
 @export_range(0.0, 1500.0, 10.0, "suffix:px") var launch_distance_min := 650.0
 @export_range(0.0, 1500.0, 10.0, "suffix:px") var launch_distance_max := 900.0
 @export_range(0.0, 800.0, 10.0, "suffix:px") var launch_spread := 260.0
-@export_range(1.0, 1.2, 0.005) var lock_punch_scale := 1.035
+## Scale the title starts at when the blocks become the logo. 1.0 keeps the
+## handoff seamless; anything larger makes the title jump in size for a frame.
+@export_range(1.0, 1.2, 0.005) var lock_punch_scale := 1.0
 
 @export_category("Sound")
 @export_range(-40.0, 6.0, 0.5, "suffix:dB") var land_volume_db := -12.0
@@ -118,6 +124,12 @@ func play() -> void:
 		return
 	_logo_texture = _title_logo.texture
 	_logo_rect = _get_drawn_texture_rect(_title_logo)
+	# Attach the shine now, with the band off-screen, so its shader is ready
+	# before the lock instead of being set up on that exact frame.
+	_shine_material = ShaderMaterial.new()
+	_shine_material.shader = SHINE_SHADER
+	_shine_material.set_shader_parameter("progress", SHINE_START)
+	_title_logo.material = _shine_material
 	_build_pieces()
 	_elapsed = 0.0
 	_playing = true
@@ -189,17 +201,14 @@ func _lock_logo() -> void:
 	if not is_instance_valid(_title_logo):
 		return
 	_title_logo.modulate.a = 1.0
-	_shine_material = ShaderMaterial.new()
-	_shine_material.shader = SHINE_SHADER
-	_shine_material.set_shader_parameter("progress", -0.3)
-	_title_logo.material = _shine_material
 	var tween := _title_logo.create_tween()
-	tween.tween_method(_set_shine_progress, -0.3, 1.3, shine_duration)
-	_title_logo.pivot_offset = _title_logo.size * 0.5
-	_title_logo.scale = Vector2.ONE * lock_punch_scale
-	var punch := _title_logo.create_tween()
-	punch.set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
-	punch.tween_property(_title_logo, "scale", Vector2.ONE, 0.45)
+	tween.tween_method(_set_shine_progress, SHINE_START, SHINE_END, shine_duration)
+	if lock_punch_scale > 1.0:
+		_title_logo.pivot_offset = _title_logo.size * 0.5
+		_title_logo.scale = Vector2.ONE * lock_punch_scale
+		var punch := _title_logo.create_tween()
+		punch.set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+		punch.tween_property(_title_logo, "scale", Vector2.ONE, 0.45)
 	if is_instance_valid(_backlight):
 		var glow := _backlight.create_tween()
 		glow.tween_property(_backlight, "modulate:a", 1.0, 0.6)
@@ -379,6 +388,10 @@ class IntroPiece:
 	var cell_texture_size := 30
 	var cell_screen_size := 20.0
 	var block_color := Color.GRAY
+	# Each revealed cell reaches this far (in screen px) under its neighbours.
+	# Without it, rounding at cell and piece edges leaves 1 px gaps where the
+	# dark background shows through the logo as thin lines.
+	const SEAM_OVERLAP := 0.75
 	var cells: Array = []
 	var target_position := Vector2.ZERO
 	var start_position := Vector2.ZERO
@@ -425,14 +438,20 @@ class IntroPiece:
 		block.a = 1.0 - reveal
 		var edge := block_color.lightened(0.45)
 		edge.a = (1.0 - reveal) * 0.9
+		var screen_per_texel := cell_screen_size / cell_texture_size
+		var texel_overlap := SEAM_OVERLAP / screen_per_texel
 		for index: int in cells.size():
 			var cell: Vector2i = cells[index]
 			var rect := Rect2(_local_offsets[index], Vector2.ONE * cell_screen_size)
-			var source := Rect2(Vector2(cell) * cell_texture_size, Vector2.ONE * cell_texture_size)
+			var cell_origin := Vector2(cell) * cell_texture_size
+			var source := Rect2(cell_origin, Vector2.ONE * cell_texture_size).grow(texel_overlap)
 			source = source.intersection(Rect2(Vector2.ZERO, texture_size))
 			if source.size.x <= 0.0 or source.size.y <= 0.0:
 				continue
-			var drawn := Rect2(rect.position, source.size * (cell_screen_size / cell_texture_size))
+			var drawn := Rect2(
+				rect.position + (source.position - cell_origin) * screen_per_texel,
+				source.size * screen_per_texel
+			)
 			if reveal > 0.0:
 				draw_texture_rect_region(texture, drawn, source, Color(1.0, 1.0, 1.0, reveal))
 			if reveal < 1.0:
