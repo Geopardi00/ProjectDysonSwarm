@@ -173,6 +173,7 @@ theme_override_constants/outline_size = 4
 theme_override_fonts/font = ExtResource("2_0kx2o")
 theme_override_font_sizes/font_size = 14
 text = "Launches"
+autowrap_mode = 3
 
 [node name="NeedsLabel" type="Label" parent="Layout/Panels/StatusPanel/Margin/StatusContent" unique_id=1458594468]
 unique_name_in_owner = true
