@@ -216,6 +216,15 @@ func _run() -> void:
 	if screen.moonbase_needs_label.tab_stops.size() != 2:
 		_fail("Moonbase needs text was not laid out in tab-aligned columns.")
 		return
+	var fuel_amount_label := screen.material_amount_labels.get("fuel", null) as Label
+	if (
+		fuel_amount_label == null
+		or fuel_amount_label.label_settings == null
+		or fuel_amount_label.label_settings.font_color != UiAssets.PARCHMENT_TEXT_COLOR
+		or screen.capacity_label.get_theme_color("font_color") != UiAssets.PARCHMENT_TEXT_COLOR
+	):
+		_fail("Text on the parchment info panel was not drawn in dark ink.")
+		return
 	for piece_button: Node in screen.find_children("*", "Button", true, false):
 		if (piece_button as Button).tooltip_text != "":
 			_fail("Cargo screen button %s still shows a hover tooltip." % piece_button.name)
